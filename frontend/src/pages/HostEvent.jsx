@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getSectionContent, parseBodyItems } from "../services/contentService";
 
 const fallbackContent = {
@@ -22,12 +23,14 @@ const fallbackContent = {
 
 const labels = {
   en: {
+    pageTitle: "Host an Event",
     eyebrow: "Host an Event",
     cta: "Start the Conversation",
     helper:
       "If you would like to explore a collaboration, send us the location, audience and proposed dates."
   },
   es: {
+    pageTitle: "Organizar un Evento",
     eyebrow: "Organizar un Evento",
     cta: "Empezar la Conversacion",
     helper:
@@ -39,6 +42,7 @@ function HostEvent() {
   const { currentLanguage } = useLanguage();
   const [content, setContent] = useState(fallbackContent.en);
   const copy = labels[currentLanguage];
+  usePageTitle(copy.pageTitle);
 
   useEffect(() => {
     const nextFallback = fallbackContent[currentLanguage];

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getSectionContent, parseBodyItems } from "../services/contentService";
 import { getEvents } from "../services/eventsService";
 
@@ -41,6 +42,7 @@ const fallbackContent = {
 
 const labels = {
   en: {
+    pageTitle: "Home",
     featured: "Featured Events",
     featuredTitle: "Upcoming gatherings across Spain.",
     browse: "Explore Events",
@@ -51,6 +53,7 @@ const labels = {
     noEvents: "No events are available right now."
   },
   es: {
+    pageTitle: "Inicio",
     featured: "Eventos Destacados",
     featuredTitle: "Proximos encuentros en Espana.",
     browse: "Explorar Eventos",
@@ -78,6 +81,7 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [eventsError, setEventsError] = useState("");
   const copy = labels[currentLanguage];
+  usePageTitle(copy.pageTitle);
 
   useEffect(() => {
     const nextFallback = fallbackContent[currentLanguage];

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getSectionContent } from "../services/contentService";
 import { sendContactMessage } from "../services/contactService";
 
@@ -28,6 +29,7 @@ const fallbackContent = {
 
 const labels = {
   en: {
+    pageTitle: "Contact",
     eyebrow: "Contact",
     name: "Name",
     email: "Email",
@@ -42,9 +44,10 @@ const labels = {
     messageError: "Please share a little more detail so we can help properly."
   },
   es: {
+    pageTitle: "Contacto",
     eyebrow: "Contacto",
     name: "Nombre",
-    email: "Email",
+    email: "Correo",
     message: "Mensaje",
     placeholderName: "Tu nombre",
     placeholderMessage: "Cuentanos como podemos ayudarte.",
@@ -66,6 +69,7 @@ function Contact() {
   const [serverMessage, setServerMessage] = useState("");
   const [submissionState, setSubmissionState] = useState("idle");
   const copy = labels[currentLanguage];
+  usePageTitle(copy.pageTitle);
 
   useEffect(() => {
     const nextFallback = fallbackContent[currentLanguage];

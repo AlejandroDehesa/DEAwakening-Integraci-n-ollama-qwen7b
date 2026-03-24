@@ -1,9 +1,15 @@
-const ADMIN_KEY = "admin123";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const ADMIN_KEY = import.meta.env.VITE_ADMIN_KEY;
 
 export async function apiRequest(path, options = {}) {
   const isAdminRequest = path.startsWith("/api/admin");
+  const requestUrl = `${API_BASE_URL}${path}`;
 
-  const response = await fetch(path, {
+  if (isAdminRequest && !ADMIN_KEY) {
+    throw new Error("Admin key is not configured");
+  }
+
+  const response = await fetch(requestUrl, {
     headers: {
       "Content-Type": "application/json",
       ...(isAdminRequest ? { "x-admin-key": ADMIN_KEY } : {}),

@@ -7,16 +7,14 @@ const labels = {
     events: "Events",
     about: "About",
     host: "Host an Event",
-    contact: "Contact",
-    admin: "Admin"
+    contact: "Contact"
   },
   es: {
     home: "Inicio",
     events: "Eventos",
     about: "Sobre",
     host: "Organizar un Evento",
-    contact: "Contacto",
-    admin: "Admin"
+    contact: "Contacto"
   }
 };
 
@@ -28,8 +26,7 @@ function Navbar() {
     { to: "/events", label: copy.events },
     { to: "/about", label: copy.about },
     { to: "/host-an-event", label: copy.host },
-    { to: "/contact", label: copy.contact },
-    { to: "/admin", label: copy.admin }
+    { to: "/contact", label: copy.contact }
   ];
 
   return (

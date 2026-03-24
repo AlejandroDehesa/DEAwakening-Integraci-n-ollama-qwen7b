@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getEvents } from "../services/eventsService";
 
 const labels = {
   en: {
+    pageTitle: "Events",
     eyebrow: "Events",
     title: "Upcoming DEAwakening experiences",
     intro:
@@ -14,6 +16,7 @@ const labels = {
     details: "View details"
   },
   es: {
+    pageTitle: "Eventos",
     eyebrow: "Eventos",
     title: "Proximas experiencias DEAwakening",
     intro:
@@ -38,6 +41,7 @@ function Events() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const copy = labels[currentLanguage];
+  usePageTitle(copy.pageTitle);
 
   useEffect(() => {
     async function loadEvents() {

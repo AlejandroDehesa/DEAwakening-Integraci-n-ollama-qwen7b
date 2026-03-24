@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getSectionContent, parseBodyItems } from "../services/contentService";
 
 const fallbackContent = {
@@ -28,6 +29,7 @@ const labels = {
 function About() {
   const { currentLanguage } = useLanguage();
   const [content, setContent] = useState(fallbackContent.en);
+  usePageTitle(labels[currentLanguage]);
 
   useEffect(() => {
     const nextFallback = fallbackContent[currentLanguage];

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { getEventBySlug, registerForEvent } from "../services/eventsService";
 
 const initialForm = {
@@ -33,7 +34,7 @@ const labels = {
     registerIntro:
       "Reserva tu plaza y te escribiremos por email con los detalles practicos.",
     name: "Nombre",
-    email: "Email",
+    email: "Correo",
     submit: "Reservar Plaza",
     submitting: "Enviando...",
     success: "Tu plaza ha quedado registrada. Te escribiremos con los siguientes pasos.",
@@ -62,6 +63,7 @@ function EventDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitState, setSubmitState] = useState("idle");
+  usePageTitle(event?.title || copy.eyebrow);
 
   useEffect(() => {
     async function loadEvent() {

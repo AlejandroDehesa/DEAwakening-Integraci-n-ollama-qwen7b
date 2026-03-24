@@ -5,6 +5,7 @@ import {
   getAdminEvents,
   updateAdminEvent
 } from "../../services/eventsService";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const initialForm = {
   slug: "",
@@ -24,6 +25,8 @@ const initialForm = {
 };
 
 function AdminEvents() {
+  usePageTitle("Admin Events");
+
   const [events, setEvents] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(initialForm);

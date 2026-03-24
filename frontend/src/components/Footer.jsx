@@ -11,7 +11,6 @@ const labels = {
     about: "About",
     host: "Host an Event",
     contact: "Contact",
-    admin: "Admin",
     connect: "Connect"
   },
   es: {
@@ -23,7 +22,6 @@ const labels = {
     about: "Sobre",
     host: "Organizar un Evento",
     contact: "Contacto",
-    admin: "Admin",
     connect: "Conectar"
   }
 };
@@ -47,7 +45,6 @@ function Footer() {
           <Link to="/about">{copy.about}</Link>
           <Link to="/host-an-event">{copy.host}</Link>
           <Link to="/contact">{copy.contact}</Link>
-          <Link to="/admin">{copy.admin}</Link>
         </div>
 
         <div className="footer-block">

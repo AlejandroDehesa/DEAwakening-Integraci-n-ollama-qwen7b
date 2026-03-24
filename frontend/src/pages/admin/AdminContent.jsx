@@ -3,8 +3,11 @@ import {
   getAdminContent,
   updateAdminContent
 } from "../../services/contentService";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 function AdminContent() {
+  usePageTitle("Admin Content");
+
   const [sections, setSections] = useState([]);
   const [selectedKey, setSelectedKey] = useState("");
   const [formData, setFormData] = useState(null);

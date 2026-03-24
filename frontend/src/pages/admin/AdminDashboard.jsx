@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 function AdminDashboard() {
+  usePageTitle("Admin Dashboard");
+
   return (
     <section className="section">
       <div className="container">
