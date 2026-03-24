@@ -1,17 +1,49 @@
-import { fetchEventBySlug, fetchEvents } from "../services/eventsService.js";
+import {
+  fetchEventBySlug,
+  fetchEvents,
+  registerForEvent
+} from "../services/eventsService.js";
 
-export function getEvents(_req, res) {
-  res.json(fetchEvents());
+export async function getEvents(_req, res, next) {
+  try {
+    const events = await fetchEvents();
+    res.json(events);
+  } catch (error) {
+    next(error);
+  }
 }
 
-export function getEventBySlug(req, res) {
-  const event = fetchEventBySlug(req.params.slug);
+export async function getEventBySlug(req, res, next) {
+  try {
+    const event = await fetchEventBySlug(req.params.slug);
 
-  if (!event) {
-    return res.status(404).json({
-      message: "Event not found"
-    });
+    if (!event) {
+      return res.status(404).json({
+        message: "Event not found"
+      });
+    }
+
+    return res.json(event);
+  } catch (error) {
+    next(error);
   }
+}
 
-  return res.json(event);
+export async function submitEventRegistration(req, res, next) {
+  try {
+    const result = await registerForEvent(Number(req.params.id), req.body);
+
+    if (!result.success) {
+      return res.status(result.status).json({
+        success: false,
+        message: result.message
+      });
+    }
+
+    return res.json({
+      success: true
+    });
+  } catch (error) {
+    next(error);
+  }
 }

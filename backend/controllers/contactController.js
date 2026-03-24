@@ -1,5 +1,6 @@
 import {
   fetchContactInfo,
+  saveContactMessage,
   validateContactPayload
 } from "../services/contactService.js";
 
@@ -7,7 +8,7 @@ export function getContactInfo(_req, res) {
   res.json(fetchContactInfo());
 }
 
-export function submitContactForm(req, res) {
+export async function submitContactForm(req, res, next) {
   const validationError = validateContactPayload(req.body);
 
   if (validationError) {
@@ -17,7 +18,13 @@ export function submitContactForm(req, res) {
     });
   }
 
-  return res.json({
-    success: true
-  });
+  try {
+    await saveContactMessage(req.body);
+
+    return res.json({
+      success: true
+    });
+  } catch (error) {
+    next(error);
+  }
 }

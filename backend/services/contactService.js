@@ -1,3 +1,5 @@
+import { run } from "../database/database.js";
+
 export function fetchContactInfo() {
   return {
     email: "hello@deawakening.com",
@@ -25,4 +27,19 @@ export function validateContactPayload(payload) {
   }
 
   return null;
+}
+
+export async function saveContactMessage(payload) {
+  await run(
+    `
+      INSERT INTO contact_messages (name, email, message, created_at)
+      VALUES (?, ?, ?, ?)
+    `,
+    [
+      payload.name.trim(),
+      payload.email.trim(),
+      payload.message.trim(),
+      new Date().toISOString()
+    ]
+  );
 }

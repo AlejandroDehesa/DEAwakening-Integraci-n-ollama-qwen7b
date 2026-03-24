@@ -1,46 +1,90 @@
-const events = [
-  {
-    id: 1,
-    title: "DEAwakening Valencia",
-    slug: "deawakening-valencia",
-    date: "2026-05-10",
-    location: "Valencia",
-    description:
-      "Una jornada presencial centrada en crecimiento personal, presencia emocional y reconexión interior a través de dinámicas guiadas por David Biddle."
-  },
-  {
-    id: 2,
-    title: "DEAwakening Madrid",
-    slug: "deawakening-madrid",
-    date: "2026-06-14",
-    location: "Madrid",
-    description:
-      "Encuentro inmersivo para explorar claridad, apertura y relaciones más conscientes en un entorno seguro, humano y transformador."
-  },
-  {
-    id: 3,
-    title: "DEAwakening Barcelona",
-    slug: "deawakening-barcelona",
-    date: "2026-07-05",
-    location: "Barcelona",
-    description:
-      "Experiencia diseñada para quienes desean volver al cuerpo, desbloquear patrones limitantes y vivir una expansión interna con acompañamiento profesional."
-  },
-  {
-    id: 4,
-    title: "DEAwakening Málaga",
-    slug: "deawakening-malaga",
-    date: "2026-09-20",
-    location: "Malaga",
-    description:
-      "Espacio de comunidad, práctica y profundidad terapéutica para integrar herramientas de conciencia en la vida cotidiana."
-  }
-];
+import { all, get, run } from "../database/database.js";
 
-export function fetchEvents() {
-  return events;
+function mapEvent(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    date: row.date,
+    location: row.location,
+    description: row.description
+    // Reserved for future i18n support, for example a translations JSON column.
+  };
 }
 
-export function fetchEventBySlug(slug) {
-  return events.find((event) => event.slug === slug) || null;
+export async function fetchEvents() {
+  const rows = await all(
+    `
+      SELECT id, title, slug, date, location, description
+      FROM events
+      ORDER BY date ASC
+    `
+  );
+
+  return rows.map(mapEvent);
+}
+
+export async function fetchEventBySlug(slug) {
+  const row = await get(
+    `
+      SELECT id, title, slug, date, location, description
+      FROM events
+      WHERE slug = ?
+    `,
+    [slug]
+  );
+
+  return row ? mapEvent(row) : null;
+}
+
+export async function registerForEvent(eventId, payload) {
+  const name = payload?.name?.trim();
+  const email = payload?.email?.trim();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!Number.isInteger(eventId) || eventId <= 0) {
+    return {
+      success: false,
+      status: 400,
+      message: "A valid event id is required"
+    };
+  }
+
+  if (!name || !email) {
+    return {
+      success: false,
+      status: 400,
+      message: "Name and email are required"
+    };
+  }
+
+  if (!emailPattern.test(email)) {
+    return {
+      success: false,
+      status: 400,
+      message: "A valid email is required"
+    };
+  }
+
+  const event = await get("SELECT id FROM events WHERE id = ?", [eventId]);
+
+  if (!event) {
+    return {
+      success: false,
+      status: 404,
+      message: "Event not found"
+    };
+  }
+
+  await run(
+    `
+      INSERT INTO event_registrations (name, email, event_id, created_at)
+      VALUES (?, ?, ?, ?)
+    `,
+    [name, email, eventId, new Date().toISOString()]
+  );
+
+  return {
+    success: true
+  };
 }
