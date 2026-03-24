@@ -26,6 +26,10 @@ export function validateContactPayload(payload) {
     return "Message must be at least 10 characters long";
   }
 
+  if (message.length > 3000) {
+    return "Message is too long";
+  }
+
   return null;
 }
 

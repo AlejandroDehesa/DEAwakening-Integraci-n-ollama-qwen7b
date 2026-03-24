@@ -36,10 +36,10 @@ const labels = {
     placeholderMessage: "Tell us how we can help.",
     submit: "Send Message",
     sending: "Sending...",
-    success: "Your message has been sent successfully.",
-    nameError: "Please enter your name.",
-    emailError: "Please enter a valid email.",
-    messageError: "Please write a message of at least 10 characters."
+    success: "Thank you. Your message is on its way and we will reply as soon as we can.",
+    nameError: "Please tell us your name so we know how to address you.",
+    emailError: "Please add a valid email so we can reply to you.",
+    messageError: "Please share a little more detail so we can help properly."
   },
   es: {
     eyebrow: "Contacto",
@@ -50,10 +50,10 @@ const labels = {
     placeholderMessage: "Cuentanos como podemos ayudarte.",
     submit: "Enviar Mensaje",
     sending: "Enviando...",
-    success: "Tu mensaje se ha enviado correctamente.",
-    nameError: "Por favor, introduce tu nombre.",
-    emailError: "Por favor, introduce un email valido.",
-    messageError: "Por favor, escribe un mensaje de al menos 10 caracteres."
+    success: "Gracias. Tu mensaje ya esta en camino y responderemos lo antes posible.",
+    nameError: "Por favor, dinos tu nombre para saber como dirigirnos a ti.",
+    emailError: "Por favor, escribe un email valido para poder responderte.",
+    messageError: "Comparte un poco mas de detalle para poder ayudarte bien."
   }
 };
 

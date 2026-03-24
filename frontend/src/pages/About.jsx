@@ -22,7 +22,7 @@ const fallbackContent = {
 
 const labels = {
   en: "About",
-  es: "About"
+  es: "Sobre"
 };
 
 function About() {

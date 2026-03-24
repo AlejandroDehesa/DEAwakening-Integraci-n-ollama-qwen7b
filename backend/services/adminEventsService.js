@@ -40,12 +40,23 @@ function normalizeEventPayload(payload) {
 }
 
 function validateEventPayload(payload) {
+  const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
   if (!payload.slug) {
     return "Slug is required";
   }
 
+  if (!slugPattern.test(payload.slug)) {
+    return "Slug must use lowercase letters, numbers and hyphens only";
+  }
+
   if (!payload.date) {
     return "Date is required";
+  }
+
+  if (!datePattern.test(payload.date)) {
+    return "Date must use YYYY-MM-DD format";
   }
 
   for (const languageCode of ["en", "es"]) {
@@ -53,6 +64,10 @@ function validateEventPayload(payload) {
 
     if (!translation.title || !translation.location || !translation.description) {
       return `All ${languageCode.toUpperCase()} event fields are required`;
+    }
+
+    if (translation.description.length < 20) {
+      return `${languageCode.toUpperCase()} description must be at least 20 characters`;
     }
   }
 

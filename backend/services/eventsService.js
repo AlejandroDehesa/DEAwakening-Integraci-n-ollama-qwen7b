@@ -81,6 +81,14 @@ export async function registerForEvent(eventId, payload) {
     };
   }
 
+  if (name.length < 2) {
+    return {
+      success: false,
+      status: 400,
+      message: "Please enter a valid name"
+    };
+  }
+
   if (!emailPattern.test(email)) {
     return {
       success: false,

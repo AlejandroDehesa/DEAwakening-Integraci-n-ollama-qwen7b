@@ -2,13 +2,14 @@ import {
   fetchContent,
   fetchContentBySectionKey
 } from "../services/contentService.js";
+import { sendError, sendSuccess } from "../utils/httpResponses.js";
 
 export async function getContent(req, res, next) {
   try {
     const sections = await fetchContent(req.query.lang);
-    res.json(sections);
+    return sendSuccess(res, sections);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
@@ -20,13 +21,11 @@ export async function getContentBySectionKey(req, res, next) {
     );
 
     if (!section) {
-      return res.status(404).json({
-        message: "Content section not found"
-      });
+      return sendError(res, 404, "Content section not found");
     }
 
-    return res.json(section);
+    return sendSuccess(res, section);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }

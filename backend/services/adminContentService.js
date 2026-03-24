@@ -42,6 +42,10 @@ function validateSectionPayload(payload) {
     if (!translation.title || !translation.body) {
       return `Title and body are required for ${languageCode.toUpperCase()}`;
     }
+
+    if (translation.body.length < 20) {
+      return `${languageCode.toUpperCase()} body must be at least 20 characters`;
+    }
   }
 
   return null;

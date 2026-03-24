@@ -132,10 +132,16 @@ function AdminEvents() {
     <section className="section">
       <div className="container">
         <span className="eyebrow">Admin Events</span>
+        <div className="section-heading">
+          <h1>Events workspace</h1>
+          <p className="page-copy">
+            Keep the public events list accurate, translated and easy to manage.
+          </p>
+        </div>
         <div className="admin-layout">
           <div className="card admin-panel">
             <div className="admin-panel-header">
-              <h2>Events</h2>
+              <h2>Existing Events</h2>
               <button className="btn btn-outline" type="button" onClick={resetForm}>
                 New Event
               </button>
@@ -143,6 +149,8 @@ function AdminEvents() {
 
             {isLoading ? (
               <p className="status-message loading-message">Loading events...</p>
+            ) : errorMessage ? (
+              <p className="status-message error-message">{errorMessage}</p>
             ) : (
               <div className="admin-list">
                 {events.map((eventItem) => (
@@ -177,6 +185,11 @@ function AdminEvents() {
           <form className="card admin-panel form-card" onSubmit={handleSubmit}>
             <div className="admin-panel-header">
               <h2>{editingId ? "Edit Event" : "Create Event"}</h2>
+              <p className="admin-form-note">
+                {editingId
+                  ? "Update the selected event and save when ready."
+                  : "Create a new event with both language versions."}
+              </p>
             </div>
 
             <div className="admin-form-grid">
@@ -264,7 +277,9 @@ function AdminEvents() {
             </div>
 
             {statusMessage && <p className="status-message">{statusMessage}</p>}
-            {errorMessage && <p className="status-message error-message">{errorMessage}</p>}
+            {!isLoading && errorMessage && (
+              <p className="status-message error-message">{errorMessage}</p>
+            )}
           </form>
         </div>
       </div>

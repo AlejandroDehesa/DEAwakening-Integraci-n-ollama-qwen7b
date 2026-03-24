@@ -13,7 +13,7 @@ const labels = {
   es: {
     home: "Inicio",
     events: "Eventos",
-    about: "About",
+    about: "Sobre",
     host: "Organizar un Evento",
     contact: "Contacto",
     admin: "Admin"

@@ -84,6 +84,13 @@ function AdminContent() {
     <section className="section">
       <div className="container">
         <span className="eyebrow">Admin Content</span>
+        <div className="section-heading">
+          <h1>Content workspace</h1>
+          <p className="page-copy">
+            Edit the core narrative of the site in English and Spanish with a
+            clean, focused workflow.
+          </p>
+        </div>
         <div className="admin-layout">
           <div className="card admin-panel">
             <div className="admin-panel-header">
@@ -92,6 +99,8 @@ function AdminContent() {
 
             {isLoading ? (
               <p className="status-message loading-message">Loading content...</p>
+            ) : errorMessage ? (
+              <p className="status-message error-message">{errorMessage}</p>
             ) : (
               <div className="admin-list">
                 {sections.map((section) => (
@@ -115,6 +124,10 @@ function AdminContent() {
           <form className="card admin-panel form-card" onSubmit={handleSubmit}>
             <div className="admin-panel-header">
               <h2>{selectedKey || "Select a section"}</h2>
+              <p className="admin-form-note">
+                Update both languages before saving to keep the public site
+                consistent.
+              </p>
             </div>
 
             {formData && (
@@ -176,7 +189,9 @@ function AdminContent() {
             </div>
 
             {statusMessage && <p className="status-message">{statusMessage}</p>}
-            {errorMessage && <p className="status-message error-message">{errorMessage}</p>}
+            {!isLoading && errorMessage && (
+              <p className="status-message error-message">{errorMessage}</p>
+            )}
           </form>
         </div>
       </div>

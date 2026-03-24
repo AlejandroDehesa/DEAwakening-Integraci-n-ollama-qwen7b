@@ -15,14 +15,14 @@ const labels = {
     date: "Date",
     location: "Location",
     register: "Register",
-    registerIntro: "Reserve your place for this DEAwakening event.",
+    registerIntro: "Reserve your place and we will follow up with practical details by email.",
     name: "Name",
     email: "Email",
     submit: "Register Now",
     submitting: "Submitting...",
-    success: "Your registration has been received.",
-    nameError: "Please enter your name.",
-    emailError: "Please enter a valid email."
+    success: "You are registered. We will be in touch with next steps by email.",
+    nameError: "Please enter the name you would like us to use.",
+    emailError: "Please add a valid email so we can confirm your place."
   },
   es: {
     eyebrow: "Detalle del Evento",
@@ -30,14 +30,15 @@ const labels = {
     date: "Fecha",
     location: "Ubicacion",
     register: "Inscripcion",
-    registerIntro: "Reserva tu plaza para este evento DEAwakening.",
+    registerIntro:
+      "Reserva tu plaza y te escribiremos por email con los detalles practicos.",
     name: "Nombre",
     email: "Email",
     submit: "Reservar Plaza",
     submitting: "Enviando...",
-    success: "Tu inscripcion ha sido recibida.",
-    nameError: "Por favor, introduce tu nombre.",
-    emailError: "Por favor, introduce un email valido."
+    success: "Tu plaza ha quedado registrada. Te escribiremos con los siguientes pasos.",
+    nameError: "Por favor, introduce el nombre con el que quieres registrarte.",
+    emailError: "Por favor, escribe un email valido para poder confirmarte la plaza."
   }
 };
 

@@ -3,28 +3,24 @@ import {
   saveContactMessage,
   validateContactPayload
 } from "../services/contactService.js";
+import { sendError, sendSuccess } from "../utils/httpResponses.js";
 
 export function getContactInfo(_req, res) {
-  res.json(fetchContactInfo());
+  return sendSuccess(res, fetchContactInfo());
 }
 
 export async function submitContactForm(req, res, next) {
   const validationError = validateContactPayload(req.body);
 
   if (validationError) {
-    return res.status(400).json({
-      success: false,
-      message: validationError
-    });
+    return sendError(res, 400, validationError);
   }
 
   try {
     await saveContactMessage(req.body);
 
-    return res.json({
-      success: true
-    });
+    return sendSuccess(res, { submitted: true });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }

@@ -4,13 +4,14 @@ import {
   fetchAdminEvents,
   updateAdminEvent
 } from "../services/adminEventsService.js";
+import { sendError, sendSuccess } from "../utils/httpResponses.js";
 
 export async function getAdminEvents(_req, res, next) {
   try {
     const events = await fetchAdminEvents();
-    res.json(events);
+    return sendSuccess(res, events);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
@@ -19,15 +20,12 @@ export async function createEvent(req, res, next) {
     const result = await createAdminEvent(req.body);
 
     if (!result.success) {
-      return res.status(result.status).json({
-        success: false,
-        message: result.message
-      });
+      return sendError(res, result.status, result.message);
     }
 
-    return res.status(201).json(result.event);
+    return sendSuccess(res, result.event, 201);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
@@ -36,15 +34,12 @@ export async function updateEvent(req, res, next) {
     const result = await updateAdminEvent(Number(req.params.id), req.body);
 
     if (!result.success) {
-      return res.status(result.status).json({
-        success: false,
-        message: result.message
-      });
+      return sendError(res, result.status, result.message);
     }
 
-    return res.json(result.event);
+    return sendSuccess(res, result.event);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
@@ -53,16 +48,11 @@ export async function deleteEvent(req, res, next) {
     const result = await deleteAdminEvent(Number(req.params.id));
 
     if (!result.success) {
-      return res.status(result.status).json({
-        success: false,
-        message: result.message
-      });
+      return sendError(res, result.status, result.message);
     }
 
-    return res.json({
-      success: true
-    });
+    return sendSuccess(res, { deleted: true });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }

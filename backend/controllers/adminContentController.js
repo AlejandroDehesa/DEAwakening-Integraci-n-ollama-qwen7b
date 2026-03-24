@@ -2,13 +2,14 @@ import {
   fetchAdminContent,
   updateAdminContent
 } from "../services/adminContentService.js";
+import { sendError, sendSuccess } from "../utils/httpResponses.js";
 
 export async function getAdminContent(_req, res, next) {
   try {
     const content = await fetchAdminContent();
-    res.json(content);
+    return sendSuccess(res, content);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
@@ -17,14 +18,11 @@ export async function updateContent(req, res, next) {
     const result = await updateAdminContent(req.params.sectionKey, req.body);
 
     if (!result.success) {
-      return res.status(result.status).json({
-        success: false,
-        message: result.message
-      });
+      return sendError(res, result.status, result.message);
     }
 
-    return res.json(result.section);
+    return sendSuccess(res, result.section);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
