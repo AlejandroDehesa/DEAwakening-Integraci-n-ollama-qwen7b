@@ -1,17 +1,32 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const LanguageContext = createContext(null);
+const STORAGE_KEY = "deawakening-language";
+
+function getInitialLanguage() {
+  if (typeof window === "undefined") {
+    return "en";
+  }
+
+  const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
+  return storedLanguage === "es" ? "es" : "en";
+}
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState("en");
+  const [currentLanguage, setCurrentLanguage] = useState(getInitialLanguage);
 
-  const value = {
-    language,
-    setLanguage
-  };
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, currentLanguage);
+  }, [currentLanguage]);
 
   return (
-    <LanguageContext.Provider value={value}>
+    <LanguageContext.Provider
+      value={{
+        currentLanguage,
+        language: currentLanguage,
+        setLanguage: setCurrentLanguage
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );

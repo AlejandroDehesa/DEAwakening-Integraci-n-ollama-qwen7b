@@ -1,53 +1,66 @@
+import { useEffect, useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import { getSectionContent, parseBodyItems } from "../services/contentService";
+
+const fallbackContent = {
+  en: {
+    title: "DEAwakening is a space for honest transformation led by David Biddle.",
+    subtitle:
+      "The work brings together personal growth, therapeutic depth and spiritual openness without losing warmth or humanity.",
+    body:
+      "What DEAwakening is: In-person experiences where people can slow down, reconnect and move through change with real support.\nMission: Help people access deeper presence, emotional honesty and meaningful transformation.\nExperiences: Guided events that combine reflection, embodied practice and conscious community.\nWho it is for: People ready for growth that feels grounded, safe and deeply human."
+  },
+  es: {
+    title:
+      "DEAwakening es un espacio para la transformacion honesta guiado por David Biddle.",
+    subtitle:
+      "Este trabajo une crecimiento personal, profundidad terapeutica y apertura espiritual sin perder calidez ni humanidad.",
+    body:
+      "Que es DEAwakening: Experiencias presenciales donde las personas pueden parar, reconectar y atravesar cambios con apoyo real.\nMision: Ayudar a las personas a acceder a mas presencia, honestidad emocional y transformacion con sentido.\nExperiencias: Eventos guiados que combinan reflexion, practica corporal y comunidad consciente.\nPara quien es: Personas listas para un crecimiento con profundidad, seguridad y humanidad."
+  }
+};
+
+const labels = {
+  en: "About",
+  es: "About"
+};
+
 function About() {
+  const { currentLanguage } = useLanguage();
+  const [content, setContent] = useState(fallbackContent.en);
+
+  useEffect(() => {
+    const nextFallback = fallbackContent[currentLanguage];
+    setContent(nextFallback);
+
+    async function loadContent() {
+      try {
+        const data = await getSectionContent("about.main", currentLanguage);
+        setContent(data);
+      } catch {
+        setContent(nextFallback);
+      }
+    }
+
+    loadContent();
+  }, [currentLanguage]);
+
   return (
     <section className="section">
       <div className="container">
-        <span className="eyebrow">About</span>
+        <span className="eyebrow">{labels[currentLanguage]}</span>
         <div className="section-heading">
-          <h1>DEAwakening is a space for honest transformation led by David Biddle.</h1>
-          <p className="page-copy">
-            The project brings together personal development, therapeutic depth
-            and conscious community for people who want change that is grounded,
-            lived and deeply human.
-          </p>
+          <h1>{content.title}</h1>
+          <p className="page-copy">{content.subtitle}</p>
         </div>
 
         <div className="stack-grid">
-          <article className="card">
-            <h2>What DEAwakening is</h2>
-            <p>
-              DEAwakening creates in-person experiences where people can slow
-              down, reconnect with themselves and move through change with more
-              awareness and support.
-            </p>
-          </article>
-
-          <article className="card">
-            <h2>Mission</h2>
-            <p>
-              The mission is to help people access deeper presence, emotional
-              honesty and meaningful transformation without losing the warmth and
-              humanity of real connection.
-            </p>
-          </article>
-
-          <article className="card">
-            <h2>Type of experiences</h2>
-            <p>
-              Events combine reflection, group process, guided exercises and
-              embodied practices that support inner clarity, relational growth
-              and sustainable integration.
-            </p>
-          </article>
-
-          <article className="card">
-            <h2>Who it is for</h2>
-            <p>
-              This work is for people who feel ready for deeper personal
-              development, want to move beyond surface inspiration and value a
-              professional, safe and spiritually open environment.
-            </p>
-          </article>
+          {parseBodyItems(content.body).map((item) => (
+            <article key={item.title} className="card">
+              <h2>{item.title}</h2>
+              <p>{item.body}</p>
+            </article>
+          ))}
         </div>
       </div>
     </section>

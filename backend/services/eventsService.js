@@ -1,4 +1,5 @@
 import { all, get, run } from "../database/database.js";
+import { normalizeLanguage } from "./languageUtils.js";
 
 function mapEvent(row) {
   return {
@@ -8,30 +9,52 @@ function mapEvent(row) {
     date: row.date,
     location: row.location,
     description: row.description
-    // Reserved for future i18n support, for example a translations JSON column.
   };
 }
 
-export async function fetchEvents() {
+export async function fetchEvents(languageCode) {
+  const language = normalizeLanguage(languageCode);
   const rows = await all(
     `
-      SELECT id, title, slug, date, location, description
-      FROM events
-      ORDER BY date ASC
-    `
+      SELECT
+        e.id,
+        e.slug,
+        e.date,
+        COALESCE(t_lang.title, t_en.title, e.title) AS title,
+        COALESCE(t_lang.location, t_en.location, e.location) AS location,
+        COALESCE(t_lang.description, t_en.description, e.description) AS description
+      FROM events e
+      LEFT JOIN event_translations t_lang
+        ON t_lang.event_id = e.id AND t_lang.language_code = ?
+      LEFT JOIN event_translations t_en
+        ON t_en.event_id = e.id AND t_en.language_code = 'en'
+      ORDER BY e.date ASC
+    `,
+    [language]
   );
 
   return rows.map(mapEvent);
 }
 
-export async function fetchEventBySlug(slug) {
+export async function fetchEventBySlug(slug, languageCode) {
+  const language = normalizeLanguage(languageCode);
   const row = await get(
     `
-      SELECT id, title, slug, date, location, description
-      FROM events
-      WHERE slug = ?
+      SELECT
+        e.id,
+        e.slug,
+        e.date,
+        COALESCE(t_lang.title, t_en.title, e.title) AS title,
+        COALESCE(t_lang.location, t_en.location, e.location) AS location,
+        COALESCE(t_lang.description, t_en.description, e.description) AS description
+      FROM events e
+      LEFT JOIN event_translations t_lang
+        ON t_lang.event_id = e.id AND t_lang.language_code = ?
+      LEFT JOIN event_translations t_en
+        ON t_en.event_id = e.id AND t_en.language_code = 'en'
+      WHERE e.slug = ?
     `,
-    [slug]
+    [language, slug]
   );
 
   return row ? mapEvent(row) : null;

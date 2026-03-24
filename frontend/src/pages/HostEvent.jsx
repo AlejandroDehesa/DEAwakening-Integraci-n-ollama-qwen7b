@@ -1,45 +1,83 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
+import { getSectionContent, parseBodyItems } from "../services/contentService";
+
+const fallbackContent = {
+  en: {
+    title: "Bring DEAwakening to your venue, retreat or community.",
+    subtitle:
+      "We collaborate with aligned hosts who want to offer a premium and transformational experience.",
+    body:
+      "What collaboration looks like: We shape each event with care so it fits the audience, venue and intention while preserving the DEAwakening experience.\nIdeal partners: Retreat centers, conscious communities, studios and facilitators who value depth, professionalism and human connection."
+  },
+  es: {
+    title: "Lleva DEAwakening a tu espacio, retiro o comunidad.",
+    subtitle:
+      "Colaboramos con anfitriones alineados que desean ofrecer una experiencia premium y transformadora.",
+    body:
+      "Como es la colaboracion: Damos forma a cada evento con cuidado para que encaje con la audiencia, el espacio y la intencion sin perder la esencia DEAwakening.\nSocios ideales: Centros de retiro, comunidades conscientes, estudios y facilitadores que valoran profundidad, profesionalidad y conexion humana."
+  }
+};
+
+const labels = {
+  en: {
+    eyebrow: "Host an Event",
+    cta: "Start the Conversation",
+    helper:
+      "If you would like to explore a collaboration, send us the location, audience and proposed dates."
+  },
+  es: {
+    eyebrow: "Organizar un Evento",
+    cta: "Empezar la Conversacion",
+    helper:
+      "Si quieres explorar una colaboracion, envianos la ubicacion, la audiencia y las fechas propuestas."
+  }
+};
 
 function HostEvent() {
+  const { currentLanguage } = useLanguage();
+  const [content, setContent] = useState(fallbackContent.en);
+  const copy = labels[currentLanguage];
+
+  useEffect(() => {
+    const nextFallback = fallbackContent[currentLanguage];
+    setContent(nextFallback);
+
+    async function loadContent() {
+      try {
+        const data = await getSectionContent("host.main", currentLanguage);
+        setContent(data);
+      } catch {
+        setContent(nextFallback);
+      }
+    }
+
+    loadContent();
+  }, [currentLanguage]);
+
   return (
     <section className="section">
       <div className="container">
-        <span className="eyebrow">Host an Event</span>
+        <span className="eyebrow">{copy.eyebrow}</span>
         <div className="section-heading">
-          <h1>Bring DEAwakening to your community or venue.</h1>
-          <p className="page-copy">
-            We collaborate with retreat spaces, wellness communities, studios
-            and event hosts who want to offer a premium, human and
-            transformational experience.
-          </p>
+          <h1>{content.title}</h1>
+          <p className="page-copy">{content.subtitle}</p>
         </div>
 
         <div className="two-column-grid">
-          <article className="card">
-            <h2>What collaboration looks like</h2>
-            <p>
-              We work closely with local hosts to shape an event that fits the
-              audience, venue and intention while preserving the DEAwakening
-              experience.
-            </p>
-          </article>
-
-          <article className="card">
-            <h2>Ideal partners</h2>
-            <p>
-              Retreat centres, conscious communities, personal growth spaces and
-              aligned facilitators looking to co-create a meaningful event.
-            </p>
-          </article>
+          {parseBodyItems(content.body).map((item) => (
+            <article key={item.title} className="card">
+              <h2>{item.title}</h2>
+              <p>{item.body}</p>
+            </article>
+          ))}
         </div>
 
         <div className="cta-panel">
-          <p>
-            If you would like to explore a collaboration, send us the location,
-            audience and proposed dates.
-          </p>
+          <p>{copy.helper}</p>
           <Link className="btn btn-primary" to="/contact">
-            Start the Conversation
+            {copy.cta}
           </Link>
         </div>
       </div>

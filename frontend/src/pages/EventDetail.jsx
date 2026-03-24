@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import { getEventBySlug, registerForEvent } from "../services/eventsService";
 
 const initialForm = {
@@ -7,8 +8,41 @@ const initialForm = {
   email: ""
 };
 
-function formatDate(date) {
-  return new Intl.DateTimeFormat("en-GB", {
+const labels = {
+  en: {
+    eyebrow: "Event Detail",
+    loading: "Loading event...",
+    date: "Date",
+    location: "Location",
+    register: "Register",
+    registerIntro: "Reserve your place for this DEAwakening event.",
+    name: "Name",
+    email: "Email",
+    submit: "Register Now",
+    submitting: "Submitting...",
+    success: "Your registration has been received.",
+    nameError: "Please enter your name.",
+    emailError: "Please enter a valid email."
+  },
+  es: {
+    eyebrow: "Detalle del Evento",
+    loading: "Cargando evento...",
+    date: "Fecha",
+    location: "Ubicacion",
+    register: "Inscripcion",
+    registerIntro: "Reserva tu plaza para este evento DEAwakening.",
+    name: "Nombre",
+    email: "Email",
+    submit: "Reservar Plaza",
+    submitting: "Enviando...",
+    success: "Tu inscripcion ha sido recibida.",
+    nameError: "Por favor, introduce tu nombre.",
+    emailError: "Por favor, introduce un email valido."
+  }
+};
+
+function formatDate(date, language) {
+  return new Intl.DateTimeFormat(language === "es" ? "es-ES" : "en-GB", {
     day: "2-digit",
     month: "long",
     year: "numeric"
@@ -17,6 +51,8 @@ function formatDate(date) {
 
 function EventDetail() {
   const { slug } = useParams();
+  const { currentLanguage } = useLanguage();
+  const copy = labels[currentLanguage];
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,7 +69,7 @@ function EventDetail() {
       setEvent(null);
 
       try {
-        const eventData = await getEventBySlug(slug);
+        const eventData = await getEventBySlug(slug, currentLanguage);
         setEvent(eventData);
       } catch (requestError) {
         setError(requestError.message);
@@ -43,7 +79,7 @@ function EventDetail() {
     }
 
     loadEvent();
-  }, [slug]);
+  }, [slug, currentLanguage]);
 
   function handleChange(eventTarget) {
     const { name, value } = eventTarget.target;
@@ -58,11 +94,11 @@ function EventDetail() {
     const nextErrors = {};
 
     if (formData.name.trim().length < 2) {
-      nextErrors.name = "Please enter your name.";
+      nextErrors.name = copy.nameError;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      nextErrors.email = "Please enter a valid email.";
+      nextErrors.email = copy.emailError;
     }
 
     return nextErrors;
@@ -87,7 +123,7 @@ function EventDetail() {
     try {
       setIsSubmitting(true);
       await registerForEvent(event.id, formData);
-      setSubmitMessage("Your registration has been received.");
+      setSubmitMessage(copy.success);
       setSubmitState("success");
       setFormData(initialForm);
     } catch (requestError) {
@@ -101,9 +137,9 @@ function EventDetail() {
   return (
     <section className="section">
       <div className="container">
-        <span className="eyebrow">Event Detail</span>
+        <span className="eyebrow">{copy.eyebrow}</span>
 
-        {isLoading && <p className="status-message loading-message">Loading event...</p>}
+        {isLoading && <p className="status-message loading-message">{copy.loading}</p>}
 
         {error && <p className="status-message error-message">{error}</p>}
 
@@ -116,31 +152,29 @@ function EventDetail() {
 
             <aside className="card detail-sidebar">
               <div>
-                <p className="detail-label">Date</p>
-                <p>{formatDate(event.date)}</p>
+                <p className="detail-label">{copy.date}</p>
+                <p>{formatDate(event.date, currentLanguage)}</p>
               </div>
 
               <div>
-                <p className="detail-label">Location</p>
+                <p className="detail-label">{copy.location}</p>
                 <p>{event.location}</p>
               </div>
 
               <form className="form-card" onSubmit={handleSubmit} noValidate>
                 <div>
-                  <p className="detail-label">Register</p>
-                  <p className="footer-copy">
-                    Reserve your place for this DEAwakening event.
-                  </p>
+                  <p className="detail-label">{copy.register}</p>
+                  <p className="footer-copy">{copy.registerIntro}</p>
                 </div>
 
                 <label className="field">
-                  <span>Name</span>
+                  <span>{copy.name}</span>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Your name"
+                    placeholder={copy.name}
                   />
                   {formErrors.name && (
                     <small className="field-error">{formErrors.name}</small>
@@ -148,7 +182,7 @@ function EventDetail() {
                 </label>
 
                 <label className="field">
-                  <span>Email</span>
+                  <span>{copy.email}</span>
                   <input
                     type="email"
                     name="email"
@@ -166,7 +200,7 @@ function EventDetail() {
                   type="submit"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : "Register Now"}
+                  {isSubmitting ? copy.submitting : copy.submit}
                 </button>
 
                 {submitMessage && (

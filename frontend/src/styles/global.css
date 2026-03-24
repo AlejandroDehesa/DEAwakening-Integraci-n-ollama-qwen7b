@@ -177,6 +177,12 @@ ul {
   padding: 1rem 0;
 }
 
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .brand-mark {
   display: inline-flex;
   flex-direction: column;
@@ -197,6 +203,30 @@ ul {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.language-option {
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  color: var(--color-muted);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.language-option-active {
+  background: rgba(42, 107, 116, 0.12);
+  color: var(--color-text);
 }
 
 .nav-link {
@@ -380,6 +410,10 @@ h3 {
   gap: var(--space-3);
 }
 
+.contact-support-copy {
+  margin-top: 1rem;
+}
+
 .cta-panel {
   display: flex;
   align-items: center;
@@ -469,6 +503,82 @@ h3 {
   gap: 0.75rem;
 }
 
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.4fr);
+  gap: var(--space-4);
+}
+
+.admin-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-panel {
+  display: grid;
+  gap: 1rem;
+  align-self: start;
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.admin-list-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.admin-list-item-active {
+  border-color: rgba(42, 107, 116, 0.35);
+  background: rgba(42, 107, 116, 0.08);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-form-grid,
+.admin-language-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-language-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-language-card {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
 @media (max-width: 960px) {
   .three-column-grid,
   .events-grid,
@@ -476,7 +586,10 @@ h3 {
   .two-column-grid,
   .contact-layout,
   .hero-grid,
-  .detail-layout {
+  .detail-layout,
+  .admin-layout,
+  .admin-language-grid,
+  .admin-form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -489,6 +602,12 @@ h3 {
 
 @media (max-width: 768px) {
   .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-tools {
+    width: 100%;
     flex-direction: column;
     align-items: flex-start;
   }

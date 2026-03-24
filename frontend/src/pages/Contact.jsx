@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import { getSectionContent } from "../services/contentService";
 import { sendContactMessage } from "../services/contactService";
 
 const initialForm = {
@@ -7,12 +9,79 @@ const initialForm = {
   message: ""
 };
 
+const fallbackContent = {
+  en: {
+    title: "Get in touch",
+    subtitle:
+      "Use this space for event enquiries, collaboration ideas or general questions about DEAwakening.",
+    body:
+      "We read every message with care and aim to respond with clarity, warmth and professionalism."
+  },
+  es: {
+    title: "Ponte en contacto",
+    subtitle:
+      "Usa este espacio para preguntas sobre eventos, ideas de colaboracion o consultas generales sobre DEAwakening.",
+    body:
+      "Leemos cada mensaje con atencion y buscamos responder con claridad, calidez y profesionalidad."
+  }
+};
+
+const labels = {
+  en: {
+    eyebrow: "Contact",
+    name: "Name",
+    email: "Email",
+    message: "Message",
+    placeholderName: "Your name",
+    placeholderMessage: "Tell us how we can help.",
+    submit: "Send Message",
+    sending: "Sending...",
+    success: "Your message has been sent successfully.",
+    nameError: "Please enter your name.",
+    emailError: "Please enter a valid email.",
+    messageError: "Please write a message of at least 10 characters."
+  },
+  es: {
+    eyebrow: "Contacto",
+    name: "Nombre",
+    email: "Email",
+    message: "Mensaje",
+    placeholderName: "Tu nombre",
+    placeholderMessage: "Cuentanos como podemos ayudarte.",
+    submit: "Enviar Mensaje",
+    sending: "Enviando...",
+    success: "Tu mensaje se ha enviado correctamente.",
+    nameError: "Por favor, introduce tu nombre.",
+    emailError: "Por favor, introduce un email valido.",
+    messageError: "Por favor, escribe un mensaje de al menos 10 caracteres."
+  }
+};
+
 function Contact() {
+  const { currentLanguage } = useLanguage();
+  const [content, setContent] = useState(fallbackContent.en);
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState("");
   const [submissionState, setSubmissionState] = useState("idle");
+  const copy = labels[currentLanguage];
+
+  useEffect(() => {
+    const nextFallback = fallbackContent[currentLanguage];
+    setContent(nextFallback);
+
+    async function loadContent() {
+      try {
+        const data = await getSectionContent("contact.main", currentLanguage);
+        setContent(data);
+      } catch {
+        setContent(nextFallback);
+      }
+    }
+
+    loadContent();
+  }, [currentLanguage]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -27,15 +96,15 @@ function Contact() {
     const nextErrors = {};
 
     if (formData.name.trim().length < 2) {
-      nextErrors.name = "Please enter your name.";
+      nextErrors.name = copy.nameError;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      nextErrors.email = "Please enter a valid email.";
+      nextErrors.email = copy.emailError;
     }
 
     if (formData.message.trim().length < 10) {
-      nextErrors.message = "Please write a message of at least 10 characters.";
+      nextErrors.message = copy.messageError;
     }
 
     return nextErrors;
@@ -56,7 +125,7 @@ function Contact() {
     try {
       setIsSubmitting(true);
       await sendContactMessage(formData);
-      setServerMessage("Your message has been sent successfully.");
+      setServerMessage(copy.success);
       setSubmissionState("success");
       setFormData(initialForm);
     } catch (error) {
@@ -70,31 +139,29 @@ function Contact() {
   return (
     <section className="section">
       <div className="container">
-        <span className="eyebrow">Contact</span>
+        <span className="eyebrow">{copy.eyebrow}</span>
         <div className="contact-layout">
           <div>
-            <h1>Get in touch</h1>
-            <p className="page-copy">
-              Use this form for event enquiries, collaboration opportunities or
-              general questions about DEAwakening.
-            </p>
+            <h1>{content.title}</h1>
+            <p className="page-copy">{content.subtitle}</p>
+            <p className="page-copy contact-support-copy">{content.body}</p>
           </div>
 
           <form className="card form-card" onSubmit={handleSubmit} noValidate>
             <label className="field">
-              <span>Name</span>
+              <span>{copy.name}</span>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Your name"
+                placeholder={copy.placeholderName}
               />
               {errors.name && <small className="field-error">{errors.name}</small>}
             </label>
 
             <label className="field">
-              <span>Email</span>
+              <span>{copy.email}</span>
               <input
                 type="email"
                 name="email"
@@ -106,12 +173,12 @@ function Contact() {
             </label>
 
             <label className="field">
-              <span>Message</span>
+              <span>{copy.message}</span>
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Tell us how we can help."
+                placeholder={copy.placeholderMessage}
                 rows="6"
               />
               {errors.message && (
@@ -120,7 +187,7 @@ function Contact() {
             </label>
 
             <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Sending..." : "Send Message"}
+              {isSubmitting ? copy.sending : copy.submit}
             </button>
 
             {serverMessage && (

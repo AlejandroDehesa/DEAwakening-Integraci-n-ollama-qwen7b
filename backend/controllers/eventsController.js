@@ -4,9 +4,9 @@ import {
   registerForEvent
 } from "../services/eventsService.js";
 
-export async function getEvents(_req, res, next) {
+export async function getEvents(req, res, next) {
   try {
-    const events = await fetchEvents();
+    const events = await fetchEvents(req.query.lang);
     res.json(events);
   } catch (error) {
     next(error);
@@ -15,7 +15,7 @@ export async function getEvents(_req, res, next) {
 
 export async function getEventBySlug(req, res, next) {
   try {
-    const event = await fetchEventBySlug(req.params.slug);
+    const event = await fetchEventBySlug(req.params.slug, req.query.lang);
 
     if (!event) {
       return res.status(404).json({
