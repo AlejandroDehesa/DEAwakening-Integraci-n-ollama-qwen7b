@@ -2,3 +2,7 @@ node_modules
 dist
 *.log
 backend/database/*.sqlite
+.env
+.env.local
+backend/.env
+frontend/.env
