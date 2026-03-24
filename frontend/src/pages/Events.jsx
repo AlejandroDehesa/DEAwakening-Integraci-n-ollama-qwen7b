@@ -1,29 +1,66 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getEvents } from "../services/eventsService";
 
-const placeholderEvents = [
-  { slug: "deep-awakening-intensive", title: "Deep Awakening Intensive" },
-  { slug: "inner-freedom-retreat", title: "Inner Freedom Retreat" }
-];
+function formatDate(date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  }).format(new Date(date));
+}
 
 function Events() {
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const eventsData = await getEvents();
+        setEvents(eventsData);
+      } catch (requestError) {
+        setError(requestError.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadEvents();
+  }, []);
+
   return (
-    <section className="page-section">
+    <section className="section">
       <div className="container">
         <span className="eyebrow">Events</span>
-        <h1>Upcoming Experiences</h1>
+        <h1>Upcoming DEAwakening experiences</h1>
         <p className="page-copy">
-          Placeholder events listing ready to connect to real backend content.
+          Explore live gatherings created to support personal expansion,
+          emotional depth and meaningful human connection.
         </p>
 
-        <div className="placeholder-grid">
-          {placeholderEvents.map((event) => (
-            <article key={event.slug} className="placeholder-card">
-              <h2>{event.title}</h2>
-              <p>Event content will be connected in a later phase.</p>
-              <Link to={`/events/${event.slug}`}>View event</Link>
-            </article>
-          ))}
-        </div>
+        {isLoading && <p className="status-message">Loading events...</p>}
+
+        {error && <p className="status-message error-message">{error}</p>}
+
+        {!isLoading && !error && (
+          <div className="events-grid">
+            {events.map((event) => (
+              <Link
+                key={event.id}
+                to={`/events/${event.slug}`}
+                className="card event-card event-card-link"
+              >
+                <p className="event-meta">{formatDate(event.date)}</p>
+                <h2>{event.title}</h2>
+                <p className="event-location">{event.location}</p>
+                <p>{event.description}</p>
+                <span className="text-link">View details</span>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,5 +1,11 @@
 export function fetchContent() {
   return {
-    message: "Content endpoint placeholder"
+    brand: "DEAwakening",
+    guide: "David Biddle",
+    focus: [
+      "Transformational live events",
+      "Personal growth experiences",
+      "Conscious community gatherings"
+    ]
   };
 }

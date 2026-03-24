@@ -13,7 +13,8 @@ function Navbar() {
     <header className="site-header">
       <div className="container header-inner">
         <NavLink className="brand-mark" to="/">
-          DEAwakening
+          <span className="brand-kicker">David Biddle</span>
+          <span>DEAwakening</span>
         </NavLink>
 
         <nav className="main-nav" aria-label="Primary navigation">
