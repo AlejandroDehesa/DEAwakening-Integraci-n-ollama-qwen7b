@@ -1,3 +1,7 @@
 export function normalizeLanguage(languageCode) {
-  return languageCode === "es" ? "es" : "en";
+  if (languageCode === "es" || languageCode === "de") {
+    return languageCode;
+  }
+
+  return "en";
 }

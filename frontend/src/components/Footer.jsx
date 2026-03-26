@@ -1,34 +1,50 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { getSectionExtra } from "../services/contentService";
 
-const labels = {
-  en: {
-    description:
-      "A space for transformational events, therapeutic depth and human connection led by David Biddle.",
-    navigate: "Navigate",
-    home: "Home",
-    events: "Events",
-    about: "About",
-    host: "Host an Event",
-    contact: "Contact",
-    connect: "Connect"
-  },
-  es: {
-    description:
-      "Un espacio para eventos transformadores, profundidad terapeutica y conexion humana guiado por David Biddle.",
-    navigate: "Navegacion",
-    home: "Inicio",
-    events: "Eventos",
-    about: "Sobre",
-    host: "Organizar un Evento",
-    contact: "Contacto",
-    connect: "Conectar"
-  }
+const emptyFooter = {
+  description: "",
+  navigate: "",
+  home: "",
+  events: "",
+  about: "",
+  host: "",
+  contact: "",
+  connect: "",
+  email: "",
+  socials: ""
 };
 
 function Footer() {
   const { currentLanguage } = useLanguage();
-  const copy = labels[currentLanguage];
+  const [copy, setCopy] = useState(emptyFooter);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadFooter() {
+      try {
+        const data = await getSectionExtra("ui.footer", currentLanguage, emptyFooter);
+        if (!ignore) {
+          setCopy({
+            ...emptyFooter,
+            ...data
+          });
+        }
+      } catch {
+        if (!ignore) {
+          setCopy(emptyFooter);
+        }
+      }
+    }
+
+    loadFooter();
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentLanguage]);
 
   return (
     <footer className="site-footer">
@@ -56,8 +72,8 @@ function Footer() {
 
         <div className="footer-block">
           <p className="footer-heading">{copy.connect}</p>
-          <p className="footer-copy">hello@deawakening.com</p>
-          <p className="footer-copy">Instagram / YouTube / Facebook</p>
+          <p className="footer-copy">{copy.email}</p>
+          <p className="footer-copy">{copy.socials}</p>
         </div>
       </div>
     </footer>

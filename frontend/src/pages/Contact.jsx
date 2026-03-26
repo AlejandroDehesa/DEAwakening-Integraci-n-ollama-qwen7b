@@ -1,139 +1,308 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { getSectionContent } from "../services/contentService";
+import { getSectionContent, getSectionExtra } from "../services/contentService";
 import { sendContactMessage } from "../services/contactService";
 
-const initialForm = {
+const DRAFT_KEY = "deawakening-contact-draft-v1";
+const SUBMIT_COOLDOWN_SECONDS = 12;
+const MESSAGE_MIN_LENGTH = 20;
+const MESSAGE_MAX_LENGTH = 1200;
+
+const emptyForm = {
   name: "",
   email: "",
-  message: ""
+  message: "",
+  website: ""
 };
 
-const fallbackContent = {
-  en: {
-    title: "Get in touch",
-    subtitle:
-      "Use this space for event enquiries, collaboration ideas or general questions about DEAwakening.",
-    body:
-      "We read every message with care and aim to respond with clarity, warmth and professionalism."
-  },
-  es: {
-    title: "Ponte en contacto",
-    subtitle:
-      "Usa este espacio para preguntas sobre eventos, ideas de colaboracion o consultas generales sobre DEAwakening.",
-    body:
-      "Leemos cada mensaje con atencion y buscamos responder con claridad, calidez y profesionalidad."
-  }
+const fallbackMain = {
+  title: "",
+  subtitle: "",
+  body: ""
 };
 
-const labels = {
-  en: {
-    pageTitle: "Contact",
-    eyebrow: "Contact",
-    name: "Name",
-    email: "Email",
-    message: "Message",
-    placeholderName: "Your name",
-    placeholderMessage: "Tell us how we can help.",
-    submit: "Send Message",
-    sending: "Sending...",
-    success: "Thank you. Your message is on its way and we will reply as soon as we can.",
-    nameError: "Please tell us your name so we know how to address you.",
-    emailError: "Please add a valid email so we can reply to you.",
-    messageError: "Please share a little more detail so we can help properly."
-  },
-  es: {
-    pageTitle: "Contacto",
-    eyebrow: "Contacto",
-    name: "Nombre",
-    email: "Correo",
-    message: "Mensaje",
-    placeholderName: "Tu nombre",
-    placeholderMessage: "Cuentanos como podemos ayudarte.",
-    submit: "Enviar Mensaje",
-    sending: "Enviando...",
-    success: "Gracias. Tu mensaje ya esta en camino y responderemos lo antes posible.",
-    nameError: "Por favor, dinos tu nombre para saber como dirigirnos a ti.",
-    emailError: "Por favor, escribe un email valido para poder responderte.",
-    messageError: "Comparte un poco mas de detalle para poder ayudarte bien."
-  }
+const fallbackUi = {
+  pageTitle: "Contact",
+  supportTitle: "",
+  supportItems: [],
+  expectedReply: "",
+  name: "",
+  email: "",
+  message: "",
+  placeholderName: "",
+  placeholderMessage: "",
+  submit: "",
+  sending: "",
+  clear: "",
+  draftSaved: "",
+  success: "",
+  nameError: "",
+  emailError: "",
+  messageShortError: "",
+  messageLongError: "",
+  genericError: "",
+  charCount: "",
+  canSendIn: "",
+  secondsShort: "",
+  completionLabel: ""
 };
+
+function validateField(name, value, copy) {
+  if (name === "name") {
+    const trimmed = value.trim();
+
+    if (trimmed.length < 2) {
+      return copy.nameError;
+    }
+  }
+
+  if (name === "email") {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(value.trim())) {
+      return copy.emailError;
+    }
+  }
+
+  if (name === "message") {
+    const length = value.trim().length;
+
+    if (length < MESSAGE_MIN_LENGTH) {
+      return copy.messageShortError;
+    }
+
+    if (length > MESSAGE_MAX_LENGTH) {
+      return copy.messageLongError;
+    }
+  }
+
+  return "";
+}
+
+function mapServerError(message, copy) {
+  if (!message) {
+    return copy.genericError;
+  }
+
+  if (message.includes("Name must be at least 2")) {
+    return copy.nameError;
+  }
+
+  if (message.includes("valid email")) {
+    return copy.emailError;
+  }
+
+  if (message.includes("at least 10")) {
+    return copy.messageShortError;
+  }
+
+  if (message.includes("too long")) {
+    return copy.messageLongError;
+  }
+
+  return message;
+}
 
 function Contact() {
   const { currentLanguage } = useLanguage();
-  const [content, setContent] = useState(fallbackContent.en);
-  const [formData, setFormData] = useState(initialForm);
+  const [content, setContent] = useState(fallbackMain);
+  const [copy, setCopy] = useState(fallbackUi);
+  const [formData, setFormData] = useState(emptyForm);
+  const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverMessage, setServerMessage] = useState("");
   const [submissionState, setSubmissionState] = useState("idle");
-  const copy = labels[currentLanguage];
-  usePageTitle(copy.pageTitle);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  usePageTitle(copy.pageTitle || "Contact");
+
+  const messageLength = formData.message.trim().length;
+
+  const completion = useMemo(() => {
+    const checks = [
+      !validateField("name", formData.name, copy),
+      !validateField("email", formData.email, copy),
+      !validateField("message", formData.message, copy)
+    ];
+
+    const okCount = checks.filter(Boolean).length;
+    return Math.round((okCount / checks.length) * 100);
+  }, [copy, formData.email, formData.message, formData.name]);
 
   useEffect(() => {
-    const nextFallback = fallbackContent[currentLanguage];
-    setContent(nextFallback);
+    let ignore = false;
 
     async function loadContent() {
       try {
-        const data = await getSectionContent("contact.main", currentLanguage);
-        setContent(data);
+        const [mainData, uiData] = await Promise.all([
+          getSectionContent("contact.main", currentLanguage),
+          getSectionExtra("contact.ui", currentLanguage, fallbackUi)
+        ]);
+
+        if (!ignore) {
+          setContent(mainData);
+          setCopy({
+            ...fallbackUi,
+            ...uiData
+          });
+        }
       } catch {
-        setContent(nextFallback);
+        if (!ignore) {
+          setContent(fallbackMain);
+          setCopy(fallbackUi);
+        }
       }
     }
 
     loadContent();
+
+    return () => {
+      ignore = true;
+    };
   }, [currentLanguage]);
 
-  function handleChange(event) {
-    const { name, value } = event.target;
+  useEffect(() => {
+    try {
+      const rawDraft = window.localStorage.getItem(DRAFT_KEY);
 
+      if (!rawDraft) {
+        return;
+      }
+
+      const parsed = JSON.parse(rawDraft);
+
+      setFormData((current) => ({
+        ...current,
+        name: parsed?.name || "",
+        email: parsed?.email || "",
+        message: parsed?.message || ""
+      }));
+    } catch {
+      window.localStorage.removeItem(DRAFT_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    const draft = {
+      name: formData.name,
+      email: formData.email,
+      message: formData.message
+    };
+
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  }, [formData.email, formData.message, formData.name]);
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) {
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => {
+      setCooldownSeconds((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [cooldownSeconds]);
+
+  function setField(name, value) {
     setFormData((current) => ({
       ...current,
       [name]: value
     }));
+
+    if (touched[name]) {
+      setErrors((current) => ({
+        ...current,
+        [name]: validateField(name, value, copy)
+      }));
+    }
+  }
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setField(name, value);
+  }
+
+  function handleBlur(event) {
+    const { name, value } = event.target;
+
+    setTouched((current) => ({
+      ...current,
+      [name]: true
+    }));
+
+    setErrors((current) => ({
+      ...current,
+      [name]: validateField(name, value, copy)
+    }));
   }
 
   function validateForm() {
-    const nextErrors = {};
-
-    if (formData.name.trim().length < 2) {
-      nextErrors.name = copy.nameError;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      nextErrors.email = copy.emailError;
-    }
-
-    if (formData.message.trim().length < 10) {
-      nextErrors.message = copy.messageError;
-    }
+    const nextErrors = {
+      name: validateField("name", formData.name, copy),
+      email: validateField("email", formData.email, copy),
+      message: validateField("message", formData.message, copy)
+    };
 
     return nextErrors;
   }
 
+  function handleReset() {
+    setFormData(emptyForm);
+    setTouched({});
+    setErrors({});
+    setServerMessage("");
+    setSubmissionState("idle");
+    window.localStorage.removeItem(DRAFT_KEY);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (isSubmitting || cooldownSeconds > 0) {
+      return;
+    }
+
     const nextErrors = validateForm();
 
+    setTouched({
+      name: true,
+      email: true,
+      message: true
+    });
     setErrors(nextErrors);
     setServerMessage("");
     setSubmissionState("idle");
 
-    if (Object.keys(nextErrors).length > 0) {
+    if (Object.values(nextErrors).some(Boolean)) {
+      return;
+    }
+
+    if (formData.website.trim()) {
+      setServerMessage(copy.success);
+      setSubmissionState("success");
+      setCooldownSeconds(SUBMIT_COOLDOWN_SECONDS);
+      setFormData(emptyForm);
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await sendContactMessage(formData);
+      await sendContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        message: formData.message.trim()
+      });
       setServerMessage(copy.success);
       setSubmissionState("success");
-      setFormData(initialForm);
+      setCooldownSeconds(SUBMIT_COOLDOWN_SECONDS);
+      setFormData(emptyForm);
+      setTouched({});
+      setErrors({});
+      window.localStorage.removeItem(DRAFT_KEY);
     } catch (error) {
-      setServerMessage(error.message);
+      setServerMessage(mapServerError(error.message, copy));
       setSubmissionState("error");
     } finally {
       setIsSubmitting(false);
@@ -141,17 +310,38 @@ function Contact() {
   }
 
   return (
-    <section className="section">
-      <div className="container">
-        <span className="eyebrow">{copy.eyebrow}</span>
-        <div className="contact-layout">
-          <div>
-            <h1>{content.title}</h1>
-            <p className="page-copy">{content.subtitle}</p>
-            <p className="page-copy contact-support-copy">{content.body}</p>
-          </div>
+    <section className="section contact-advanced-section">
+      <div className="container contact-advanced-stack">
+        <header className="card contact-hero-card">
+          <h1>{content.title}</h1>
+          <p className="page-copy">{content.subtitle}</p>
+        </header>
 
-          <form className="card form-card" onSubmit={handleSubmit} noValidate>
+        <div className="contact-advanced-layout">
+          <aside className="card contact-intro-card">
+            <h2>{copy.supportTitle}</h2>
+            <p className="contact-support-copy">{content.body}</p>
+
+            <ul className="contact-support-list">
+              {copy.supportItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+
+            <p className="contact-reply-time">{copy.expectedReply}</p>
+          </aside>
+
+          <form className="card contact-form-card" onSubmit={handleSubmit} noValidate>
+            <div className="contact-form-progress-wrap">
+              <div className="contact-form-progress-head">
+                <span>{copy.completionLabel}</span>
+                <strong>{completion}%</strong>
+              </div>
+              <div className="contact-form-progress-bar" aria-hidden="true">
+                <span style={{ width: `${completion}%` }} />
+              </div>
+            </div>
+
             <label className="field">
               <span>{copy.name}</span>
               <input
@@ -159,9 +349,14 @@ function Contact() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder={copy.placeholderName}
+                maxLength={80}
+                autoComplete="name"
               />
-              {errors.name && <small className="field-error">{errors.name}</small>}
+              {touched.name && errors.name ? (
+                <small className="field-error">{errors.name}</small>
+              ) : null}
             </label>
 
             <label className="field">
@@ -171,30 +366,84 @@ function Contact() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="you@example.com"
+                maxLength={160}
+                autoComplete="email"
               />
-              {errors.email && <small className="field-error">{errors.email}</small>}
+              {touched.email && errors.email ? (
+                <small className="field-error">{errors.email}</small>
+              ) : null}
+            </label>
+
+            <label className="field field-honeypot" aria-hidden="true">
+              <span>Website</span>
+              <input
+                type="text"
+                name="website"
+                value={formData.website}
+                onChange={handleChange}
+                tabIndex={-1}
+                autoComplete="off"
+              />
             </label>
 
             <label className="field">
-              <span>{copy.message}</span>
+              <div className="field-row">
+                <span>{copy.message}</span>
+                <small
+                  className={
+                    messageLength > MESSAGE_MAX_LENGTH
+                      ? "field-counter field-counter-error"
+                      : "field-counter"
+                  }
+                >
+                  {messageLength} / {MESSAGE_MAX_LENGTH} {copy.charCount}
+                </small>
+              </div>
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder={copy.placeholderMessage}
-                rows="6"
+                rows="8"
               />
-              {errors.message && (
+              {touched.message && errors.message ? (
                 <small className="field-error">{errors.message}</small>
-              )}
+              ) : null}
             </label>
 
-            <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? copy.sending : copy.submit}
-            </button>
+            <div className="contact-form-actions">
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={isSubmitting || cooldownSeconds > 0}
+              >
+                {isSubmitting ? copy.sending : copy.submit}
+              </button>
 
-            {serverMessage && (
+              <button
+                className="btn btn-outline"
+                type="button"
+                onClick={handleReset}
+                disabled={isSubmitting}
+              >
+                {copy.clear}
+              </button>
+            </div>
+
+            <div className="contact-form-meta">
+              <small>{copy.draftSaved}</small>
+              {cooldownSeconds > 0 ? (
+                <small>
+                  {copy.canSendIn} {cooldownSeconds}
+                  {copy.secondsShort}
+                </small>
+              ) : null}
+            </div>
+
+            {serverMessage ? (
               <p
                 className={
                   submissionState === "error"
@@ -204,7 +453,7 @@ function Contact() {
               >
                 {serverMessage}
               </p>
-            )}
+            ) : null}
           </form>
         </div>
       </div>

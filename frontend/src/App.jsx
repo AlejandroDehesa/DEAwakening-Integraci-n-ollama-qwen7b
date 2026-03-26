@@ -9,6 +9,7 @@ import EventDetail from "./pages/EventDetail";
 import Events from "./pages/Events";
 import Home from "./pages/Home";
 import HostEvent from "./pages/HostEvent";
+import MyBook from "./pages/MyBook";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/events/:slug" element={<EventDetail />} />
         <Route path="/about" element={<About />} />
+        <Route path="/mi-libro" element={<MyBook />} />
         <Route path="/host-an-event" element={<HostEvent />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin" element={<AdminDashboard />} />

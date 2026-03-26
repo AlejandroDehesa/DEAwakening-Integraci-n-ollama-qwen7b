@@ -1,5 +1,7 @@
 import { all, get, run } from "../database/database.js";
 
+const SUPPORTED_LANGUAGES = ["en", "es", "de"];
+
 function mapAdminEvent(row) {
   return {
     id: row.id,
@@ -15,27 +17,42 @@ function mapAdminEvent(row) {
         title: row.title_es || "",
         location: row.location_es || "",
         description: row.description_es || ""
+      },
+      de: {
+        title: row.title_de || "",
+        location: row.location_de || "",
+        description: row.description_de || ""
       }
     }
   };
 }
 
 function normalizeEventPayload(payload) {
+  const fallbackEn = {
+    title: payload?.translations?.en?.title?.trim() || "",
+    location: payload?.translations?.en?.location?.trim() || "",
+    description: payload?.translations?.en?.description?.trim() || ""
+  };
+
+  const translations = Object.fromEntries(
+    SUPPORTED_LANGUAGES.map((languageCode) => {
+      const source = payload?.translations?.[languageCode] || {};
+
+      return [
+        languageCode,
+        {
+          title: source.title?.trim() || fallbackEn.title,
+          location: source.location?.trim() || fallbackEn.location,
+          description: source.description?.trim() || fallbackEn.description
+        }
+      ];
+    })
+  );
+
   return {
     slug: payload?.slug?.trim(),
     date: payload?.date?.trim(),
-    translations: {
-      en: {
-        title: payload?.translations?.en?.title?.trim() || "",
-        location: payload?.translations?.en?.location?.trim() || "",
-        description: payload?.translations?.en?.description?.trim() || ""
-      },
-      es: {
-        title: payload?.translations?.es?.title?.trim() || "",
-        location: payload?.translations?.es?.location?.trim() || "",
-        description: payload?.translations?.es?.description?.trim() || ""
-      }
-    }
+    translations
   };
 }
 
@@ -59,7 +76,7 @@ function validateEventPayload(payload) {
     return "Date must use YYYY-MM-DD format";
   }
 
-  for (const languageCode of ["en", "es"]) {
+  for (const languageCode of SUPPORTED_LANGUAGES) {
     const translation = payload.translations[languageCode];
 
     if (!translation.title || !translation.location || !translation.description) {
@@ -86,12 +103,17 @@ async function fetchAdminEventById(id) {
         t_en.description AS description_en,
         t_es.title AS title_es,
         t_es.location AS location_es,
-        t_es.description AS description_es
+        t_es.description AS description_es,
+        t_de.title AS title_de,
+        t_de.location AS location_de,
+        t_de.description AS description_de
       FROM events e
       LEFT JOIN event_translations t_en
         ON t_en.event_id = e.id AND t_en.language_code = 'en'
       LEFT JOIN event_translations t_es
         ON t_es.event_id = e.id AND t_es.language_code = 'es'
+      LEFT JOIN event_translations t_de
+        ON t_de.event_id = e.id AND t_de.language_code = 'de'
       WHERE e.id = ?
     `,
     [id]
@@ -144,12 +166,17 @@ export async function fetchAdminEvents() {
       t_en.description AS description_en,
       t_es.title AS title_es,
       t_es.location AS location_es,
-      t_es.description AS description_es
+      t_es.description AS description_es,
+      t_de.title AS title_de,
+      t_de.location AS location_de,
+      t_de.description AS description_de
     FROM events e
     LEFT JOIN event_translations t_en
       ON t_en.event_id = e.id AND t_en.language_code = 'en'
     LEFT JOIN event_translations t_es
       ON t_es.event_id = e.id AND t_es.language_code = 'es'
+    LEFT JOIN event_translations t_de
+      ON t_de.event_id = e.id AND t_de.language_code = 'de'
     ORDER BY e.date ASC
   `);
 
@@ -203,6 +230,11 @@ export async function createAdminEvent(payload) {
     insertResult.lastID,
     "es",
     normalizedPayload.translations.es
+  );
+  await upsertEventTranslation(
+    insertResult.lastID,
+    "de",
+    normalizedPayload.translations.de
   );
 
   return {
@@ -277,6 +309,7 @@ export async function updateAdminEvent(id, payload) {
 
   await upsertEventTranslation(id, "en", normalizedPayload.translations.en);
   await upsertEventTranslation(id, "es", normalizedPayload.translations.es);
+  await upsertEventTranslation(id, "de", normalizedPayload.translations.de);
 
   return {
     success: true,

@@ -1,30 +1,52 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { getSectionExtra } from "../services/contentService";
 
-const labels = {
-  en: {
-    home: "Home",
-    events: "Events",
-    about: "About",
-    host: "Host an Event",
-    contact: "Contact"
-  },
-  es: {
-    home: "Inicio",
-    events: "Eventos",
-    about: "Sobre",
-    host: "Organizar un Evento",
-    contact: "Contacto"
-  }
+const emptyLabels = {
+  home: "",
+  events: "",
+  about: "",
+  book: "",
+  host: "",
+  contact: ""
 };
 
 function Navbar() {
   const { currentLanguage, setLanguage } = useLanguage();
-  const copy = labels[currentLanguage];
+  const [copy, setCopy] = useState(emptyLabels);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadLabels() {
+      try {
+        const data = await getSectionExtra("ui.navbar", currentLanguage, emptyLabels);
+        if (!ignore) {
+          setCopy({
+            ...emptyLabels,
+            ...data
+          });
+        }
+      } catch {
+        if (!ignore) {
+          setCopy(emptyLabels);
+        }
+      }
+    }
+
+    loadLabels();
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentLanguage]);
+
   const links = [
     { to: "/", label: copy.home },
     { to: "/events", label: copy.events },
     { to: "/about", label: copy.about },
+    { to: "/mi-libro", label: copy.book },
     { to: "/host-an-event", label: copy.host },
     { to: "/contact", label: copy.contact }
   ];
@@ -78,6 +100,17 @@ function Navbar() {
               onClick={() => setLanguage("es")}
             >
               ES
+            </button>
+            <button
+              className={
+                currentLanguage === "de"
+                  ? "language-option language-option-active"
+                  : "language-option"
+              }
+              type="button"
+              onClick={() => setLanguage("de")}
+            >
+              DE
             </button>
           </div>
         </div>

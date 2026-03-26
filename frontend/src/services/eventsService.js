@@ -1,11 +1,14 @@
 import { apiRequest } from "./api";
+import { normalizeLocalizedDeep } from "../utils/textNormalization";
 
-export function getEvents(language = "en") {
-  return apiRequest(`/api/events?lang=${language}`);
+export async function getEvents(language = "en") {
+  const data = await apiRequest(`/api/events?lang=${language}`);
+  return normalizeLocalizedDeep(data, language);
 }
 
-export function getEventBySlug(slug, language = "en") {
-  return apiRequest(`/api/events/${slug}?lang=${language}`);
+export async function getEventBySlug(slug, language = "en") {
+  const data = await apiRequest(`/api/events/${slug}?lang=${language}`);
+  return normalizeLocalizedDeep(data, language);
 }
 
 export function registerForEvent(eventId, payload) {
@@ -16,7 +19,16 @@ export function registerForEvent(eventId, payload) {
 }
 
 export function getAdminEvents() {
-  return apiRequest("/api/admin/events");
+  return apiRequest("/api/admin/events").then((events) =>
+    events.map((eventItem) => ({
+      ...eventItem,
+      translations: {
+        en: normalizeLocalizedDeep(eventItem.translations?.en || {}, "en"),
+        es: normalizeLocalizedDeep(eventItem.translations?.es || {}, "es"),
+        de: normalizeLocalizedDeep(eventItem.translations?.de || {}, "de")
+      }
+    }))
+  );
 }
 
 export function createAdminEvent(payload) {

@@ -5,6 +5,8 @@ import {
 } from "../../services/contentService";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
+const LANGUAGES = ["en", "es", "de"];
+
 function AdminContent() {
   usePageTitle("Admin Content");
 
@@ -128,14 +130,14 @@ function AdminContent() {
             <div className="admin-panel-header">
               <h2>{selectedKey || "Select a section"}</h2>
               <p className="admin-form-note">
-                Update both languages before saving to keep the public site
+                Update all language versions before saving to keep the public site
                 consistent.
               </p>
             </div>
 
             {formData && (
               <div className="admin-language-grid">
-                {["en", "es"].map((languageCode) => (
+                {LANGUAGES.map((languageCode) => (
                   <div key={languageCode} className="admin-language-card">
                     <p className="detail-label">{languageCode.toUpperCase()}</p>
                     <label className="field">

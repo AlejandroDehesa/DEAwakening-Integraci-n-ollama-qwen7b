@@ -1,6 +1,7 @@
 import path from "path";
 import sqlite3 from "sqlite3";
 import { fileURLToPath } from "url";
+import { extendedSiteSections } from "./siteSectionsSeed.js";
 
 sqlite3.verbose();
 
@@ -304,6 +305,11 @@ const initialSiteSections = {
   }
 };
 
+const allSiteSections = {
+  ...initialSiteSections,
+  ...extendedSiteSections
+};
+
 export function run(query, params = []) {
   return new Promise((resolve, reject) => {
     database.run(query, params, function onRun(error) {
@@ -348,6 +354,7 @@ export function all(query, params = []) {
 
 async function insertSiteSectionTranslation(sectionId, languageCode, content) {
   const timestamp = new Date().toISOString();
+  const extraJson = JSON.stringify(content.extra || {});
 
   await run(
     `
@@ -369,7 +376,7 @@ async function insertSiteSectionTranslation(sectionId, languageCode, content) {
       content.title,
       content.subtitle,
       content.body,
-      "{}",
+      extraJson,
       timestamp,
       timestamp
     ]
@@ -525,29 +532,36 @@ export async function initializeDatabase() {
       });
     }
 
-    const esTranslation = await get(
-      `
-        SELECT id
-        FROM event_translations
-        WHERE event_id = ? AND language_code = ?
-      `,
-      [event.id, "es"]
-    );
-
-    if (!esTranslation) {
-      await insertEventTranslation(
-        event.id,
-        "es",
-        initialEventSpanishTranslations[event.slug] || {
-          title: event.title,
-          location: event.location,
-          description: event.description
-        }
+    for (const languageCode of ["es", "de"]) {
+      const translation = await get(
+        `
+          SELECT id
+          FROM event_translations
+          WHERE event_id = ? AND language_code = ?
+        `,
+        [event.id, languageCode]
       );
+
+      if (!translation) {
+        const nextTranslation =
+          languageCode === "es"
+            ? initialEventSpanishTranslations[event.slug] || {
+                title: event.title,
+                location: event.location,
+                description: event.description
+              }
+            : {
+                title: event.title,
+                location: event.location,
+                description: event.description
+              };
+
+        await insertEventTranslation(event.id, languageCode, nextTranslation);
+      }
     }
   }
 
-  for (const [sectionKey, translations] of Object.entries(initialSiteSections)) {
+  for (const [sectionKey, translations] of Object.entries(allSiteSections)) {
     let section = await get(
       `
         SELECT id
@@ -572,7 +586,7 @@ export async function initializeDatabase() {
       };
     }
 
-    for (const languageCode of ["en", "es"]) {
+    for (const languageCode of ["en", "es", "de"]) {
       const translation = await get(
         `
           SELECT id
@@ -583,10 +597,17 @@ export async function initializeDatabase() {
       );
 
       if (!translation) {
+        const content =
+          translations[languageCode] || translations.en || {
+            title: "",
+            subtitle: "",
+            body: ""
+          };
+
         await insertSiteSectionTranslation(
           section.id,
           languageCode,
-          translations[languageCode]
+          content
         );
       }
     }

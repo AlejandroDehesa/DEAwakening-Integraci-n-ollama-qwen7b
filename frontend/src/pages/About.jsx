@@ -1,155 +1,64 @@
+import { useEffect, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { getSectionExtra } from "../services/contentService";
 
-const marks = {
-  circle: "\u25CC",
-  triangle: "\u25B3",
-  star: "\u2726"
-};
-
-const aboutContent = {
-  en: {
-    pageTitle: "About",
-    title: "Body. Life. Awakening.",
-    subtitle: "I work in the space where your body and your life meet.",
-    intro:
-      "As a chiropractor with more than 25 years of experience, I support physical, emotional, mental and energetic change through precise and gentle work. My approach combines deep listening, practical body awareness and a clear process designed to create sustainable transformation in everyday life.",
-    summary:
-      "DEAwakening and ResoSense are practical paths to reconnect with your true nature and activate your innate capacity to heal.",
-    logos: [
-      `${marks.circle} DEA`,
-      `${marks.triangle} ResoSense`,
-      `${marks.star} Deep Energetic Awakening`
-    ],
-    whoTitle: "Who I am",
-    whoText:
-      "I am David Biddle. My focus is simple: helping you create real change in your body and in your life, with depth, clarity and human warmth.",
-    whoText2:
-      "My work is not about forcing results. It is about creating the right internal conditions so your system can reorganize with more ease, intelligence and coherence.",
-    whoPoints: [
-      "Personalized guidance adapted to your current moment.",
-      "A practical bridge between body awareness and life decisions.",
-      "A process focused on integration, not only emotional release."
-    ],
-    pillars: [
-      {
-        symbol: marks.circle,
-        title: "Body",
-        text: "Restore coherence, mobility and natural regulation."
-      },
-      {
-        symbol: marks.triangle,
-        title: "Life",
-        text: "Release patterns that keep you stuck in old cycles."
-      },
-      {
-        symbol: marks.star,
-        title: "Awakening",
-        text: "Open a deeper state of awareness and integration."
-      }
-    ],
-    deaTitle: "Deep Energetic Awakening",
-    deaLead:
-      "Since discovering energetic healing in 1997, David has developed a unique way of supporting personal transformation through light, precise contact.",
-    deaPoints: [
-      "The body stores unresolved stress as tension and distortion.",
-      "DEA helps awaken physical and energetic resources for change.",
-      "People often report relief, clearer perspective and renewed vitality."
-    ],
-    howTitle: "How DEA works",
-    howPoints: [
-      "Group format (10-24 people) to amplify the collective field.",
-      "Rotating receive/hold-the-space dynamics for everyone.",
-      "A first block opens regulation, awareness and energetic contact.",
-      "A deeper second block supports release, integration and new perspective.",
-      "The process begins on the table and keeps integrating for hours or days after."
-    ],
-    resoTitle: "ResoSense",
-    resoLead:
-      "In 2006, David identified frequency-based body oscillations and developed ResoSense as a gentle personal practice.",
-    resoPoints: [
-      "Uses your own muscles to generate standing waves of resonance.",
-      "Supports physical, emotional and energetic regulation.",
-      "Taught in Basic and Advanced modules, with professional training options."
-    ],
-    resoLinkLabel: "More information",
-    resoLinkUrl: "https://www.resosense.com",
-    videoTitle: "Watch the experience"
-  },
-  es: {
-    pageTitle: "Sobre",
-    title: "CUERPO. VIDA. DESPERTAR.",
-    subtitle: "Trabajo en el espacio donde tu cuerpo y tu vida se encuentran.",
-    intro:
-      "Como quiropractico con mas de 25 anos de experiencia, acompano procesos de cambio fisico, emocional, mental y energetico mediante un trabajo suave y preciso. Mi enfoque une escucha profunda, conciencia corporal y una guia clara para que el cambio no sea momentaneo, sino real y sostenible en tu vida diaria.",
-    summary:
-      "DEAwakening y ResoSense son vias practicas para reconectar con tu naturaleza y activar tu capacidad innata de sanacion.",
-    logos: [
-      `${marks.circle} DEA`,
-      `${marks.triangle} ResoSense`,
-      `${marks.star} Deep Energetic Awakening`
-    ],
-    whoTitle: "Quien soy",
-    whoText:
-      "Soy David Biddle. Mi enfoque es claro: ayudarte a generar cambios reales en tu cuerpo y en tu vida, con profundidad, claridad y cercania humana.",
-    whoText2:
-      "Mi trabajo no consiste en forzar resultados, sino en crear las condiciones para que tu sistema se reorganice con mas facilidad, inteligencia y coherencia.",
-    whoPoints: [
-      "Acompanamiento adaptado a tu momento actual.",
-      "Un puente practico entre conciencia corporal y decisiones de vida.",
-      "Un proceso orientado a integrar, no solo a liberar."
-    ],
-    pillars: [
-      {
-        symbol: marks.circle,
-        title: "Cuerpo",
-        text: "Recuperar coherencia, movilidad y regulacion natural."
-      },
-      {
-        symbol: marks.triangle,
-        title: "Vida",
-        text: "Soltar patrones que te mantienen en ciclos repetidos."
-      },
-      {
-        symbol: marks.star,
-        title: "Despertar",
-        text: "Abrir un estado mas profundo de conciencia e integracion."
-      }
-    ],
-    deaTitle: "Despertar energetico profundo",
-    deaLead:
-      "Desde que descubrio la sanacion energetica en 1997, David ha desarrollado una forma unica de facilitar transformacion personal con contactos suaves y precisos.",
-    deaPoints: [
-      "El cuerpo acumula tension y distorsiones por experiencias no resueltas.",
-      "DEA despierta recursos fisicos y energeticos para generar cambio real.",
-      "Muchas personas reportan alivio, mas claridad y nuevas perspectivas."
-    ],
-    howTitle: "Como funciona DEA",
-    howPoints: [
-      "Formato grupal (10-24 personas) para amplificar el campo colectivo.",
-      "Rotacion entre recibir y sostener el espacio para todo el grupo.",
-      "Un primer bloque abre regulacion, presencia y contacto energetico.",
-      "Un segundo bloque mas profundo facilita liberacion e integracion.",
-      "El proceso empieza en camilla y sigue integrandose durante horas o dias."
-    ],
-    resoTitle: "ResoSense",
-    resoLead:
-      "En 2006, David identifico frecuencias de oscilacion del cuerpo y desarrollo ResoSense como practica personal suave y profunda.",
-    resoPoints: [
-      "Usa tus propios musculos para crear ondas estacionarias de resonancia.",
-      "Favorece regulacion fisica, emocional y energetica.",
-      "Se ensena en modulos Basico y Avanzado, con opcion de formacion profesional."
-    ],
-    resoLinkLabel: "Mas informacion",
-    resoLinkUrl: "https://www.resosense.com",
-    videoTitle: "Ver experiencia"
-  }
+const fallbackContent = {
+  pageTitle: "About",
+  title: "",
+  subtitle: "",
+  intro: "",
+  summary: "",
+  logos: [],
+  whoTitle: "",
+  whoText: "",
+  whoText2: "",
+  whoPoints: [],
+  pillars: [],
+  deaTitle: "",
+  deaLead: "",
+  deaPoints: [],
+  howTitle: "",
+  howPoints: [],
+  resoTitle: "",
+  resoLead: "",
+  resoPoints: [],
+  resoLinkLabel: "",
+  resoLinkUrl: "https://www.resosense.com",
+  videoTitle: ""
 };
 
 function About() {
   const { currentLanguage } = useLanguage();
-  const content = aboutContent[currentLanguage];
-  usePageTitle(content.pageTitle);
+  const [content, setContent] = useState(fallbackContent);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadContent() {
+      try {
+        const data = await getSectionExtra("about.page", currentLanguage, fallbackContent);
+        if (!ignore) {
+          setContent({
+            ...fallbackContent,
+            ...data
+          });
+        }
+      } catch {
+        if (!ignore) {
+          setContent(fallbackContent);
+        }
+      }
+    }
+
+    loadContent();
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentLanguage]);
+
+  usePageTitle(content.pageTitle || "About");
 
   return (
     <section className="section about-premium-section">
@@ -257,12 +166,6 @@ function About() {
             </a>
           </article>
         </section>
-
-        <div className="about-symbol-line" aria-hidden="true">
-          <span>{marks.circle}</span>
-          <span>{marks.triangle}</span>
-          <span>{marks.star}</span>
-        </div>
       </div>
     </section>
   );

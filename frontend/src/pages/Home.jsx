@@ -2,103 +2,52 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { getSectionContent, parseBodyItems } from "../services/contentService";
+import {
+  getSectionContent,
+  getSectionExtra,
+  parseBodyItems
+} from "../services/contentService";
 import { getEvents } from "../services/eventsService";
 
-const fallbackContent = {
-  en: {
-    value: {
-      title: "DEAwakening is built on presence, depth and human connection.",
-      subtitle:
-        "Each gathering is designed to create a felt experience rather than surface inspiration.",
-      body:
-        "Community: Honest spaces where people can connect with warmth and presence.\nEvents: Guided gatherings that blend insight, embodiment and human depth.\nExperiences: Transformational moments designed for lasting integration."
-    }
-  },
-  es: {
-    value: {
-      title: "DEAwakening se construye sobre presencia, profundidad y conexion humana.",
-      subtitle:
-        "Cada encuentro esta disenado para generar una experiencia vivida, no solo inspiracion superficial.",
-      body:
-        "Comunidad: Espacios honestos donde las personas pueden encontrarse con calidez y presencia.\nEventos: Encuentros guiados que unen claridad, cuerpo y profundidad humana.\nExperiencias: Momentos transformadores pensados para una integracion real."
-    }
-  }
+const fallbackValue = {
+  title: "",
+  subtitle: "",
+  body: ""
 };
 
-const labels = {
-  en: {
-    pageTitle: "Home",
-    featured: "Featured Events",
-    featuredTitle: "Upcoming gatherings across Spain.",
-    allEvents: "View All Events",
-    viewMore: "View more",
-    portraitAlt: "David Biddle portrait",
-    loading: "Loading featured events...",
-    noEvents: "No events are available right now."
-  },
-  es: {
-    pageTitle: "Inicio",
-    featured: "\u00faltimos eventos",
-    featuredTitle: "\u00faltimos eventos",
-    allEvents: "Ver Todos los Eventos",
-    viewMore: "Ver mas",
-    portraitAlt: "Retrato de David Biddle",
-    loading: "Cargando eventos destacados...",
-    noEvents: "No hay eventos disponibles ahora mismo."
-  }
+const fallbackFront = {
+  pageTitle: "Home",
+  eyebrow: "",
+  heroTitle: "",
+  heroIntroLead: "",
+  heroQuestionLineOne: "",
+  heroQuestionLineTwo: "",
+  heroWhoTitle: "",
+  heroWhoText: "",
+  deaTitle: "",
+  deaText: "",
+  deaFeatureTitle: "",
+  deaFeatureLead: "",
+  deaFeatureQuestion: "",
+  deaFeatureFooter: "",
+  featuredEyebrow: "",
+  featuredTitle: "",
+  allEvents: "",
+  viewMore: "",
+  loading: "",
+  noEvents: "",
+  portraitAlt: "",
+  featuredOverrides: {}
 };
-
-const heroIntroLead =
-  "Todos tenemos un cuerpo y todos tenemos una vida, pero pocas veces nos detenemos a observar como ambos estan profundamente conectados. Ahi es donde trabajo yo, en el punto exacto donde tu cuerpo y tu vida se encuentran.";
-
-const heroQuestionLineOne = "\u00bfQue cambiarias si realmente pudieras hacerlo?";
-const heroQuestionLineTwo = "\u00bfQue mejorarias en tu cuerpo o en tu forma de vivir?";
-
-const heroDavidParagraphOne =
-  "Mi nombre es David Biddle, soy quiropractico con mas de 25 anos de experiencia, he dedicado mi vida a comprender esa conexion. Mi enfoque no se limita a lo fisico, trabajo contigo a nivel corporal, emocional, mental y energetico, acompanandote hacia un equilibrio mas profundo y real.";
-
-const heroDavidParagraphTwo =
-  "DEA nace de esa experiencia, es una sintesis de tecnicas, intuicion y una forma distinta de percibir la informacion mas alla de lo evidente. A traves de contactos suaves y precisos, te ayudo a reconectar con tu propia naturaleza, a escuchar tu cuerpo y a activar una capacidad que ya esta en ti: tu poder de sanacion.";
 
 const heroPortraitUrl = "/david-hero.jpg";
 const deaVideoUrl = "/dea-intro.mp4";
-const deaLead =
-  "We all have bodies and we all have lives. I work in that space where your body and your life meet.";
-const deaQuestion =
-  "What would like to change or improve in your body or in your life?";
-const deaParagraphThree =
-  'Working with groups of 10-24 people, we are able to harness the collective consciousness for a more profound experience. While a part of the group is receiving on the tables, the rest are seated around them, "holding the space" with their focused attention. This combination facilitates states of consciousness that promote healing and release more easily and more deeply than working alone.';
-
-const featuredEventOverrides = {
-  "deawakening-valencia": {
-    title: "ResoFusion Basic - Findhorn",
-    subtitle: "Findhorn, Scotland",
-    dateLabel: "viernes 30 de mayo",
-    image: "/resofusion-findhorn.jpg",
-    alt: "ResoFusion Basic retreat visual",
-    detailsLabel: "detalles"
-  },
-  "deawakening-madrid": {
-    title: "ResoFusion Basic - Doha",
-    subtitle: "Niya Honor Air, Doha",
-    dateLabel: "jueves 27 de febrero",
-    image: "/resofusion-doha.avif",
-    alt: "ResoFusion Basic Doha visual",
-    detailsLabel: "detalles"
-  },
-  "deawakening-barcelona": {
-    title: "ResoFusion Basico - Doha",
-    subtitle: "Niya Honor Air, Doha",
-    dateLabel: "jueves 17 de octubre",
-    image: "/resofusion-doha-oct.avif",
-    alt: "ResoFusion Basico Doha visual",
-    detailsLabel: "detalles"
-  }
-};
 
 function formatDate(date, language) {
-  return new Intl.DateTimeFormat(language === "es" ? "es-ES" : "en-GB", {
+  const locale =
+    language === "es" ? "es-ES" : language === "de" ? "de-DE" : "en-GB";
+
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "long",
     year: "numeric"
@@ -107,43 +56,58 @@ function formatDate(date, language) {
 
 function Home() {
   const { currentLanguage } = useLanguage();
-  const [valueContent, setValueContent] = useState(fallbackContent.en.value);
+  const [frontContent, setFrontContent] = useState(fallbackFront);
+  const [valueContent, setValueContent] = useState(fallbackValue);
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [eventsError, setEventsError] = useState("");
   const [portraitError, setPortraitError] = useState(false);
-  const copy = labels[currentLanguage];
-  usePageTitle(copy.pageTitle);
+
+  usePageTitle(frontContent.pageTitle || fallbackFront.pageTitle);
 
   useEffect(() => {
-    const nextFallback = fallbackContent[currentLanguage];
-    setValueContent(nextFallback.value);
+    let ignore = false;
 
     async function loadHomeData() {
       try {
         setIsLoading(true);
         setEventsError("");
-        const [valueResult, eventsResult] = await Promise.allSettled([
+
+        const [frontResult, valueResult, eventsResult] = await Promise.allSettled([
+          getSectionExtra("home.front", currentLanguage, fallbackFront),
           getSectionContent("home.value", currentLanguage),
           getEvents(currentLanguage)
         ]);
 
-        if (valueResult.status === "fulfilled") {
+        if (!ignore && frontResult.status === "fulfilled") {
+          setFrontContent({
+            ...fallbackFront,
+            ...frontResult.value
+          });
+        }
+
+        if (!ignore && valueResult.status === "fulfilled") {
           setValueContent(valueResult.value);
         }
 
-        if (eventsResult.status === "fulfilled") {
+        if (!ignore && eventsResult.status === "fulfilled") {
           setFeaturedEvents(eventsResult.value.slice(0, 3));
-        } else {
+        } else if (!ignore && eventsResult.status === "rejected") {
           setEventsError(eventsResult.reason.message);
           setFeaturedEvents([]);
         }
       } finally {
-        setIsLoading(false);
+        if (!ignore) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadHomeData();
+
+    return () => {
+      ignore = true;
+    };
   }, [currentLanguage]);
 
   return (
@@ -157,7 +121,7 @@ function Home() {
                   <img
                     className="hero-portrait"
                     src={heroPortraitUrl}
-                    alt={copy.portraitAlt}
+                    alt={frontContent.portraitAlt}
                     loading="eager"
                     onError={() => setPortraitError(true)}
                   />
@@ -170,24 +134,24 @@ function Home() {
             </div>
 
             <article className="card hero-intro-card">
-              <span className="eyebrow">David Biddle</span>
-              <h1 className="hero-title">Cuerpo y vida en coherencia</h1>
-              <p className="hero-intro-text">{heroIntroLead}</p>
+              <span className="eyebrow">{frontContent.eyebrow}</span>
+              <h1 className="hero-title">{frontContent.heroTitle}</h1>
+              <p className="hero-intro-text">{frontContent.heroIntroLead}</p>
               <div className="hero-question-block">
-                <p>{heroQuestionLineOne}</p>
-                <p>{heroQuestionLineTwo}</p>
+                <p>{frontContent.heroQuestionLineOne}</p>
+                <p>{frontContent.heroQuestionLineTwo}</p>
               </div>
             </article>
           </div>
 
           <article className="hero-bottom-message">
-            <h2 className="hero-bottom-title">¿Quien soy?</h2>
-            <p className="hero-bottom-text">{heroDavidParagraphOne}</p>
+            <h2 className="hero-bottom-title">{frontContent.heroWhoTitle}</h2>
+            <p className="hero-bottom-text">{frontContent.heroWhoText}</p>
           </article>
 
           <article className="card dea-origin-card">
-            <h2 className="dea-origin-title">DEA</h2>
-            <p className="dea-origin-text">{heroDavidParagraphTwo}</p>
+            <h2 className="dea-origin-title">{frontContent.deaTitle}</h2>
+            <p className="dea-origin-text">{frontContent.deaText}</p>
           </article>
 
           <article className="card deawakening-values-card">
@@ -210,9 +174,9 @@ function Home() {
           <article className="card dea-feature-card">
             <div className="dea-feature-grid">
               <div className="dea-copy">
-                <h2 className="dea-title">Body. Life. Awakening.</h2>
-                <p className="dea-copy-text dea-copy-lead">{deaLead}</p>
-                <p className="dea-question">{deaQuestion}</p>
+                <h2 className="dea-title">{frontContent.deaFeatureTitle}</h2>
+                <p className="dea-copy-text dea-copy-lead">{frontContent.deaFeatureLead}</p>
+                <p className="dea-question">{frontContent.deaFeatureQuestion}</p>
               </div>
 
               <div className="dea-media-wrap">
@@ -230,7 +194,7 @@ function Home() {
                 </video>
               </div>
             </div>
-            <p className="dea-footer-text">{deaParagraphThree}</p>
+            <p className="dea-footer-text">{frontContent.deaFeatureFooter}</p>
           </article>
         </div>
       </section>
@@ -239,31 +203,31 @@ function Home() {
         <div className="container">
           <div className="section-heading section-heading-row">
             <div>
-              <span className="eyebrow">{copy.featured}</span>
-              <h2>{copy.featuredTitle}</h2>
+              <span className="eyebrow">{frontContent.featuredEyebrow}</span>
+              <h2>{frontContent.featuredTitle}</h2>
             </div>
             <Link className="btn btn-outline" to="/events">
-              {copy.allEvents}
+              {frontContent.allEvents}
             </Link>
           </div>
 
           {isLoading ? (
-            <p className="status-message loading-message">{copy.loading}</p>
+            <p className="status-message loading-message">{frontContent.loading}</p>
           ) : eventsError ? (
             <p className="status-message error-message">{eventsError}</p>
           ) : featuredEvents.length === 0 ? (
-            <p className="status-message">{copy.noEvents}</p>
+            <p className="status-message">{frontContent.noEvents}</p>
           ) : (
             <div className="three-column-grid">
               {featuredEvents.map((event) => {
-                const override = featuredEventOverrides[event.slug];
+                const override = frontContent.featuredOverrides?.[event.slug];
                 const cardTitle = override?.title || event.title;
                 const cardSubtitle = override?.subtitle || event.location;
                 const cardDateLabel =
                   override?.dateLabel || formatDate(event.date, currentLanguage);
                 const cardImage = override?.image || "/resofusion-findhorn.jpg";
                 const cardImageAlt = override?.alt || event.title;
-                const detailsLabel = override?.detailsLabel || copy.viewMore;
+                const detailsLabel = override?.detailsLabel || frontContent.viewMore;
 
                 return (
                   <article

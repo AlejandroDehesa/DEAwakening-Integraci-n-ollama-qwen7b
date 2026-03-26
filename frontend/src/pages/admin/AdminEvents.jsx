@@ -20,9 +20,16 @@ const initialForm = {
       title: "",
       location: "",
       description: ""
+    },
+    de: {
+      title: "",
+      location: "",
+      description: ""
     }
   }
 };
+
+const LANGUAGES = ["en", "es", "de"];
 
 function AdminEvents() {
   usePageTitle("Admin Events");
@@ -191,7 +198,7 @@ function AdminEvents() {
               <p className="admin-form-note">
                 {editingId
                   ? "Update the selected event and save when ready."
-                  : "Create a new event with both language versions."}
+                  : "Create a new event with all language versions."}
               </p>
             </div>
 
@@ -219,7 +226,7 @@ function AdminEvents() {
             </div>
 
             <div className="admin-language-grid">
-              {["en", "es"].map((languageCode) => (
+              {LANGUAGES.map((languageCode) => (
                 <div key={languageCode} className="admin-language-card">
                   <p className="detail-label">{languageCode.toUpperCase()}</p>
                   <label className="field">

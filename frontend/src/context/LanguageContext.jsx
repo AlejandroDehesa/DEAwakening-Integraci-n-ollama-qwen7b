@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const LanguageContext = createContext(null);
 const STORAGE_KEY = "deawakening-language";
+const SUPPORTED_LANGUAGES = ["en", "es", "de"];
 
 function getInitialLanguage() {
   if (typeof window === "undefined") {
@@ -9,11 +10,23 @@ function getInitialLanguage() {
   }
 
   const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
-  return storedLanguage === "es" ? "es" : "en";
+  if (SUPPORTED_LANGUAGES.includes(storedLanguage)) {
+    return storedLanguage;
+  }
+
+  return "en";
 }
 
 export function LanguageProvider({ children }) {
   const [currentLanguage, setCurrentLanguage] = useState(getInitialLanguage);
+
+  function setLanguage(language) {
+    if (!SUPPORTED_LANGUAGES.includes(language)) {
+      return;
+    }
+
+    setCurrentLanguage(language);
+  }
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, currentLanguage);
@@ -24,7 +37,7 @@ export function LanguageProvider({ children }) {
       value={{
         currentLanguage,
         language: currentLanguage,
-        setLanguage: setCurrentLanguage
+        setLanguage
       }}
     >
       {children}
