@@ -49,6 +49,86 @@ const initialEvents = [
     location: "Malaga",
     description:
       "A community-centered event that brings together therapeutic depth, practical tools and lasting integration."
+  },
+  {
+    title: "DEAwakening Sevilla",
+    slug: "deawakening-sevilla",
+    date: "2026-10-04",
+    location: "Sevilla",
+    description:
+      "A spacious and grounded gathering to support emotional release, nervous system balance and conscious embodiment."
+  },
+  {
+    title: "DEAwakening Bilbao",
+    slug: "deawakening-bilbao",
+    date: "2026-10-25",
+    location: "Bilbao",
+    description:
+      "An intensive group experience focused on clarity, resilience and practical integration in daily life."
+  },
+  {
+    title: "DEAwakening Zaragoza",
+    slug: "deawakening-zaragoza",
+    date: "2026-11-08",
+    location: "Zaragoza",
+    description:
+      "A guided process that combines therapeutic precision, spiritual openness and warm human connection."
+  },
+  {
+    title: "DEAwakening Alicante",
+    slug: "deawakening-alicante",
+    date: "2026-11-22",
+    location: "Alicante",
+    description:
+      "A transformational event for participants who want to reconnect with purpose, body awareness and emotional depth."
+  },
+  {
+    title: "DEAwakening Granada",
+    slug: "deawakening-granada",
+    date: "2026-12-06",
+    location: "Granada",
+    description:
+      "A premium community space where inner work, presence and collective support create sustainable change."
+  },
+  {
+    title: "DEAwakening Palma",
+    slug: "deawakening-palma",
+    date: "2027-01-17",
+    location: "Palma",
+    description:
+      "A restorative and insightful gathering designed to help people soften, listen and realign with what matters."
+  },
+  {
+    title: "DEAwakening San Sebastian",
+    slug: "deawakening-san-sebastian",
+    date: "2027-02-07",
+    location: "San Sebastian",
+    description:
+      "A live experience where body intelligence and therapeutic depth support lasting personal transformation."
+  },
+  {
+    title: "DEAwakening Murcia",
+    slug: "deawakening-murcia",
+    date: "2027-02-28",
+    location: "Murcia",
+    description:
+      "A focused event for people ready to move through emotional blocks with clarity, safety and embodied awareness."
+  },
+  {
+    title: "DEAwakening Santiago de Compostela",
+    slug: "deawakening-santiago-compostela",
+    date: "2027-03-21",
+    location: "Santiago de Compostela",
+    description:
+      "A deeply human gathering that invites participants into honest reflection, healing contact and renewed vitality."
+  },
+  {
+    title: "DEAwakening Las Palmas",
+    slug: "deawakening-las-palmas",
+    date: "2027-04-18",
+    location: "Las Palmas",
+    description:
+      "A conscious group journey blending therapeutic support, collective presence and practical tools for integration."
   }
 ];
 
@@ -76,6 +156,66 @@ const initialEventSpanishTranslations = {
     location: "Malaga",
     description:
       "Un evento centrado en comunidad, profundidad terapeutica y herramientas practicas para integrar el cambio."
+  },
+  "deawakening-sevilla": {
+    title: "DEAwakening Sevilla",
+    location: "Sevilla",
+    description:
+      "Un encuentro amplio y con arraigo para facilitar liberacion emocional, regulacion del sistema nervioso y presencia corporal."
+  },
+  "deawakening-bilbao": {
+    title: "DEAwakening Bilbao",
+    location: "Bilbao",
+    description:
+      "Una experiencia intensiva de grupo enfocada en claridad, resiliencia e integracion practica en la vida diaria."
+  },
+  "deawakening-zaragoza": {
+    title: "DEAwakening Zaragoza",
+    location: "Zaragoza",
+    description:
+      "Un proceso guiado que une precision terapeutica, apertura espiritual y una conexion humana calida."
+  },
+  "deawakening-alicante": {
+    title: "DEAwakening Alicante",
+    location: "Alicante",
+    description:
+      "Un evento transformador para personas que desean reconectar con su proposito, su cuerpo y su profundidad emocional."
+  },
+  "deawakening-granada": {
+    title: "DEAwakening Granada",
+    location: "Granada",
+    description:
+      "Un espacio premium de comunidad donde trabajo interior, presencia y apoyo colectivo generan cambios sostenibles."
+  },
+  "deawakening-palma": {
+    title: "DEAwakening Palma",
+    location: "Palma",
+    description:
+      "Un encuentro restaurativo y revelador para soltar tension, escuchar el cuerpo y realinearse con lo esencial."
+  },
+  "deawakening-san-sebastian": {
+    title: "DEAwakening San Sebastian",
+    location: "San Sebastian",
+    description:
+      "Una experiencia en vivo donde inteligencia corporal y profundidad terapeutica impulsan una transformacion real."
+  },
+  "deawakening-murcia": {
+    title: "DEAwakening Murcia",
+    location: "Murcia",
+    description:
+      "Un evento enfocado en atravesar bloqueos emocionales con claridad, seguridad y conciencia corporal."
+  },
+  "deawakening-santiago-compostela": {
+    title: "DEAwakening Santiago de Compostela",
+    location: "Santiago de Compostela",
+    description:
+      "Un encuentro profundamente humano que abre espacio para reflexion honesta, contacto terapeutico y nueva vitalidad."
+  },
+  "deawakening-las-palmas": {
+    title: "DEAwakening Las Palmas",
+    location: "Las Palmas",
+    description:
+      "Un viaje consciente en grupo que combina soporte terapeutico, presencia colectiva y herramientas para integrar."
   }
 };
 
@@ -339,10 +479,17 @@ export async function initializeDatabase() {
     )
   `);
 
-  const eventCount = await get("SELECT COUNT(*) AS count FROM events");
+  for (const event of initialEvents) {
+    const existingEvent = await get(
+      `
+        SELECT id
+        FROM events
+        WHERE slug = ?
+      `,
+      [event.slug]
+    );
 
-  if ((eventCount?.count ?? 0) === 0) {
-    for (const event of initialEvents) {
+    if (!existingEvent) {
       await run(
         `
           INSERT INTO events (title, slug, date, location, description)

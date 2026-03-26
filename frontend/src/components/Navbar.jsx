@@ -33,8 +33,7 @@ function Navbar() {
     <header className="site-header">
       <div className="container header-inner">
         <NavLink className="brand-mark" to="/">
-          <span className="brand-kicker">David Biddle</span>
-          <span>DEAwakening</span>
+          DEAwakening
         </NavLink>
 
         <div className="header-tools">
