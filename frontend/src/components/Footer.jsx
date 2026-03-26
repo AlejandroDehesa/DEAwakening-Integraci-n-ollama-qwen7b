@@ -34,7 +34,14 @@ function Footer() {
     <footer className="site-footer">
       <div className="container footer-inner">
         <div className="footer-block">
-          <p className="footer-brand">DEAwakening</p>
+          <Link to="/" className="footer-brand-link" aria-label="DEAwakening">
+            <img
+              className="footer-logo"
+              src="/deawakening_symbol.png"
+              alt="DEAwakening"
+              loading="lazy"
+            />
+          </Link>
           <p className="footer-copy">{copy.description}</p>
         </div>
 

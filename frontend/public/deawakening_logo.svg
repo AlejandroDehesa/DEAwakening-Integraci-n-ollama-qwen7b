@@ -1,0 +1,10 @@
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" fill="white"/>
+  <g transform="translate(250,200)">
+    <path d="M0,-80 C60,-80 80,0 0,80 C-80,0 -60,-80 0,-80" fill="#1f7a7a"/>
+    <circle cx="0" cy="0" r="20" fill="#e6f2f2"/>
+  </g>
+  <text x="250" y="380" font-family="serif" font-size="40" text-anchor="middle" fill="#333">
+    DEAwakening
+  </text>
+</svg>

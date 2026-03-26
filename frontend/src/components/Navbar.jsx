@@ -32,8 +32,12 @@ function Navbar() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <NavLink className="brand-mark" to="/">
-          DEAwakening
+        <NavLink className="brand-mark" to="/" aria-label="DEAwakening">
+          <img
+            className="brand-logo brand-logo-full"
+            src="/deawakening_symbol.png"
+            alt="DEAwakening"
+          />
         </NavLink>
 
         <div className="header-tools">

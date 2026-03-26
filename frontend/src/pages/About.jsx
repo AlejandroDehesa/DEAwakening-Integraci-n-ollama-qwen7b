@@ -10,11 +10,10 @@ const marks = {
 const aboutContent = {
   en: {
     pageTitle: "About",
-    eyebrow: "About David",
     title: "Body. Life. Awakening.",
     subtitle: "I work in the space where your body and your life meet.",
     intro:
-      "As a chiropractor with more than 25 years of experience, I support physical, emotional, mental and energetic change through precise and gentle work.",
+      "As a chiropractor with more than 25 years of experience, I support physical, emotional, mental and energetic change through precise and gentle work. My approach combines deep listening, practical body awareness and a clear process designed to create sustainable transformation in everyday life.",
     summary:
       "DEAwakening and ResoSense are practical paths to reconnect with your true nature and activate your innate capacity to heal.",
     logos: [
@@ -25,6 +24,13 @@ const aboutContent = {
     whoTitle: "Who I am",
     whoText:
       "I am David Biddle. My focus is simple: helping you create real change in your body and in your life, with depth, clarity and human warmth.",
+    whoText2:
+      "My work is not about forcing results. It is about creating the right internal conditions so your system can reorganize with more ease, intelligence and coherence.",
+    whoPoints: [
+      "Personalized guidance adapted to your current moment.",
+      "A practical bridge between body awareness and life decisions.",
+      "A process focused on integration, not only emotional release."
+    ],
     pillars: [
       {
         symbol: marks.circle,
@@ -72,11 +78,10 @@ const aboutContent = {
   },
   es: {
     pageTitle: "Sobre",
-    eyebrow: "Sobre mi",
-    title: "Cuerpo. Vida. Despertar.",
+    title: "CUERPO. VIDA. DESPERTAR.",
     subtitle: "Trabajo en el espacio donde tu cuerpo y tu vida se encuentran.",
     intro:
-      "Como quiropractico con mas de 25 anos de experiencia, acompano procesos de cambio fisico, emocional, mental y energetico mediante un trabajo suave y preciso.",
+      "Como quiropractico con mas de 25 anos de experiencia, acompano procesos de cambio fisico, emocional, mental y energetico mediante un trabajo suave y preciso. Mi enfoque une escucha profunda, conciencia corporal y una guia clara para que el cambio no sea momentaneo, sino real y sostenible en tu vida diaria.",
     summary:
       "DEAwakening y ResoSense son vias practicas para reconectar con tu naturaleza y activar tu capacidad innata de sanacion.",
     logos: [
@@ -87,6 +92,13 @@ const aboutContent = {
     whoTitle: "Quien soy",
     whoText:
       "Soy David Biddle. Mi enfoque es claro: ayudarte a generar cambios reales en tu cuerpo y en tu vida, con profundidad, claridad y cercania humana.",
+    whoText2:
+      "Mi trabajo no consiste en forzar resultados, sino en crear las condiciones para que tu sistema se reorganice con mas facilidad, inteligencia y coherencia.",
+    whoPoints: [
+      "Acompanamiento adaptado a tu momento actual.",
+      "Un puente practico entre conciencia corporal y decisiones de vida.",
+      "Un proceso orientado a integrar, no solo a liberar."
+    ],
     pillars: [
       {
         symbol: marks.circle,
@@ -142,44 +154,53 @@ function About() {
   return (
     <section className="section about-premium-section">
       <div className="container">
-        <span className="eyebrow">{content.eyebrow}</span>
-        <header className="section-heading about-premium-header">
-          <h1>{content.title}</h1>
-          <p className="page-copy">{content.subtitle}</p>
-          <p className="about-premium-intro">{content.intro}</p>
-        </header>
+        <section className="card about-hero-shell">
+          <header className="section-heading about-premium-header">
+            <h1>{content.title}</h1>
+            <p className="page-copy">{content.subtitle}</p>
+            <p className="about-premium-intro">{content.intro}</p>
+          </header>
 
-        <div className="about-logo-row" aria-label="DEA marks">
-          {content.logos.map((logo) => (
-            <span key={logo} className="about-logo-pill">
-              {logo}
-            </span>
-          ))}
-        </div>
+          <div className="about-logo-row" aria-label="DEA marks">
+            {content.logos.map((logo) => (
+              <span key={logo} className="about-logo-pill">
+                {logo}
+              </span>
+            ))}
+          </div>
+        </section>
 
-        <div className="about-premium-grid">
-          <article className="card about-main-card">
-            <h2>{content.whoTitle}</h2>
-            <p>{content.whoText}</p>
-            <p className="about-summary">{content.summary}</p>
-          </article>
-
+        <section className="about-identity-grid">
           <aside className="card about-portrait-card">
             <img src="/david-hero.jpg" alt="David Biddle" className="about-portrait-image" />
           </aside>
-        </div>
 
-        <div className="about-pillars-grid">
-          {content.pillars.map((pillar) => (
-            <article key={pillar.title} className="card about-pillar-card">
-              <p className="about-pillar-symbol" aria-hidden="true">
-                {pillar.symbol}
-              </p>
-              <h3>{pillar.title}</h3>
-              <p>{pillar.text}</p>
-            </article>
-          ))}
-        </div>
+          <article className="card about-main-card">
+            <h2>{content.whoTitle}</h2>
+            <p>{content.whoText}</p>
+            <p>{content.whoText2}</p>
+            <ul className="about-method-list">
+              {content.whoPoints.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+            <p className="about-summary">{content.summary}</p>
+          </article>
+        </section>
+
+        <section className="card about-pillars-shell">
+          <div className="about-pillars-grid">
+            {content.pillars.map((pillar) => (
+              <article key={pillar.title} className="about-pillar-card">
+                <p className="about-pillar-symbol" aria-hidden="true">
+                  {pillar.symbol}
+                </p>
+                <h3>{pillar.title}</h3>
+                <p>{pillar.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="about-dea-grid">
           <article className="card about-detail-card">

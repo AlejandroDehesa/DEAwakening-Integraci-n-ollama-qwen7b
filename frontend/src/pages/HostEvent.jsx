@@ -1,87 +1,123 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { getSectionContent, parseBodyItems } from "../services/contentService";
 
-const fallbackContent = {
-  en: {
-    title: "Bring DEAwakening to your venue, retreat or community.",
-    subtitle:
-      "We collaborate with aligned hosts who want to offer a premium and transformational experience.",
-    body:
-      "What collaboration looks like: We shape each event with care so it fits the audience, venue and intention while preserving the DEAwakening experience.\nIdeal partners: Retreat centers, conscious communities, studios and facilitators who value depth, professionalism and human connection."
-  },
-  es: {
-    title: "Lleva DEAwakening a tu espacio, retiro o comunidad.",
-    subtitle:
-      "Colaboramos con anfitriones alineados que desean ofrecer una experiencia premium y transformadora.",
-    body:
-      "Como es la colaboracion: Damos forma a cada evento con cuidado para que encaje con la audiencia, el espacio y la intencion sin perder la esencia DEAwakening.\nSocios ideales: Centros de retiro, comunidades conscientes, estudios y facilitadores que valoran profundidad, profesionalidad y conexion humana."
-  }
-};
-
-const labels = {
+const content = {
   en: {
     pageTitle: "Host an Event",
     eyebrow: "Host an Event",
-    cta: "Start the Conversation",
-    helper:
-      "If you would like to explore a collaboration, send us the location, audience and proposed dates."
+    title: "Would you like to host a DEAwakening workshop or retreat near you?",
+    subtitle: "Tailor-made events",
+    intro:
+      "What would you like to create? Whether you want a stand-alone event based on my work or you prefer to integrate these possibilities into a multidisciplinary event, I would be happy to explore the options with you.",
+    formatText:
+      "A wide range of workshops and retreats can be offered, depending on what you want participants to experience and receive, and how actively they want to engage in their own healing process.",
+    programsTitle: "Program options",
+    programs: [
+      "1) Experiential healing with DEA, 1-3 days.",
+      "2) Active learning with Resosense PPS, 2-3 days.",
+      "3) RESOFUSION program: DEA + Resosense PPS, 3-5 days.",
+      "4) For longer and more complete programs, we can add other modalities such as breath practices, focused energetic movement, body-awareness movement and more."
+    ],
+    retreatTitle: "Sample retreat format",
+    retreatText:
+      "Here is an example structure from a recent RESOFUSION retreat in Portugal.",
+    retreatCta: "Retreat Program",
+    proofTitle: "Integration in larger events",
+    proofText:
+      "DEA can be a valuable addition to group events focused on wellbeing, personal development, awareness and healing.",
+    proofHighlight:
+      "At the Harvest Series in Turkey (May 2022 and 2023), six DEA sessions with 24 participants each allowed almost half of the attendees to experience DEA, many of them describing life-changing results.",
+    finalCtaText:
+      "If you would like to explore a collaboration, share your location, audience and possible dates.",
+    finalCtaButton: "Start the Conversation"
   },
   es: {
     pageTitle: "Organizar un Evento",
     eyebrow: "Organizar un Evento",
-    cta: "Empezar la Conversacion",
-    helper:
-      "Si quieres explorar una colaboracion, envianos la ubicacion, la audiencia y las fechas propuestas."
+    title: "DEAwakening cerca de ti",
+    subtitle: "Te gustaria tener un taller o retiro?",
+    intro:
+      "Que te gustaria crear? Tanto si deseas crear un evento basado en mi trabajo como si prefieres incorporar estas posibilidades a tu evento multidisciplinar, estare encantado de analizar las opciones contigo.",
+    formatText:
+      "Se puede ofrecer una amplia gama de talleres y retiros, segun lo que quieras que vivan y reciban los participantes, y segun su interes en tener un papel activo en su propio proceso de sanacion.",
+    programsTitle: "Programas disponibles",
+    programs: [
+      "1) Sanacion experiencial con DEA, 1-3 dias.",
+      "2) Aprendizaje activo con Resosense PPS, 2-3 dias.",
+      "3) Programa RESOFUSION: DEA + Resosense PPS, 3-5 dias.",
+      "4) Para programas mas largos y completos, podemos anadir otras modalidades como ejercicios de respiracion, movimientos energeticos focalizados, movimientos de conciencia corporal y mas."
+    ],
+    retreatTitle: "Ejemplo de retiro",
+    retreatText:
+      "Aqui tienes un ejemplo de estructura de un retiro reciente de RESOFUSION en Portugal.",
+    retreatCta: "Programa del Retiro",
+    proofTitle: "Integracion en eventos mas amplios",
+    proofText:
+      "La DEA puede ser una incorporacion de gran valor en eventos grupales de bienestar, desarrollo personal, consciencia y sanacion.",
+    proofHighlight:
+      "En la Serie Cosecha de Turquia (mayo de 2022 y 2023), seis sesiones DEA con 24 personas en cada una permitieron que casi la mitad de los asistentes experimentaran las posibilidades de la DEA, muchas con vivencias que les cambiaron la vida.",
+    finalCtaText:
+      "Si quieres explorar una colaboracion, comparte ubicacion, tipo de audiencia y fechas aproximadas.",
+    finalCtaButton: "Empezar la Conversacion"
   }
 };
 
 function HostEvent() {
   const { currentLanguage } = useLanguage();
-  const [content, setContent] = useState(fallbackContent.en);
-  const copy = labels[currentLanguage];
+  const copy = content[currentLanguage];
   usePageTitle(copy.pageTitle);
 
-  useEffect(() => {
-    const nextFallback = fallbackContent[currentLanguage];
-    setContent(nextFallback);
-
-    async function loadContent() {
-      try {
-        const data = await getSectionContent("host.main", currentLanguage);
-        setContent(data);
-      } catch {
-        setContent(nextFallback);
-      }
-    }
-
-    loadContent();
-  }, [currentLanguage]);
-
   return (
-    <section className="section">
-      <div className="container">
-        <span className="eyebrow">{copy.eyebrow}</span>
-        <div className="section-heading">
-          <h1>{content.title}</h1>
-          <p className="page-copy">{content.subtitle}</p>
-        </div>
+    <section className="section host-page">
+      <div className="container host-page-stack">
+        <header className="card host-hero-card">
+          <span className="eyebrow">{copy.eyebrow}</span>
+          <h1>{copy.title}</h1>
+        </header>
 
-        <div className="two-column-grid">
-          {parseBodyItems(content.body).map((item) => (
-            <article key={item.title} className="card">
-              <h2>{item.title}</h2>
-              <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
+        <section className="host-main-grid">
+          <article className="card host-copy-card">
+            <h2>{copy.subtitle}</h2>
+            <p>{copy.intro}</p>
+            <p>{copy.formatText}</p>
+          </article>
 
-        <div className="cta-panel">
-          <p>{copy.helper}</p>
+          <article className="card host-programs-card">
+            <h2>{copy.programsTitle}</h2>
+            <ul className="host-program-list">
+              {copy.programs.map((program) => (
+                <li key={program}>{program}</li>
+              ))}
+            </ul>
+          </article>
+        </section>
+
+        <section className="host-main-grid">
+          <article className="card host-proof-card">
+            <h2>{copy.proofTitle}</h2>
+            <p>{copy.proofText}</p>
+            <p className="host-proof-highlight">{copy.proofHighlight}</p>
+          </article>
+
+          <article className="card host-retreat-card">
+            <h2>{copy.retreatTitle}</h2>
+            <p>{copy.retreatText}</p>
+            <a
+              className="btn btn-outline"
+              href="/retreat-program-portugal.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {copy.retreatCta}
+            </a>
+          </article>
+        </section>
+
+        <div className="cta-panel host-cta-panel">
+          <p>{copy.finalCtaText}</p>
           <Link className="btn btn-primary" to="/contact">
-            {copy.cta}
+            {copy.finalCtaButton}
           </Link>
         </div>
       </div>
