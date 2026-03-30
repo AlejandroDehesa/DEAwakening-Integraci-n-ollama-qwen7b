@@ -53,6 +53,29 @@ const labels = {
     participationHeading: "Participacion",
     participationCopy:
       "Completa tu inscripcion para reservar tu plaza y recibir por email los detalles practicos de este encuentro."
+  },
+  de: {
+    eyebrow: "Veranstaltungsdetails",
+    loading: "Event wird geladen...",
+    date: "Datum",
+    location: "Ort",
+    register: "Anmeldung",
+    registerIntro:
+      "Reserviere deinen Platz und wir schicken dir die praktischen Details per E-Mail.",
+    name: "Name",
+    email: "E-Mail",
+    submit: "Jetzt Anmelden",
+    submitting: "Wird gesendet...",
+    success:
+      "Dein Platz wurde registriert. Wir melden uns per E-Mail mit den nächsten Schritten.",
+    nameError: "Bitte gib den Namen ein, mit dem du dich registrieren möchtest.",
+    emailError: "Bitte gib eine gültige E-Mail ein, damit wir deinen Platz bestätigen können.",
+    status: "Status",
+    aboutTitle: "Über das Event",
+    overviewHeading: "Überblick",
+    participationHeading: "Teilnahme",
+    participationCopy:
+      "Fülle das Formular aus, um deinen Platz zu reservieren und alle praktischen Details zu erhalten."
   }
 };
 
@@ -1879,7 +1902,10 @@ const specialEventDetails = {
 };
 
 function formatDate(date, language) {
-  return new Intl.DateTimeFormat(language === "es" ? "es-ES" : "en-GB", {
+  const locale =
+    language === "es" ? "es-ES" : language === "de" ? "de-DE" : "en-GB";
+
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "long",
     year: "numeric"
@@ -1925,7 +1951,7 @@ function buildDefaultEventDetails(event, language, copy) {
 function EventDetail() {
   const { slug } = useParams();
   const { currentLanguage } = useLanguage();
-  const copy = labels[currentLanguage];
+  const copy = labels[currentLanguage] || labels.en;
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1934,7 +1960,13 @@ function EventDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitState, setSubmitState] = useState("idle");
-  const customDetails = specialEventDetails[slug]?.[currentLanguage] ?? null;
+  const customDetails =
+    currentLanguage === "de"
+      ? specialEventDetails[slug]?.de ?? null
+      : specialEventDetails[slug]?.[currentLanguage] ??
+        specialEventDetails[slug]?.es ??
+        specialEventDetails[slug]?.en ??
+        null;
   const eventDetails = event
     ? customDetails ?? buildDefaultEventDetails(event, currentLanguage, copy)
     : null;

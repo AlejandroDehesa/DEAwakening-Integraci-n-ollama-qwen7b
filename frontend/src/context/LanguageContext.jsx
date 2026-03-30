@@ -6,15 +6,19 @@ const SUPPORTED_LANGUAGES = ["en", "es", "de"];
 
 function getInitialLanguage() {
   if (typeof window === "undefined") {
-    return "en";
+    return "es";
   }
 
-  const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
-  if (SUPPORTED_LANGUAGES.includes(storedLanguage)) {
-    return storedLanguage;
+  try {
+    const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
+    if (SUPPORTED_LANGUAGES.includes(storedLanguage)) {
+      return storedLanguage;
+    }
+  } catch {
+    return "es";
   }
 
-  return "en";
+  return "es";
 }
 
 export function LanguageProvider({ children }) {
@@ -29,7 +33,12 @@ export function LanguageProvider({ children }) {
   }
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, currentLanguage);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, currentLanguage);
+    } catch {
+      // ignore storage errors and keep in-memory language
+    }
+    document.documentElement.lang = currentLanguage;
   }, [currentLanguage]);
 
   return (

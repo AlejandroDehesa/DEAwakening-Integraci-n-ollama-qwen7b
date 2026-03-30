@@ -7,6 +7,7 @@ import contentRoutes from "./routes/contentRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import adminContentRoutes from "./routes/adminContentRoutes.js";
 import adminEventsRoutes from "./routes/adminEventsRoutes.js";
+import assistantRoutes from "./routes/assistantRoutes.js";
 import eventsRoutes from "./routes/eventsRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -35,6 +36,7 @@ app.get("/api/status", (_req, res) => {
 app.use("/api/content", contentRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/assistant", assistantRoutes);
 app.use("/api/admin/events", requireAdminAuth, adminEventsRoutes);
 app.use("/api/admin/content", requireAdminAuth, adminContentRoutes);
 app.use(errorHandler);

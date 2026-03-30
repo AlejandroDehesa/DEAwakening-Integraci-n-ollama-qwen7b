@@ -3,34 +3,58 @@ import { NavLink } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getSectionExtra } from "../services/contentService";
 
-const emptyLabels = {
-  home: "",
-  events: "",
-  about: "",
-  book: "",
-  host: "",
-  contact: ""
+const fallbackLabelsByLanguage = {
+  en: {
+    home: "HOME",
+    events: "EVENTS",
+    about: "ABOUT",
+    book: "MY BOOK",
+    host: "HOST AN EVENT",
+    contact: "CONTACT"
+  },
+  es: {
+    home: "INICIO",
+    events: "EVENTOS",
+    about: "SOBRE MI",
+    book: "MI LIBRO",
+    host: "ORGANIZAR EVENTO",
+    contact: "CONTACTO"
+  },
+  de: {
+    home: "START",
+    events: "VERANSTALTUNGEN",
+    about: "UBER MICH",
+    book: "MEIN BUCH",
+    host: "EVENT AUSRICHTEN",
+    contact: "KONTAKT"
+  }
 };
 
 function Navbar() {
   const { currentLanguage, setLanguage } = useLanguage();
-  const [copy, setCopy] = useState(emptyLabels);
+  const [copy, setCopy] = useState(fallbackLabelsByLanguage.en);
 
   useEffect(() => {
     let ignore = false;
 
     async function loadLabels() {
+      const nextFallback =
+        fallbackLabelsByLanguage[currentLanguage] || fallbackLabelsByLanguage.en;
+      if (!ignore) {
+        setCopy(nextFallback);
+      }
+
       try {
-        const data = await getSectionExtra("ui.navbar", currentLanguage, emptyLabels);
+        const data = await getSectionExtra("ui.navbar", currentLanguage, nextFallback);
         if (!ignore) {
           setCopy({
-            ...emptyLabels,
+            ...nextFallback,
             ...data
           });
         }
       } catch {
         if (!ignore) {
-          setCopy(emptyLabels);
+          setCopy(nextFallback);
         }
       }
     }

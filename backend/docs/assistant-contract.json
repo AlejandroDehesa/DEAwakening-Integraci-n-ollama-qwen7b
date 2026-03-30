@@ -1,0 +1,42 @@
+{
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/assistant/chat"
+  },
+  "requestExample": {
+    "message": "Quiero un evento en Mallorca para empezar",
+    "language": "es",
+    "sessionId": "session-123",
+    "pageContext": "events",
+    "pageSlug": null
+  },
+  "responseExample": {
+    "success": true,
+    "data": {
+      "answer": "Si buscas empezar con una experiencia guiada, te recomiendo revisar los proximos encuentros y elegir el formato que mejor encaje contigo.",
+      "language": "es",
+      "intent": "event_discovery",
+      "suggestedCtas": [
+        {
+          "type": "route",
+          "label": "Ver eventos",
+          "target": "/events"
+        },
+        {
+          "type": "contact",
+          "label": "Hablar con el equipo",
+          "target": "/contact"
+        }
+      ],
+      "recommendedEventSlug": "deawakening-palma"
+    },
+    "error": null
+  },
+  "validationRules": {
+    "message": "required, string, max 4000",
+    "language": "optional, en|es|de (defaults to en)",
+    "sessionId": "optional, string, max 120",
+    "pageContext": "optional, home|events|event-detail|about|book|contact|host-event",
+    "pageSlug": "optional, string, max 180"
+  }
+}
