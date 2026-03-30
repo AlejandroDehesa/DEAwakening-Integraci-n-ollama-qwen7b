@@ -486,6 +486,74 @@ export async function initializeDatabase() {
     )
   `);
 
+  await run(`
+    CREATE TABLE IF NOT EXISTS assistant_interactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at TEXT NOT NULL,
+      session_id TEXT,
+      language TEXT NOT NULL,
+      page_context TEXT,
+      page_slug TEXT,
+      message_hash TEXT NOT NULL,
+      message_length INTEGER NOT NULL,
+      answer_length INTEGER NOT NULL,
+      page_intent TEXT NOT NULL,
+      confidence REAL,
+      knowledge_site_status TEXT NOT NULL,
+      knowledge_documents_status TEXT NOT NULL,
+      recommended_event_slug TEXT,
+      suggested_actions_json TEXT NOT NULL,
+      related_links_json TEXT NOT NULL,
+      response_time_ms INTEGER,
+      error_code TEXT
+    )
+  `);
+
+  await run(`
+    CREATE TABLE IF NOT EXISTS assistant_clicks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at TEXT NOT NULL,
+      interaction_id INTEGER,
+      session_id TEXT,
+      language TEXT NOT NULL,
+      page_context TEXT,
+      page_slug TEXT,
+      source TEXT NOT NULL,
+      click_type TEXT NOT NULL,
+      action_type TEXT,
+      label TEXT NOT NULL,
+      target TEXT NOT NULL,
+      page_intent TEXT,
+      recommended_event_slug TEXT,
+      FOREIGN KEY (interaction_id) REFERENCES assistant_interactions(id)
+    )
+  `);
+
+  await run(`
+    CREATE INDEX IF NOT EXISTS idx_assistant_interactions_created_at
+    ON assistant_interactions(created_at)
+  `);
+
+  await run(`
+    CREATE INDEX IF NOT EXISTS idx_assistant_interactions_language
+    ON assistant_interactions(language)
+  `);
+
+  await run(`
+    CREATE INDEX IF NOT EXISTS idx_assistant_interactions_intent
+    ON assistant_interactions(page_intent)
+  `);
+
+  await run(`
+    CREATE INDEX IF NOT EXISTS idx_assistant_clicks_created_at
+    ON assistant_clicks(created_at)
+  `);
+
+  await run(`
+    CREATE INDEX IF NOT EXISTS idx_assistant_clicks_target
+    ON assistant_clicks(target)
+  `);
+
   for (const event of initialEvents) {
     const existingEvent = await get(
       `

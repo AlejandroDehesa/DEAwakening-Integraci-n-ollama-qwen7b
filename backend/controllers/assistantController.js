@@ -2,6 +2,11 @@ import {
   generateAssistantChatResponse,
   validateAssistantChatPayload
 } from "../services/assistantService.js";
+import {
+  saveAssistantInteraction,
+  saveAssistantClick,
+  validateAssistantClickPayload
+} from "../services/assistantTelemetryService.js";
 import { sendError, sendSuccess } from "../utils/httpResponses.js";
 
 export async function chatWithAssistant(req, res, next) {
@@ -23,10 +28,27 @@ export async function chatWithAssistant(req, res, next) {
   try {
     const data = await generateAssistantChatResponse(validation.data);
     const durationMs = Date.now() - startedAt;
+
+    let interactionId = null;
+    try {
+      interactionId = await saveAssistantInteraction({
+        requestData: validation.data,
+        responseData: data,
+        durationMs
+      });
+    } catch (trackingError) {
+      console.warn(
+        `[assistant] interaction_tracking_failed language=${language} pageContext=${pageContext || "n/a"} reason="${trackingError?.message || "unknown"}"`
+      );
+    }
+
     console.log(
       `[assistant] success language=${language} pageContext=${pageContext || "n/a"} intent=${data.pageIntent} docs=${data.knowledgeStatus?.documents || "n/a"} durationMs=${durationMs}`
     );
-    return sendSuccess(res, data);
+    return sendSuccess(res, {
+      ...data,
+      interactionId
+    });
   } catch (error) {
     const durationMs = Date.now() - startedAt;
 
@@ -43,5 +65,28 @@ export async function chatWithAssistant(req, res, next) {
     );
 
     return next(error);
+  }
+}
+
+export async function trackAssistantClick(req, res, next) {
+  const validation = validateAssistantClickPayload(req.body);
+  if (!validation.success) {
+    return sendError(res, 400, validation.error);
+  }
+
+  try {
+    const clickId = await saveAssistantClick(validation.data);
+    return sendSuccess(res, {
+      tracked: true,
+      clickId
+    });
+  } catch (error) {
+    console.warn(
+      `[assistant] click_tracking_failed source=${validation.data.source} clickType=${validation.data.clickType} reason="${error?.message || "unknown"}"`
+    );
+    return sendSuccess(res, {
+      tracked: false,
+      clickId: null
+    });
   }
 }
