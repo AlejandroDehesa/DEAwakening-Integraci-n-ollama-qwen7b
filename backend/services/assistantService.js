@@ -5,6 +5,11 @@ import {
 } from "./promptBuilder.js";
 import { fetchSiteKnowledge } from "./siteKnowledgeService.js";
 
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_SESSION_ID_LENGTH = 120;
+const MAX_PAGE_SLUG_LENGTH = 180;
+const SLUG_PATTERN = /^[a-z0-9-]+$/i;
+
 const VALID_PAGE_CONTEXTS = new Set([
   "home",
   "events",
@@ -15,10 +20,11 @@ const VALID_PAGE_CONTEXTS = new Set([
   "host-event"
 ]);
 
-function createPublicError(status, message) {
+function createAssistantError({ status, message, code }) {
   const error = new Error(message);
   error.status = status;
   error.expose = true;
+  error.code = code;
   return error;
 }
 
@@ -38,10 +44,10 @@ export function validateAssistantChatPayload(payload) {
     };
   }
 
-  if (rawMessage.length > 4000) {
+  if (rawMessage.length > MAX_MESSAGE_LENGTH) {
     return {
       success: false,
-      error: "message is too long"
+      error: `message must be ${MAX_MESSAGE_LENGTH} characters or less`
     };
   }
 
@@ -71,7 +77,7 @@ export function validateAssistantChatPayload(payload) {
   if (sessionId && sessionId.length > 120) {
     return {
       success: false,
-      error: "sessionId is too long"
+      error: `sessionId must be ${MAX_SESSION_ID_LENGTH} characters or less`
     };
   }
 
@@ -93,10 +99,24 @@ export function validateAssistantChatPayload(payload) {
       ? payload.pageSlug.trim()
       : null;
 
-  if (pageSlug && pageSlug.length > 180) {
+  if (pageSlug && pageSlug.length > MAX_PAGE_SLUG_LENGTH) {
     return {
       success: false,
-      error: "pageSlug is too long"
+      error: `pageSlug must be ${MAX_PAGE_SLUG_LENGTH} characters or less`
+    };
+  }
+
+  if (pageSlug && !SLUG_PATTERN.test(pageSlug)) {
+    return {
+      success: false,
+      error: "pageSlug has an invalid format"
+    };
+  }
+
+  if (pageContext === "event-detail" && !pageSlug) {
+    return {
+      success: false,
+      error: "pageSlug is required when pageContext is event-detail"
     };
   }
 
@@ -115,61 +135,104 @@ export function validateAssistantChatPayload(payload) {
 async function callOpenAI(messages) {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL;
+  const timeoutMs = Number(process.env.OPENAI_TIMEOUT_MS || 15000);
 
   if (!apiKey) {
-    throw createPublicError(
-      503,
-      "Assistant is not configured: missing OPENAI_API_KEY"
-    );
+    throw createAssistantError({
+      status: 503,
+      code: "assistant_missing_api_key",
+      message: "Assistant is not configured: missing OPENAI_API_KEY"
+    });
   }
 
   if (!model) {
-    throw createPublicError(
-      503,
-      "Assistant is not configured: missing OPENAI_MODEL"
-    );
+    throw createAssistantError({
+      status: 503,
+      code: "assistant_missing_model",
+      message: "Assistant is not configured: missing OPENAI_MODEL"
+    });
   }
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      messages
-    })
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const payload = await response.json().catch(() => null);
+  let response;
+  let payload = null;
+
+  try {
+    response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        messages
+      }),
+      signal: controller.signal
+    });
+
+    payload = await response.json().catch(() => null);
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw createAssistantError({
+        status: 504,
+        code: "assistant_timeout",
+        message: `Assistant provider timeout after ${timeoutMs}ms`
+      });
+    }
+
+    throw createAssistantError({
+      status: 502,
+      code: "assistant_provider_unreachable",
+      message: "Assistant provider request failed"
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const apiMessage =
       payload?.error?.message ||
       payload?.message ||
       `OpenAI request failed with status ${response.status}`;
-    throw createPublicError(502, `Assistant provider error: ${apiMessage}`);
+    throw createAssistantError({
+      status: 502,
+      code: "assistant_provider_error",
+      message: `Assistant provider error: ${apiMessage}`
+    });
   }
 
   const rawContent = payload?.choices?.[0]?.message?.content;
   if (typeof rawContent !== "string" || !rawContent.trim()) {
-    throw createPublicError(
-      502,
-      "Assistant provider returned an empty response"
-    );
+    throw createAssistantError({
+      status: 502,
+      code: "assistant_empty_provider_response",
+      message: "Assistant provider returned an empty response"
+    });
   }
 
   return rawContent;
 }
 
 export async function generateAssistantChatResponse(input) {
-  const knowledge = await fetchSiteKnowledge({
-    language: input.language,
-    pageContext: input.pageContext,
-    pageSlug: input.pageSlug
-  });
+  let knowledge;
+
+  try {
+    knowledge = await fetchSiteKnowledge({
+      language: input.language,
+      pageContext: input.pageContext,
+      pageSlug: input.pageSlug
+    });
+  } catch {
+    throw createAssistantError({
+      status: 500,
+      code: "assistant_knowledge_error",
+      message: "Failed to build site knowledge for assistant"
+    });
+  }
 
   const messages = buildAssistantMessages({
     language: input.language,
@@ -186,18 +249,28 @@ export async function generateAssistantChatResponse(input) {
   try {
     parsedOutput = parseAssistantOutput(
       rawModelOutput,
-      knowledge.availableEventSlugs
+      {
+        language: input.language,
+        availableEventSlugs: knowledge.availableEventSlugs
+      }
     );
   } catch (error) {
-    throw createPublicError(
-      502,
-      `Assistant provider returned invalid structured output: ${error.message}`
-    );
+    throw createAssistantError({
+      status: 502,
+      code: "assistant_invalid_provider_output",
+      message: `Assistant provider returned invalid structured output: ${error.message}`
+    });
   }
 
   return {
     answer: parsedOutput.answer,
     language: input.language,
+    pageIntent: parsedOutput.pageIntent,
+    confidence: parsedOutput.confidence,
+    suggestedActions: parsedOutput.suggestedActions,
+    relatedLinks: parsedOutput.relatedLinks,
+
+    // Backward compatibility aliases for the previous contract.
     intent: parsedOutput.intent,
     suggestedCtas: parsedOutput.suggestedCtas,
     recommendedEventSlug: parsedOutput.recommendedEventSlug

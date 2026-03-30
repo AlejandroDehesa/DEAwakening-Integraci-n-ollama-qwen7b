@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom";
+import AssistantWidget from "../components/AssistantWidget";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 
@@ -9,6 +10,7 @@ function MainLayout() {
       <main className="site-main">
         <Outlet />
       </main>
+      <AssistantWidget />
       <Footer />
     </div>
   );

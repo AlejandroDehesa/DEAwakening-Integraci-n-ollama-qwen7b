@@ -2371,3 +2371,229 @@ li {
     width: 48px;
   }
 }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.assistant-widget-shell {
+  position: fixed;
+  right: 1.15rem;
+  bottom: 1.15rem;
+  z-index: 30;
+  display: grid;
+  justify-items: end;
+  gap: 0.7rem;
+}
+
+.assistant-launcher {
+  min-height: 48px;
+  padding: 0.72rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 89, 98, 0.3);
+  background: linear-gradient(135deg, rgba(42, 111, 120, 0.94), rgba(35, 90, 97, 0.94));
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 12px 28px rgba(24, 36, 49, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.assistant-launcher:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(24, 36, 49, 0.25);
+}
+
+.assistant-panel {
+  width: min(400px, calc(100vw - 2.3rem));
+  max-height: min(72vh, 640px);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(41, 54, 68, 0.2);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(245, 240, 230, 0.92) 100%
+  );
+  box-shadow: 0 22px 48px rgba(18, 29, 40, 0.24);
+}
+
+.assistant-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0.8rem;
+  border-bottom: 1px solid rgba(41, 54, 68, 0.14);
+}
+
+.assistant-panel-title {
+  margin: 0;
+  color: #1f3544;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.assistant-panel-subtitle {
+  margin: 0.3rem 0 0;
+  color: #536170;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.assistant-close {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(41, 54, 68, 0.2);
+  background: rgba(255, 255, 255, 0.8);
+  color: #2b3947;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.assistant-feed {
+  min-height: 170px;
+  max-height: min(48vh, 420px);
+  overflow: auto;
+  padding: 0.85rem 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.assistant-message {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.72rem 0.78rem;
+  border-radius: 12px;
+  border: 1px solid rgba(41, 54, 68, 0.12);
+}
+
+.assistant-message p {
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
+
+.assistant-message-user {
+  background: rgba(236, 244, 245, 0.88);
+}
+
+.assistant-message-assistant {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.assistant-meta {
+  color: #647281;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.assistant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.assistant-action,
+.assistant-link-button {
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(41, 54, 68, 0.2);
+  background: rgba(255, 255, 255, 0.88);
+  color: #234f56;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.assistant-action:hover,
+.assistant-link-button:hover {
+  background: rgba(233, 242, 244, 0.94);
+  border-color: rgba(35, 90, 97, 0.32);
+}
+
+.assistant-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.assistant-links a {
+  color: #2b5c63;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.assistant-error {
+  margin: 0 1rem;
+  padding: 0.6rem 0.72rem;
+  border-radius: 10px;
+  border: 1px solid rgba(177, 72, 72, 0.28);
+  background: rgba(177, 72, 72, 0.1);
+  color: #a23f3f;
+  font-size: 0.85rem;
+}
+
+.assistant-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  padding: 0.8rem 1rem 1rem;
+  border-top: 1px solid rgba(41, 54, 68, 0.12);
+}
+
+.assistant-form input {
+  min-height: 44px;
+  padding: 0.7rem 0.82rem;
+  border-radius: 10px;
+  border: 1px solid rgba(41, 54, 68, 0.2);
+  background: rgba(255, 255, 255, 0.88);
+  color: #1d2a37;
+}
+
+.assistant-form input:focus {
+  outline: none;
+  border-color: rgba(42, 111, 120, 0.5);
+  box-shadow: 0 0 0 3px rgba(42, 111, 120, 0.12);
+}
+
+.assistant-form .btn {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .assistant-widget-shell {
+    right: 0.8rem;
+    bottom: 0.8rem;
+  }
+
+  .assistant-panel {
+    width: min(100vw - 1.6rem, 420px);
+    max-height: min(74vh, 590px);
+  }
+
+  .assistant-feed {
+    max-height: min(46vh, 360px);
+  }
+}

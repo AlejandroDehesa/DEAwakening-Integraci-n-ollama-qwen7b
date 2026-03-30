@@ -1,4 +1,4 @@
-const VALID_INTENTS = [
+const VALID_PAGE_INTENTS = [
   "general_info",
   "event_discovery",
   "book_interest",
@@ -7,7 +7,7 @@ const VALID_INTENTS = [
   "guidance"
 ];
 
-const VALID_CTA_TYPES = ["route", "event", "contact", "book"];
+const VALID_ACTION_TYPES = ["route", "event", "contact", "book", "external"];
 
 function trimText(value, maxLength = 2400) {
   if (typeof value !== "string") {
@@ -24,32 +24,175 @@ function trimText(value, maxLength = 2400) {
 
 function compactKnowledge(knowledge) {
   const sections = Object.fromEntries(
-    Object.entries(knowledge.sections || {}).map(([sectionKey, section]) => [
+    Object.entries(knowledge.content || {}).map(([sectionKey, section]) => [
       sectionKey,
       {
-        title: section.title,
-        subtitle: section.subtitle,
-        body: trimText(section.body, 800)
+        title: trimText(section.title, 220),
+        subtitle: trimText(section.subtitle, 220),
+        body: trimText(section.body, 900)
       }
     ])
   );
 
-  const events = (knowledge.events || []).map((eventItem) => ({
+  const events = (knowledge.events?.upcoming || []).map((eventItem) => ({
     slug: eventItem.slug,
-    title: eventItem.title,
+    title: trimText(eventItem.title, 160),
     date: eventItem.date,
-    location: eventItem.location,
-    description: trimText(eventItem.description, 320)
+    location: trimText(eventItem.location, 160),
+    description: trimText(eventItem.description, 300)
   }));
 
   return {
+    language: knowledge.language,
+    navigation: knowledge.navigation,
     sections,
-    events,
-    pageContext: knowledge.pageContext,
-    pageSlug: knowledge.pageSlug,
-    eventContext: knowledge.eventContext,
-    contact: knowledge.contact
+    events: {
+      total: knowledge.events?.total || events.length,
+      upcoming: events
+    },
+    contact: knowledge.contact,
+    page: knowledge.page
   };
+}
+
+function defaultLabel(type, language) {
+  const labels = {
+    route: {
+      en: "Open page",
+      es: "Abrir pagina",
+      de: "Seite offnen"
+    },
+    event: {
+      en: "View event",
+      es: "Ver evento",
+      de: "Event ansehen"
+    },
+    contact: {
+      en: "Contact",
+      es: "Contacto",
+      de: "Kontakt"
+    },
+    book: {
+      en: "My book",
+      es: "Mi libro",
+      de: "Mein Buch"
+    },
+    external: {
+      en: "Open link",
+      es: "Abrir enlace",
+      de: "Link offnen"
+    }
+  };
+
+  return labels[type]?.[language] || labels[type]?.en || "Open";
+}
+
+function normalizeEventTarget(target, availableEventSlugs = []) {
+  if (typeof target !== "string") {
+    return null;
+  }
+
+  const trimmed = target.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (availableEventSlugs.includes(trimmed)) {
+    return `/events/${trimmed}`;
+  }
+
+  const match = trimmed.match(/^\/events\/([a-z0-9-]+)$/i);
+  if (match && availableEventSlugs.includes(match[1])) {
+    return trimmed;
+  }
+
+  return null;
+}
+
+function normalizeAction(rawAction, { language, availableEventSlugs }) {
+  if (!rawAction || typeof rawAction !== "object") {
+    return null;
+  }
+
+  const type = typeof rawAction.type === "string" ? rawAction.type.trim() : "";
+  if (!VALID_ACTION_TYPES.includes(type)) {
+    return null;
+  }
+
+  const rawLabel = typeof rawAction.label === "string" ? rawAction.label.trim() : "";
+  const label = rawLabel || defaultLabel(type, language);
+
+  const rawTarget =
+    typeof rawAction.target === "string" ? rawAction.target.trim() : "";
+
+  if (type === "route" || type === "contact" || type === "book") {
+    const fallbackTarget =
+      type === "contact" ? "/contact" : type === "book" ? "/mi-libro" : "/";
+    const target = rawTarget.startsWith("/") ? rawTarget : fallbackTarget;
+    return { type, label, target };
+  }
+
+  if (type === "event") {
+    const eventTarget = normalizeEventTarget(rawTarget, availableEventSlugs);
+    if (!eventTarget) {
+      return null;
+    }
+
+    return { type, label, target: eventTarget };
+  }
+
+  if (type === "external") {
+    if (!/^https?:\/\//i.test(rawTarget)) {
+      return null;
+    }
+
+    return { type, label, target: rawTarget };
+  }
+
+  return null;
+}
+
+function normalizeRelatedLink(rawLink) {
+  if (!rawLink || typeof rawLink !== "object") {
+    return null;
+  }
+
+  const label = typeof rawLink.label === "string" ? rawLink.label.trim() : "";
+  const target = typeof rawLink.target === "string" ? rawLink.target.trim() : "";
+
+  if (!label || !target) {
+    return null;
+  }
+
+  if (!target.startsWith("/") && !/^https?:\/\//i.test(target)) {
+    return null;
+  }
+
+  return { label, target };
+}
+
+function dedupeByTarget(items) {
+  const map = new Map();
+
+  for (const item of items) {
+    if (!item?.target) {
+      continue;
+    }
+
+    if (!map.has(item.target)) {
+      map.set(item.target, item);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+function clampConfidence(value) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return 0.72;
+  }
+
+  return Math.max(0, Math.min(1, Number(value.toFixed(2))));
 }
 
 export function buildAssistantMessages({
@@ -63,22 +206,26 @@ export function buildAssistantMessages({
   const compact = compactKnowledge(knowledge);
 
   const systemPrompt = `
-You are the DEAwakening assistant.
-Style: warm, clear, premium, human and guiding.
+You are the DEAwakening website guide assistant.
+Tone: warm, clear, premium, human and orienting.
 Rules:
-- Reply ONLY in the requested language: ${language}.
-- Use ONLY the provided knowledge JSON.
-- Do not invent facts, dates, events, prices, addresses or claims.
-- If data is missing, state that clearly and suggest a real CTA (events page or contact).
-- Keep responses concise and actionable.
-- recommendedEventSlug must be one of: ${(knowledge.availableEventSlugs || []).join(", ") || "none"}.
+- Always reply in: ${language}.
+- Use only facts present in the provided knowledge.
+- Never invent events, dates, prices, addresses or claims.
+- If information is missing, say so clearly and redirect to a real page or contact.
+- Keep answers concise: 2 to 5 short sentences.
+- Behave as a site guide, not as a therapist or medical advisor.
 
 Return ONLY valid JSON with this exact shape:
 {
   "answer": "string",
-  "intent": "general_info|event_discovery|book_interest|contact_interest|about_david|guidance",
-  "suggestedCtas": [
-    { "type": "route|event|contact|book", "label": "string", "target": "string" }
+  "pageIntent": "general_info|event_discovery|book_interest|contact_interest|about_david|guidance",
+  "confidence": 0.0,
+  "suggestedActions": [
+    { "type": "route|event|contact|book|external", "label": "string", "target": "string" }
+  ],
+  "relatedLinks": [
+    { "label": "string", "target": "string" }
   ],
   "recommendedEventSlug": "string|null"
 }
@@ -122,7 +269,10 @@ function parseJsonContent(rawText) {
   }
 }
 
-export function parseAssistantOutput(rawText, availableEventSlugs = []) {
+export function parseAssistantOutput(
+  rawText,
+  { language = "en", availableEventSlugs = [] } = {}
+) {
   const parsed = parseJsonContent(rawText);
 
   if (!parsed || typeof parsed !== "object") {
@@ -134,45 +284,74 @@ export function parseAssistantOutput(rawText, availableEventSlugs = []) {
     throw new Error("Model response is missing a valid answer");
   }
 
-  if (!VALID_INTENTS.includes(parsed.intent)) {
-    throw new Error("Model response contains an invalid intent");
-  }
+  const rawPageIntent =
+    typeof parsed.pageIntent === "string"
+      ? parsed.pageIntent.trim()
+      : typeof parsed.intent === "string"
+        ? parsed.intent.trim()
+        : "";
 
-  const rawCtas = Array.isArray(parsed.suggestedCtas) ? parsed.suggestedCtas : [];
-  const suggestedCtas = rawCtas.map((cta) => {
-    if (!cta || typeof cta !== "object") {
-      throw new Error("Model response contains an invalid CTA entry");
-    }
+  const pageIntent = VALID_PAGE_INTENTS.includes(rawPageIntent)
+    ? rawPageIntent
+    : "guidance";
 
-    const type = typeof cta.type === "string" ? cta.type.trim() : "";
-    const label = typeof cta.label === "string" ? cta.label.trim() : "";
-    const target = typeof cta.target === "string" ? cta.target.trim() : "";
+  const confidence = clampConfidence(parsed.confidence);
 
-    if (!VALID_CTA_TYPES.includes(type) || !label || !target) {
-      throw new Error("Model response contains a malformed CTA");
-    }
+  const rawActions = Array.isArray(parsed.suggestedActions)
+    ? parsed.suggestedActions
+    : Array.isArray(parsed.suggestedCtas)
+      ? parsed.suggestedCtas
+      : [];
 
-    return { type, label, target };
-  });
+  const suggestedActions = rawActions
+    .map((action) =>
+      normalizeAction(action, {
+        language,
+        availableEventSlugs
+      })
+    )
+    .filter(Boolean);
+
+  const rawRelated = Array.isArray(parsed.relatedLinks) ? parsed.relatedLinks : [];
+  const relatedFromModel = rawRelated
+    .map(normalizeRelatedLink)
+    .filter(Boolean);
+
+  const relatedFromActions = suggestedActions.map((action) => ({
+    label: action.label,
+    target: action.target
+  }));
+
+  const relatedLinks = dedupeByTarget([...relatedFromModel, ...relatedFromActions]);
 
   let recommendedEventSlug = null;
   if (parsed.recommendedEventSlug !== null && parsed.recommendedEventSlug !== undefined) {
-    if (typeof parsed.recommendedEventSlug !== "string") {
-      throw new Error("Model response contains an invalid recommendedEventSlug");
+    if (typeof parsed.recommendedEventSlug === "string") {
+      const trimmedSlug = parsed.recommendedEventSlug.trim();
+      if (availableEventSlugs.includes(trimmedSlug)) {
+        recommendedEventSlug = trimmedSlug;
+      }
     }
+  }
 
-    const trimmedSlug = parsed.recommendedEventSlug.trim();
-    if (!availableEventSlugs.includes(trimmedSlug)) {
-      throw new Error("Model response recommended an unknown event slug");
+  if (!recommendedEventSlug) {
+    const eventAction = suggestedActions.find((action) => action.type === "event");
+    if (eventAction?.target) {
+      const match = eventAction.target.match(/^\/events\/([a-z0-9-]+)$/i);
+      if (match && availableEventSlugs.includes(match[1])) {
+        recommendedEventSlug = match[1];
+      }
     }
-
-    recommendedEventSlug = trimmedSlug;
   }
 
   return {
     answer,
-    intent: parsed.intent,
-    suggestedCtas,
+    pageIntent,
+    confidence,
+    suggestedActions,
+    relatedLinks,
+    intent: pageIntent,
+    suggestedCtas: suggestedActions,
     recommendedEventSlug
   };
 }

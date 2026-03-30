@@ -3,18 +3,79 @@
     "method": "POST",
     "path": "/api/assistant/chat"
   },
+  "request": {
+    "message": "string (required, max 4000)",
+    "language": "en|es|de (optional, default en)",
+    "sessionId": "string (optional, max 120)",
+    "pageContext": "home|events|event-detail|about|book|contact|host-event (optional)",
+    "pageSlug": "string (optional, required when pageContext=event-detail, slug format)"
+  },
+  "response": {
+    "success": true,
+    "data": {
+      "answer": "string",
+      "language": "en|es|de",
+      "pageIntent": "general_info|event_discovery|book_interest|contact_interest|about_david|guidance",
+      "confidence": 0.84,
+      "suggestedActions": [
+        {
+          "type": "route|event|contact|book|external",
+          "label": "string",
+          "target": "string"
+        }
+      ],
+      "relatedLinks": [
+        {
+          "label": "string",
+          "target": "string"
+        }
+      ],
+      "intent": "legacy alias of pageIntent",
+      "suggestedCtas": "legacy alias of suggestedActions",
+      "recommendedEventSlug": "string|null"
+    },
+    "error": null
+  },
+  "errorEnvelope": {
+    "success": false,
+    "data": null,
+    "error": "string"
+  },
   "requestExample": {
-    "message": "Quiero un evento en Mallorca para empezar",
+    "message": "Quiero un evento para empezar en Mallorca",
     "language": "es",
-    "sessionId": "session-123",
-    "pageContext": "events",
-    "pageSlug": null
+    "sessionId": "session-001",
+    "pageContext": "events"
   },
   "responseExample": {
     "success": true,
     "data": {
-      "answer": "Si buscas empezar con una experiencia guiada, te recomiendo revisar los proximos encuentros y elegir el formato que mejor encaje contigo.",
+      "answer": "Si quieres empezar, puedo orientarte hacia los proximos encuentros y ayudarte a elegir el formato mas adecuado para ti.",
       "language": "es",
+      "pageIntent": "event_discovery",
+      "confidence": 0.84,
+      "suggestedActions": [
+        {
+          "type": "route",
+          "label": "Ver eventos",
+          "target": "/events"
+        },
+        {
+          "type": "contact",
+          "label": "Contactar",
+          "target": "/contact"
+        }
+      ],
+      "relatedLinks": [
+        {
+          "label": "Ver eventos",
+          "target": "/events"
+        },
+        {
+          "label": "Contactar",
+          "target": "/contact"
+        }
+      ],
       "intent": "event_discovery",
       "suggestedCtas": [
         {
@@ -24,19 +85,12 @@
         },
         {
           "type": "contact",
-          "label": "Hablar con el equipo",
+          "label": "Contactar",
           "target": "/contact"
         }
       ],
-      "recommendedEventSlug": "deawakening-palma"
+      "recommendedEventSlug": null
     },
     "error": null
-  },
-  "validationRules": {
-    "message": "required, string, max 4000",
-    "language": "optional, en|es|de (defaults to en)",
-    "sessionId": "optional, string, max 120",
-    "pageContext": "optional, home|events|event-detail|about|book|contact|host-event",
-    "pageSlug": "optional, string, max 180"
   }
 }

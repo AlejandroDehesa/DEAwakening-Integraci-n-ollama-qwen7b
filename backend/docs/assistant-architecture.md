@@ -1,65 +1,80 @@
-# DEAwakening Assistant - Phase 1 Backend Core
+# DEAwakening Assistant - Architecture (Phase 1.5 + Frontend v1)
 
 ## Scope
-- Add a minimal and stable backend entry point for IA chat.
-- Keep Express as the main server and SQLite as the source of truth.
-- Reuse existing content/events/contact services.
-- Return a strict, structured response for frontend integration.
+- Harden existing assistant backend (no rewrite).
+- Keep Express + SQLite + current project structure.
+- Add first frontend assistant UI integrated into current layout.
+- Keep implementation simple, maintainable and production-small ready.
 
-## New files
-- `backend/routes/assistantRoutes.js`
-- `backend/controllers/assistantController.js`
-- `backend/services/assistantService.js`
-- `backend/services/siteKnowledgeService.js`
-- `backend/services/promptBuilder.js`
-- `backend/docs/assistant-contract.json`
-- `backend/docs/assistant-architecture.md`
-
-## Modified files
-- `backend/app.js`
-  - Registers `app.use("/api/assistant", assistantRoutes)`.
-- `backend/.env.example`
-  - Adds `OPENAI_API_KEY` and `OPENAI_MODEL`.
-
-## API contract
-- Endpoint: `POST /api/assistant/chat`
-- Request and response schema: `backend/docs/assistant-contract.json`
-- Response envelope remains consistent with current backend style:
-  - `{ success, data, error }`
-
-## Data flow
-1. Client sends `message`, `language`, optional `sessionId`, `pageContext`, `pageSlug`.
-2. `assistantController` validates payload explicitly.
+## Backend flow
+1. `POST /api/assistant/chat` enters through `assistantRoutes`.
+2. `assistantController` validates input and logs request summary.
 3. `assistantService`:
-   - loads knowledge from SQLite-backed services via `siteKnowledgeService`
-   - builds prompts using `promptBuilder`
-   - calls OpenAI Chat Completions
-   - validates and normalizes structured output
-4. Controller returns:
-   - `answer`
-   - `language`
-   - `intent`
-   - `suggestedCtas[]`
-   - `recommendedEventSlug`
+   - validates payload with strict rules
+   - builds site knowledge from existing services (`content/events/contact`)
+   - builds prompt with language + page context
+   - calls OpenAI with timeout
+   - parses and normalizes model output into stable JSON
+4. Controller returns standard envelope:
+   - `{ success, data, error }`
 
-## Decisions and reasons
-- No heavy frameworks (LangChain, agent frameworks) to keep maintenance simple.
-- No RAG/vector store in this phase to reduce complexity and risk.
-- No silent fallback on provider/output errors:
-  - missing env vars -> explicit `503`
-  - provider errors / invalid model JSON -> explicit `502`
-- Language handling reuses existing `normalizeLanguage` helper.
-- Knowledge source is only existing system data:
-  - content sections
-  - events
-  - contact info
+## Output contract
+Primary assistant fields:
+- `answer`
+- `language`
+- `pageIntent`
+- `confidence`
+- `suggestedActions[]`
+- `relatedLinks[]`
 
-## What is intentionally out of scope (this phase)
-- No voice
-- No streaming
-- No conversation persistence
-- No admin changes
-- No frontend UI implementation (only backend contract ready)
+Backward-compatible aliases:
+- `intent` (alias of `pageIntent`)
+- `suggestedCtas` (alias of `suggestedActions`)
+- `recommendedEventSlug`
+
+Contract source:
+- `backend/docs/assistant-contract.json`
+
+## Error handling (controlled)
+- Missing `OPENAI_API_KEY`: `503`
+- Missing `OPENAI_MODEL`: `503`
+- Provider timeout: `504`
+- Provider/network error: `502`
+- Malformed provider output: `502`
+- Knowledge build failure: `500`
+- Invalid request body: `400`
+
+All errors are returned in envelope format without stack traces in API responses.
+
+## Logging (minimal and useful)
+Controller logs:
+- language
+- pageContext
+- message length
+- success/failure
+- error code/status
+- operation duration (ms)
+
+## Site knowledge design
+Knowledge is built only from existing project data:
+- content sections
+- events list + selected event context
+- contact info
+- navigation map (from `ui.navbar`)
+- current page context summary
+
+No RAG/vector store in this phase.
+
+## Frontend integration (v1)
+Assistant UI is isolated in its own component/service:
+- launcher button (floating)
+- open/close panel
+- short message history
+- loading/error states
+- context-aware request payload (`language`, `pageContext`, `pageSlug`)
+- suggested actions + related links rendering
+
+No changes to existing page business logic were required.
 
 ## Environment variables
 Add to `backend/.env`:
@@ -67,29 +82,20 @@ Add to `backend/.env`:
 ```env
 OPENAI_API_KEY=your-openai-api-key
 OPENAI_MODEL=gpt-4.1-mini
+OPENAI_TIMEOUT_MS=15000
 ```
 
-## Quick test
-From `backend/`:
+## Smoke tests
+Script:
+- `npm run assistant:smoke`
 
-```bash
-curl -X POST http://localhost:5000/api/assistant/chat \
-  -H "Content-Type: application/json" \
-  -d "{\"message\":\"Quiero conocer a David\",\"language\":\"es\",\"pageContext\":\"about\"}"
-```
+Covers:
+- valid ES
+- valid EN
+- valid with pageContext
+- invalid body (`400`)
+- API key failure probe (`503` when expected)
 
-Expected response shape:
-
-```json
-{
-  "success": true,
-  "data": {
-    "answer": "...",
-    "language": "es",
-    "intent": "about_david",
-    "suggestedCtas": [],
-    "recommendedEventSlug": null
-  },
-  "error": null
-}
-```
+Use:
+- `ASSISTANT_BASE_URL` to target another backend URL
+- `ASSISTANT_EXPECT_MISSING_KEY=true` when testing missing API key scenario
