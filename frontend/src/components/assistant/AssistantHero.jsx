@@ -7,6 +7,7 @@ import AssistantQuickActions from "./AssistantQuickActions";
 import {
   getAssistantQuickActions,
   getAssistantUiCopy,
+  getQuickActionPrompt,
   getPageContextFromPath
 } from "./assistantConfig";
 import { useAssistantActionRouter } from "./useAssistantActionRouter";
@@ -53,8 +54,13 @@ function AssistantHero() {
     feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [conversation.messages, conversation.isSending]);
 
-  async function handleQuickAction(promptText) {
-    actionRouter.handleQuickActionClick(promptText);
+  async function handleQuickAction(actionItem) {
+    const promptText = getQuickActionPrompt(actionItem);
+    if (!promptText) {
+      return;
+    }
+
+    actionRouter.handleQuickActionClick(actionItem);
     try {
       await conversation.sendQuickAction(promptText);
     } catch {

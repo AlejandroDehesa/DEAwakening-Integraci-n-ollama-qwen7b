@@ -7,6 +7,7 @@ import AssistantQuickActions from "./assistant/AssistantQuickActions";
 import {
   getAssistantQuickActions,
   getAssistantUiCopy,
+  getQuickActionPrompt,
   getPageContextFromPath
 } from "./assistant/assistantConfig";
 import { useAssistantActionRouter } from "./assistant/useAssistantActionRouter";
@@ -96,8 +97,13 @@ function AssistantWidget() {
     setIsOpen(false);
   }
 
-  async function handleQuickAction(promptText) {
-    actionRouter.handleQuickActionClick(promptText);
+  async function handleQuickAction(actionItem) {
+    const promptText = getQuickActionPrompt(actionItem);
+    if (!promptText) {
+      return;
+    }
+
+    actionRouter.handleQuickActionClick(actionItem);
     try {
       await conversation.sendQuickAction(promptText);
     } catch {

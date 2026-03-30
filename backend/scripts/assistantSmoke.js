@@ -130,9 +130,9 @@ async function run() {
 
   const clickTracking = await callJson("/api/assistant/track-click", {
     source: "hero",
-    clickType: "suggested-action",
-    label: "Ver eventos",
-    target: "/events",
+    clickType: "quick-action",
+    label: "Quiero entender el enfoque de David",
+    target: "qa:understand-david",
     language: "es",
     pageContext: "home"
   });

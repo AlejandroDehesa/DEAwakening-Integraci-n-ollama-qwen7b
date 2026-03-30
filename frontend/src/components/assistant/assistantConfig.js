@@ -16,8 +16,7 @@ export const assistantUiCopy = {
     send: "Send",
     thinking: "Thinking...",
     close: "Close assistant",
-    error:
-      "I could not complete that right now. Please try again in a moment.",
+    error: "I could not complete that right now. Please try again in a moment.",
     emptyState: "Choose a quick action or ask your question.",
     quickActionsTitle: "Quick start",
     recommendationLabel: "Recommended event",
@@ -32,31 +31,30 @@ export const assistantUiCopy = {
     }
   },
   es: {
-    launcher: "Guía",
-    heroEyebrow: "Guía IA",
-    widgetTitle: "Guía DEAwakening",
+    launcher: "Guia",
+    heroEyebrow: "Guia IA",
+    widgetTitle: "Guia DEAwakening",
     widgetSubtitle: "Pregunta sobre eventos, el enfoque de David o tu mejor siguiente paso.",
-    heroTitle: "Empieza con tu guía personal",
+    heroTitle: "Empieza con tu guia personal",
     heroSubtitle:
-      "Cuéntame qué necesitas y te doy un siguiente paso claro: evento, libro, contexto o contacto.",
+      "Cuentame que necesitas y te doy un siguiente paso claro: evento, libro, contexto o contacto.",
     welcome:
-      "Bienvenido. Soy tu guía de DEAwakening. Puedo ayudarte a entender el enfoque, descubrir eventos y elegir tu siguiente paso.",
+      "Bienvenido. Soy tu guia de DEAwakening. Puedo ayudarte a entender el enfoque, descubrir eventos y elegir tu siguiente paso.",
     inputLabel: "Mensaje al asistente",
     placeholder: "Escribe tu pregunta...",
     send: "Enviar",
     thinking: "Pensando...",
     close: "Cerrar asistente",
-    error:
-      "Ahora mismo no he podido completarlo. Inténtalo de nuevo en unos segundos.",
-    emptyState: "Elige una acción rápida o escribe tu pregunta.",
-    quickActionsTitle: "Inicio rápido",
+    error: "Ahora mismo no he podido completarlo. Intentalo de nuevo en unos segundos.",
+    emptyState: "Elige una accion rapida o escribe tu pregunta.",
+    quickActionsTitle: "Inicio rapido",
     recommendationLabel: "Evento recomendado",
     openRecommendation: "Ver evento recomendado",
     intentLabels: {
-      general_info: "Orientación general",
-      event_discovery: "Orientación de eventos",
-      book_interest: "Orientación del libro",
-      contact_interest: "Orientación de contacto",
+      general_info: "Orientacion general",
+      event_discovery: "Orientacion de eventos",
+      book_interest: "Orientacion del libro",
+      contact_interest: "Orientacion de contacto",
       about_david: "Sobre David",
       guidance: "Siguiente paso"
     }
@@ -65,20 +63,18 @@ export const assistantUiCopy = {
     launcher: "Guide",
     heroEyebrow: "KI Guide",
     widgetTitle: "DEAwakening Guide",
-    widgetSubtitle: "Frage nach Events, Davids Ansatz oder deinem nächsten klaren Schritt.",
-    heroTitle: "Starte mit deinem persönlichen Guide",
-    heroSubtitle:
-      "Sag mir, was du brauchst, und ich zeige dir den klaren nächsten Schritt.",
+    widgetSubtitle: "Frage nach Events, Davids Ansatz oder deinem naechsten klaren Schritt.",
+    heroTitle: "Starte mit deinem persoenlichen Guide",
+    heroSubtitle: "Sag mir, was du brauchst, und ich zeige dir den klaren naechsten Schritt.",
     welcome:
-      "Willkommen. Ich bin dein DEAwakening Guide. Ich helfe dir, den Ansatz zu verstehen, passende Events zu finden und den nächsten Schritt zu wählen.",
+      "Willkommen. Ich bin dein DEAwakening Guide. Ich helfe dir, den Ansatz zu verstehen, passende Events zu finden und den naechsten Schritt zu waehlen.",
     inputLabel: "Nachricht an den Assistenten",
     placeholder: "Stelle deine Frage...",
     send: "Senden",
     thinking: "Wird vorbereitet...",
-    close: "Assistent schließen",
-    error:
-      "Ich konnte das gerade nicht abschließen. Bitte versuche es gleich erneut.",
-    emptyState: "Wähle eine Schnellaktion oder stelle deine Frage.",
+    close: "Assistent schliessen",
+    error: "Ich konnte das gerade nicht abschliessen. Bitte versuche es gleich erneut.",
+    emptyState: "Waehle eine Schnellaktion oder stelle deine Frage.",
     quickActionsTitle: "Schnellstart",
     recommendationLabel: "Empfohlenes Event",
     openRecommendation: "Empfohlenes Event ansehen",
@@ -87,33 +83,33 @@ export const assistantUiCopy = {
       event_discovery: "Event Orientierung",
       book_interest: "Buch Orientierung",
       contact_interest: "Kontakt Orientierung",
-      about_david: "Über David",
-      guidance: "Nächster Schritt"
+      about_david: "Ueber David",
+      guidance: "Naechster Schritt"
     }
   }
 };
 
 export const assistantQuickActionsByLanguage = {
   en: [
-    "I want to understand David's approach",
-    "Help me choose the right event",
-    "Where should I start today?",
-    "Tell me about the book",
-    "I want to contact David"
+    { id: "understand-david", prompt: "I want to understand David's approach" },
+    { id: "choose-event", prompt: "Help me choose the right event" },
+    { id: "where-to-start", prompt: "Where should I start today?" },
+    { id: "about-book", prompt: "Tell me about the book" },
+    { id: "contact-david", prompt: "I want to contact David" }
   ],
   es: [
-    "Quiero entender el enfoque de David",
-    "Ayúdame a elegir el evento adecuado",
-    "¿Por dónde debería empezar hoy?",
-    "Cuéntame sobre el libro",
-    "Quiero contactar con David"
+    { id: "understand-david", prompt: "Quiero entender el enfoque de David" },
+    { id: "choose-event", prompt: "Ayudame a elegir el evento adecuado" },
+    { id: "where-to-start", prompt: "Por donde deberia empezar hoy?" },
+    { id: "about-book", prompt: "Cuentame sobre el libro" },
+    { id: "contact-david", prompt: "Quiero contactar con David" }
   ],
   de: [
-    "Ich möchte Davids Ansatz verstehen",
-    "Hilf mir, das passende Event zu wählen",
-    "Wo sollte ich heute anfangen?",
-    "Erzähl mir vom Buch",
-    "Ich möchte David kontaktieren"
+    { id: "understand-david", prompt: "Ich moechte Davids Ansatz verstehen" },
+    { id: "choose-event", prompt: "Hilf mir, das passende Event zu waehlen" },
+    { id: "where-to-start", prompt: "Wo sollte ich heute anfangen?" },
+    { id: "about-book", prompt: "Erzaehl mir vom Buch" },
+    { id: "contact-david", prompt: "Ich moechte David kontaktieren" }
   ]
 };
 
@@ -123,6 +119,40 @@ export function getAssistantUiCopy(language) {
 
 export function getAssistantQuickActions(language) {
   return assistantQuickActionsByLanguage[language] || assistantQuickActionsByLanguage.en;
+}
+
+export function getQuickActionPrompt(item) {
+  if (typeof item === "string") {
+    return item;
+  }
+
+  if (item && typeof item === "object" && typeof item.prompt === "string") {
+    return item.prompt;
+  }
+
+  return "";
+}
+
+export function getQuickActionTelemetry(item) {
+  const prompt = getQuickActionPrompt(item);
+  if (!prompt) {
+    return null;
+  }
+
+  if (item && typeof item === "object") {
+    const id = typeof item.id === "string" && item.id.trim() ? item.id.trim() : "custom";
+    return {
+      id,
+      label: prompt,
+      target: `qa:${id}`
+    };
+  }
+
+  return {
+    id: "custom",
+    label: prompt,
+    target: "qa:custom"
+  };
 }
 
 export function getPageContextFromPath(pathname) {

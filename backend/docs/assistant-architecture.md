@@ -1,4 +1,4 @@
-# DEAwakening Assistant - Architecture (Phase 4.5 + Phase 5)
+# DEAwakening Assistant - Architecture (Phase 4.5 + 5 + 5.5)
 
 ## Scope
 - Harden retrieval/document layer and contract stability.
@@ -66,12 +66,12 @@ Canonical:
 Legacy:
 - `intent` (alias of `pageIntent`)
 
-## Telemetry (Phase 5)
+## Telemetry (Phase 5 + 5.5)
 ### Stored interaction
 - metadata only (no raw full message)
 - SHA-256 message hash + message length
 - intent/confidence/knowledge status
-- suggested/related action payloads
+- suggested/related action payloads (deduplicated + capped)
 - recommendation and response timing
 
 ### Stored click
@@ -79,10 +79,11 @@ Legacy:
 - click type + target + label
 - language/context/intent metadata
 - optional relation to `interactionId`
+- quick-action target uses stable format: `qa:<id>`
 
 ### Endpoints
 - `POST /api/assistant/track-click`
-- `GET /api/admin/assistant/insights`
+- `GET /api/admin/assistant/insights?days=30&limit=200&includeRecent=true`
 
 ## Runtime flags
 ```env

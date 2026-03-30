@@ -119,10 +119,10 @@ async function run() {
 
   const clickValidation = validateAssistantClickPayload({
     source: "hero",
-    clickType: "suggested-action",
-    label: "Ver eventos",
-    target: "/events",
-    actionType: "route",
+    clickType: "quick-action",
+    label: "Quiero entender el enfoque de David",
+    target: "qa:understand-david",
+    actionType: "quick_action",
     interactionId,
     language: "es",
     pageContext: "home",
@@ -134,12 +134,53 @@ async function run() {
   console.log(`[CHECK] clickId=${clickId}`);
   assert(Number.isInteger(clickId) && clickId > 0, "Click should be saved");
 
-  const insights = await fetchAssistantInsights({ days: 30, limit: 250 });
+  const previousTrackingFlag = process.env.ASSISTANT_FORCE_TRACKING_ERROR;
+  process.env.ASSISTANT_FORCE_TRACKING_ERROR = "true";
+  let trackingFailureCaptured = false;
+  try {
+    await saveAssistantClick(clickValidation.data);
+  } catch {
+    trackingFailureCaptured = true;
+  }
+  process.env.ASSISTANT_FORCE_TRACKING_ERROR = previousTrackingFlag;
+
+  assert(
+    trackingFailureCaptured,
+    "Forced tracking error should throw and be capturable without breaking flow"
+  );
+
+  const insights = await fetchAssistantInsights({
+    days: 30,
+    limit: 250,
+    includeRecent: true
+  });
   console.log(
     `[CHECK] insights interactions=${insights.interactions.total} clicks=${insights.clicks.total}`
   );
   assert(insights.interactions.total > 0, "Insights should include interactions");
   assert(insights.clicks.total > 0, "Insights should include clicks");
+  assert(
+    Array.isArray(insights.usage?.byKnowledgeStatus?.documents),
+    "Insights should include knowledge status breakdown"
+  );
+  assert(
+    typeof insights.conversion?.rates?.events === "number",
+    "Insights should include conversion rates"
+  );
+  assert(
+    insights.contractVersion === "assistant-insights.v2",
+    "Insights contractVersion should be assistant-insights.v2"
+  );
+
+  const compactInsights = await fetchAssistantInsights({
+    days: 30,
+    limit: 250,
+    includeRecent: false
+  });
+  assert(
+    !Object.prototype.hasOwnProperty.call(compactInsights, "recent"),
+    "Insights should skip recent payload when includeRecent=false"
+  );
 
   console.log("[PASS] assistantPhase45Phase5Check");
 }

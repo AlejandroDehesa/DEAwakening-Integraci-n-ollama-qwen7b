@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { trackAssistantClick } from "../../services/assistantService";
-import { normalizeActionTarget } from "./assistantConfig";
+import { getQuickActionTelemetry, normalizeActionTarget } from "./assistantConfig";
 
 export function useAssistantActionRouter({
   source,
@@ -54,12 +54,17 @@ export function useAssistantActionRouter({
   );
 
   const handleQuickActionClick = useCallback(
-    (prompt) => {
+    (quickAction) => {
+      const telemetry = getQuickActionTelemetry(quickAction);
+      if (!telemetry) {
+        return;
+      }
+
       reportClick({
         clickType: "quick-action",
-        actionType: "quick_action",
-        label: prompt,
-        target: "/api/assistant/chat"
+        actionType: telemetry.id,
+        label: telemetry.label,
+        target: telemetry.target
       });
     },
     [reportClick]

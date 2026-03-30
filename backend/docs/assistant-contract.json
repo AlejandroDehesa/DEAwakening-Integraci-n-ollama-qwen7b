@@ -42,11 +42,21 @@
       },
       "error": null
     },
-    "errorEnvelope": {
-      "success": false,
-      "data": null,
-      "error": "string"
-    }
+    "canonicalFields": [
+      "contractVersion",
+      "answer",
+      "language",
+      "pageIntent",
+      "confidence",
+      "suggestedActions",
+      "relatedLinks",
+      "recommendedEventSlug",
+      "knowledgeStatus",
+      "interactionId"
+    ],
+    "legacyCompatibility": [
+      "intent (alias of pageIntent)"
+    ]
   },
   "assistantClickTracking": {
     "endpoint": {
@@ -57,7 +67,11 @@
       "source": "hero|widget (required)",
       "clickType": "quick-action|suggested-action|related-link|recommended-event (required)",
       "label": "string (required)",
-      "target": "string route/url (required)",
+      "target": "string (required)",
+      "targetRules": {
+        "quick-action": "qa:<id>",
+        "otherClickTypes": "internal route (/...) or external URL (http/https)"
+      },
       "actionType": "string (optional)",
       "interactionId": "number (optional)",
       "sessionId": "string (optional)",
@@ -79,20 +93,74 @@
   "adminInsights": {
     "endpoint": {
       "method": "GET",
-      "path": "/api/admin/assistant/insights?days=30&limit=200",
+      "path": "/api/admin/assistant/insights?days=30&limit=200&includeRecent=true",
       "auth": "x-admin-key header required"
+    },
+    "response": {
+      "success": true,
+      "data": {
+        "contractVersion": "assistant-insights.v2",
+        "periodDays": "number",
+        "sampleSize": {
+          "interactions": "number",
+          "clicks": "number"
+        },
+        "overview": {
+          "totalInteractions": "number",
+          "totalClicks": "number",
+          "clicksPerInteraction": "number"
+        },
+        "usage": {
+          "byIntent": "array",
+          "byLanguage": "array",
+          "byPageContext": "array",
+          "byKnowledgeStatus": {
+            "documents": "array",
+            "site": "array"
+          },
+          "pagePerformance": "array"
+        },
+        "actions": {
+          "suggested": {
+            "topTargets": "array",
+            "byType": "array",
+            "relatedLinksTopTargets": "array"
+          },
+          "clicks": {
+            "topTargets": "array",
+            "byType": "array",
+            "bySource": "array"
+          }
+        },
+        "conversion": {
+          "suggested": "object",
+          "clicked": "object",
+          "rates": "object"
+        },
+        "recommendations": {
+          "totalRecommended": "number",
+          "recommendedEventClicks": "number",
+          "recommendationClickRate": "number",
+          "topEvents": "array"
+        },
+        "interactions": "legacy shape kept",
+        "suggestions": "legacy shape kept",
+        "clicks": "legacy shape kept",
+        "recent": "optional when includeRecent=true"
+      },
+      "error": null
     }
   },
   "frontendResponsibility": {
     "must": [
-      "render answer, intent, confidence, actions, links and recommendation",
       "send language + pageContext + pageSlug",
-      "sanitize malformed arrays defensively",
-      "report key CTA clicks"
+      "render answer, intent, confidence, actions, links and recommendation",
+      "track click actions and quick actions with non-blocking behavior",
+      "sanitize malformed arrays defensively"
     ],
     "mustNot": [
-      "invent business fallback actions",
-      "duplicate backend retrieval or recommendation logic"
+      "duplicate business recommendation logic from backend",
+      "convert frontend into an insights aggregation layer"
     ]
   }
 }
