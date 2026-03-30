@@ -85,6 +85,10 @@ function readTrackingEnabled() {
   return value !== "false" && value !== "0";
 }
 
+function shouldForceTrackingError() {
+  return String(process.env.ASSISTANT_FORCE_TRACKING_ERROR || "").toLowerCase() === "true";
+}
+
 function normalizeLanguage(language) {
   if (typeof language !== "string") {
     return "en";
@@ -107,6 +111,10 @@ export async function saveAssistantInteraction({
     return null;
   }
 
+  if (shouldForceTrackingError()) {
+    throw new Error("forced_tracking_error");
+  }
+
   const timestamp = new Date().toISOString();
   const message = typeof requestData?.message === "string" ? requestData.message : "";
   const answer = typeof responseData?.answer === "string" ? responseData.answer : "";
@@ -115,6 +123,7 @@ export async function saveAssistantInteraction({
     `
       INSERT INTO assistant_interactions (
         created_at,
+        interaction_type,
         session_id,
         language,
         page_context,
@@ -132,10 +141,11 @@ export async function saveAssistantInteraction({
         response_time_ms,
         error_code
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       timestamp,
+      "assistant-response",
       trimString(requestData?.sessionId, MAX_SESSION_ID_LENGTH),
       normalizeLanguage(requestData?.language),
       trimString(requestData?.pageContext, 32),
@@ -267,6 +277,10 @@ export function validateAssistantClickPayload(payload) {
 export async function saveAssistantClick(data) {
   if (!readTrackingEnabled()) {
     return null;
+  }
+
+  if (shouldForceTrackingError()) {
+    throw new Error("forced_tracking_error");
   }
 
   const timestamp = new Date().toISOString();
@@ -436,6 +450,7 @@ export async function fetchAssistantInsights({ days, limit }) {
       interactions: interactionRows.slice(0, 20).map((row) => ({
         id: row.id,
         createdAt: row.created_at,
+        interactionType: row.interaction_type,
         language: row.language,
         pageContext: row.page_context,
         pageSlug: row.page_slug,

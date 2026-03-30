@@ -30,10 +30,15 @@ export async function buildAssistantKnowledge({
     status: "empty",
     source: null,
     totalDocuments: 0,
-    snippets: []
+    snippets: [],
+    warningCount: 0
   };
 
   try {
+    if (String(process.env.ASSISTANT_FORCE_DOCUMENT_ERROR || "").toLowerCase() === "true") {
+      throw new Error("forced_document_error");
+    }
+
     const documentSource = await loadDocumentKnowledge();
     const documents = Array.isArray(documentSource.documents)
       ? documentSource.documents
@@ -43,14 +48,16 @@ export async function buildAssistantKnowledge({
       documents,
       query: message,
       language,
-      pageContext
+      pageContext,
+      pageSlug
     });
 
     documentKnowledge = {
       status: documentSource.status,
       source: documentSource.source,
       totalDocuments: documents.length,
-      snippets
+      snippets,
+      warningCount: Number(documentSource.metadata?.warnings?.length || 0)
     };
   } catch (error) {
     const reason = sanitizeErrorMessage(error);
@@ -60,6 +67,7 @@ export async function buildAssistantKnowledge({
       source: null,
       totalDocuments: 0,
       snippets: [],
+      warningCount: 0,
       error: reason
     };
   }

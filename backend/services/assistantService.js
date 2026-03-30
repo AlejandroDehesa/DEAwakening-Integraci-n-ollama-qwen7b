@@ -266,6 +266,7 @@ export async function generateAssistantChatResponse(input) {
   }
 
   return {
+    contractVersion: "assistant.v2",
     answer: parsedOutput.answer,
     language: input.language,
     pageIntent: parsedOutput.pageIntent,

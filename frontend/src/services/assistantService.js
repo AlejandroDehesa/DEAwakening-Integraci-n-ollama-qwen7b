@@ -21,6 +21,7 @@ export function sendAssistantChat(payload) {
     method: "POST",
     body: JSON.stringify(payload)
   }).then((data) => ({
+    contractVersion: typeof data?.contractVersion === "string" ? data.contractVersion : "",
     answer: typeof data?.answer === "string" ? data.answer : "",
     language: typeof data?.language === "string" ? data.language : "en",
     pageIntent:
@@ -35,7 +36,35 @@ export function sendAssistantChat(payload) {
       ["type", "label", "target"]
     ),
     relatedLinks: normalizeAssistantArray(data?.relatedLinks, ["label", "target"]),
+    knowledgeStatus:
+      data?.knowledgeStatus && typeof data.knowledgeStatus === "object"
+        ? {
+            site:
+              typeof data.knowledgeStatus.site === "string"
+                ? data.knowledgeStatus.site
+                : "ok",
+            documents:
+              typeof data.knowledgeStatus.documents === "string"
+                ? data.knowledgeStatus.documents
+                : "empty"
+          }
+        : { site: "ok", documents: "empty" },
+    interactionId:
+      Number.isInteger(data?.interactionId) && data.interactionId > 0
+        ? data.interactionId
+        : null,
     recommendedEventSlug:
       typeof data?.recommendedEventSlug === "string" ? data.recommendedEventSlug : null
   }));
+}
+
+export async function trackAssistantClick(payload) {
+  try {
+    await apiRequest("/api/assistant/track-click", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  } catch {
+    // Tracking must never break UX.
+  }
 }

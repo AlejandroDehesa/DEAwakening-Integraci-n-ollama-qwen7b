@@ -7,9 +7,9 @@ import AssistantQuickActions from "./assistant/AssistantQuickActions";
 import {
   getAssistantQuickActions,
   getAssistantUiCopy,
-  getPageContextFromPath,
-  normalizeActionTarget
+  getPageContextFromPath
 } from "./assistant/assistantConfig";
+import { useAssistantActionRouter } from "./assistant/useAssistantActionRouter";
 import { useAssistantConversation } from "./assistant/useAssistantConversation";
 
 function AssistantWidget() {
@@ -32,6 +32,15 @@ function AssistantWidget() {
     pageContext: context.pageContext,
     pageSlug: context.pageSlug,
     welcomeMessage: uiCopy.welcome
+  });
+  const actionRouter = useAssistantActionRouter({
+    source: "widget",
+    language: currentLanguage,
+    pageContext: context.pageContext,
+    pageSlug: context.pageSlug,
+    sessionId: conversation.sessionId,
+    navigate,
+    onAfterInternalNavigate: () => setIsOpen(false)
   });
 
   const isAdminArea = location.pathname.startsWith("/admin");
@@ -87,22 +96,8 @@ function AssistantWidget() {
     setIsOpen(false);
   }
 
-  function handleActionClick(action) {
-    const target = normalizeActionTarget(action);
-    if (!target) {
-      return;
-    }
-
-    if (/^https?:\/\//i.test(target)) {
-      window.open(target, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    navigate(target);
-    setIsOpen(false);
-  }
-
   async function handleQuickAction(promptText) {
+    actionRouter.handleQuickActionClick(promptText);
     try {
       await conversation.sendQuickAction(promptText);
     } catch {
@@ -172,7 +167,7 @@ function AssistantWidget() {
             intentLabels={uiCopy.intentLabels}
             recommendationLabel={uiCopy.recommendationLabel}
             openRecommendationLabel={uiCopy.openRecommendation}
-            onActionClick={handleActionClick}
+            onActionClick={actionRouter.handleActionClick}
             emptyState={uiCopy.emptyState}
             feedRef={feedRef}
           />

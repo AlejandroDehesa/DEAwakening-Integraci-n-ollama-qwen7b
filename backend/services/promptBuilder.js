@@ -118,6 +118,7 @@ function compactDocumentKnowledge(documentKnowledge) {
         id: snippet.id,
         title: trimText(snippet.title, 140),
         language: snippet.language,
+        sourcePath: trimText(snippet.sourcePath, 160),
         excerpt: trimText(snippet.excerpt, 520),
         relevance: snippet.relevance
       }))
@@ -127,6 +128,9 @@ function compactDocumentKnowledge(documentKnowledge) {
     status: documentKnowledge?.status || "empty",
     totalDocuments: Number.isInteger(documentKnowledge?.totalDocuments)
       ? documentKnowledge.totalDocuments
+      : 0,
+    warningCount: Number.isInteger(documentKnowledge?.warningCount)
+      ? documentKnowledge.warningCount
       : 0,
     snippets
   };

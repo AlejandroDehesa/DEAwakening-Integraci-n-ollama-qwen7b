@@ -96,7 +96,8 @@ export function useAssistantConversation({
           confidence: null,
           suggestedActions: [],
           relatedLinks: [],
-          recommendedEventSlug: null
+          recommendedEventSlug: null,
+          interactionId: null
         }
       ];
     });
@@ -119,6 +120,10 @@ export function useAssistantConversation({
           recommendedEventSlug:
             typeof assistantData.recommendedEventSlug === "string"
               ? assistantData.recommendedEventSlug
+              : null,
+          interactionId:
+            Number.isInteger(assistantData.interactionId) && assistantData.interactionId > 0
+              ? assistantData.interactionId
               : null
         }
       ]);
@@ -200,6 +205,7 @@ export function useAssistantConversation({
   return {
     messages,
     latestAssistantMessage,
+    sessionId,
     inputValue,
     setInputValue,
     isSending,

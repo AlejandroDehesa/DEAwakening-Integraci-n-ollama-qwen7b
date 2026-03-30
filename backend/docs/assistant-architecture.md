@@ -1,110 +1,98 @@
-# DEAwakening Assistant - Architecture (Phase 3.5 + Phase 4)
+# DEAwakening Assistant - Architecture (Phase 4.5 + Phase 5)
 
 ## Scope
-- Consolidate the current assistant without rewriting the project.
-- Keep current Express + SQLite architecture.
-- Keep AssistantHero and global AssistantWidget behavior.
-- Add a modular document-knowledge layer with clean fallback.
+- Harden retrieval/document layer and contract stability.
+- Keep existing assistant UX (Home hero + global widget).
+- Add practical telemetry with minimal persistence and no heavy analytics stack.
 
-## Final responsibility split
-### Backend (source of assistant intelligence)
-- Validate payload and enforce contract shape.
-- Build site knowledge from current content/events/contact services.
-- Load and retrieve relevant document knowledge.
-- Orchestrate prompt context.
-- Normalize model output into stable assistant actions/links/recommendation.
+## Responsibility split
+### Backend (canonical logic)
+- Input validation.
+- Site knowledge assembly.
+- Document loading + retrieval scoring.
+- Prompt orchestration + output normalization.
+- CTA/action recommendation logic.
+- Interaction and click telemetry persistence.
 
-### Frontend (presentation and UX)
-- Render assistant response clearly.
-- Send language + page context + page slug.
-- Handle loading/error states and minor defensive sanitization.
-- Do not invent fallback business actions.
+### Frontend (UX + lightweight reporting)
+- Render response structure.
+- Defensive sanitization only.
+- Navigation behavior.
+- Non-blocking click reporting.
 
-## Backend flow
-1. `POST /api/assistant/chat` enters through route/controller.
-2. `assistantService` validates body.
-3. `assistantKnowledgeOrchestrator` builds:
+## Chat flow
+1. `POST /api/assistant/chat`
+2. Validate request payload.
+3. Build knowledge:
    - `siteKnowledge` (existing source of truth)
-   - `documentKnowledge` (retrieved snippets from materials folder)
-4. `promptBuilder` composes strict JSON prompt.
-5. OpenAI call is executed with timeout.
-6. `promptBuilder.parseAssistantOutput` normalizes:
-   - `pageIntent`
-   - `suggestedActions`
-   - `relatedLinks`
-   - `recommendedEventSlug`
-   - `confidence`
-7. Controller returns envelope `{ success, data, error }`.
+   - `documentKnowledge` (retrieved snippets)
+4. Build prompt and call provider.
+5. Normalize model output to canonical contract.
+6. Try to persist interaction telemetry.
+7. Return structured envelope.
 
-## Knowledge layers
-### Site knowledge (base, always present if backend is healthy)
-- content sections
-- events (including event-detail context)
-- contact info
-- navigation labels
-- current page context summary
+## Document layer hardening
+- Supported materials: `.md`, `.txt`, `.json`
+- Recursive file scan with fingerprint cache.
+- Metadata normalization:
+  - `id`, `title`, `language`, `tags`, `pageContexts`
+- Duplicate handling by `(language,id)` with deterministic keep rule.
+- Retrieval scoring balances:
+  - term matches in body/title/tags
+  - language priority
+  - pageContext match
+  - pageSlug hints
+  - term coverage
+- Snippet deduplication by semantic key.
 
-### Document knowledge (expanded, optional, fallback-safe)
-- Source folder: `backend/knowledge/documents`
-- Supported formats: `.md`, `.txt`, `.json`
-- Retrieval: lightweight keyword scoring by query + language + page context
-- If retrieval layer fails:
-  - assistant still runs with site knowledge
-  - logs warning
-  - returns `knowledgeStatus.documents = "unavailable"`
+### Fallback behavior
+- If document layer fails, assistant still works using site knowledge.
+- Response includes `knowledgeStatus.documents = "unavailable"`.
+- Warn-level backend log is emitted.
 
-## Contract simplification notes
-- Canonical fields:
-  - `answer`
-  - `language`
-  - `pageIntent`
-  - `confidence`
-  - `suggestedActions`
-  - `relatedLinks`
-  - `recommendedEventSlug`
-- Compatibility:
-  - `intent` remains as deprecated alias of `pageIntent`
-  - `suggestedCtas` removed from backend output to reduce duplication noise
+## Contract
+Canonical:
+- `contractVersion`
+- `answer`
+- `language`
+- `pageIntent`
+- `confidence`
+- `suggestedActions`
+- `relatedLinks`
+- `recommendedEventSlug`
+- `knowledgeStatus`
+- `interactionId`
 
-## Error handling (controlled)
-- Missing `OPENAI_API_KEY`: `503`
-- Missing `OPENAI_MODEL`: `503`
-- Provider timeout: `504`
-- Provider/network error: `502`
-- Malformed provider output: `502`
-- Knowledge build failure: `500`
-- Invalid request body: `400`
+Legacy:
+- `intent` (alias of `pageIntent`)
 
-## Logging
-Controller logs include:
-- language
-- pageContext
-- message length
-- pageIntent
-- document knowledge status
-- duration
+## Telemetry (Phase 5)
+### Stored interaction
+- metadata only (no raw full message)
+- SHA-256 message hash + message length
+- intent/confidence/knowledge status
+- suggested/related action payloads
+- recommendation and response timing
 
-## Environment variables
+### Stored click
+- source (`hero|widget`)
+- click type + target + label
+- language/context/intent metadata
+- optional relation to `interactionId`
+
+### Endpoints
+- `POST /api/assistant/track-click`
+- `GET /api/admin/assistant/insights`
+
+## Runtime flags
 ```env
-PORT=5000
-ADMIN_KEY=...
-OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-4.1-mini
-OPENAI_TIMEOUT_MS=15000
 ASSISTANT_DOCUMENTS_DIR=./knowledge/documents
+ASSISTANT_FORCE_DOCUMENT_ERROR=false
+ASSISTANT_TRACKING_ENABLED=true
+ASSISTANT_FORCE_TRACKING_ERROR=false
 ```
 
-## Material ingestion
-- Add curated materials into `backend/knowledge/documents`.
-- Recommended metadata in markdown front matter:
-  - `id`
-  - `title`
-  - `language` (`en|es|de`)
-  - `tags` (comma-separated)
-  - `pageContexts` (comma-separated)
-
-## Verification commands
-- Assistant smoke:
-  - `npm run assistant:smoke`
-- Document retrieval preview:
-  - `npm run assistant:docs:preview`
+## Verification scripts
+- `npm run assistant:docs:preview`
+- `npm run assistant:materials:validate`
+- `npm run assistant:phase-check`

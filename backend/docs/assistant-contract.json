@@ -1,103 +1,98 @@
 {
-  "endpoint": {
-    "method": "POST",
-    "path": "/api/assistant/chat"
-  },
-  "request": {
-    "message": "string (required, max 4000)",
-    "language": "en|es|de (optional, default en)",
-    "sessionId": "string (optional, max 120)",
-    "pageContext": "home|events|event-detail|about|book|contact|host-event (optional)",
-    "pageSlug": "string (optional, required when pageContext=event-detail, slug format)"
-  },
-  "response": {
-    "success": true,
-    "data": {
-      "answer": "string",
-      "language": "en|es|de",
-      "pageIntent": "general_info|event_discovery|book_interest|contact_interest|about_david|guidance",
-      "confidence": 0.84,
-      "suggestedActions": [
-        {
-          "type": "route|event|contact|book|external",
-          "label": "string",
-          "target": "string"
-        }
-      ],
-      "relatedLinks": [
-        {
-          "label": "string",
-          "target": "string"
-        }
-      ],
-      "recommendedEventSlug": "string|null",
-      "intent": "deprecated alias of pageIntent",
-      "knowledgeStatus": {
-        "site": "ok",
-        "documents": "ok|empty|unavailable"
-      }
+  "assistantChat": {
+    "endpoint": {
+      "method": "POST",
+      "path": "/api/assistant/chat"
     },
-    "error": null
+    "request": {
+      "message": "string (required, max 4000)",
+      "language": "en|es|de (optional, default en)",
+      "sessionId": "string (optional, max 120)",
+      "pageContext": "home|events|event-detail|about|book|contact|host-event (optional)",
+      "pageSlug": "string (optional, required when pageContext=event-detail, slug format)"
+    },
+    "response": {
+      "success": true,
+      "data": {
+        "contractVersion": "assistant.v2",
+        "answer": "string",
+        "language": "en|es|de",
+        "pageIntent": "general_info|event_discovery|book_interest|contact_interest|about_david|guidance",
+        "confidence": 0.84,
+        "suggestedActions": [
+          {
+            "type": "route|event|contact|book|external",
+            "label": "string",
+            "target": "string"
+          }
+        ],
+        "relatedLinks": [
+          {
+            "label": "string",
+            "target": "string"
+          }
+        ],
+        "recommendedEventSlug": "string|null",
+        "knowledgeStatus": {
+          "site": "ok",
+          "documents": "ok|empty|unavailable"
+        },
+        "interactionId": "number|null",
+        "intent": "legacy alias of pageIntent"
+      },
+      "error": null
+    },
+    "errorEnvelope": {
+      "success": false,
+      "data": null,
+      "error": "string"
+    }
   },
-  "errorEnvelope": {
-    "success": false,
-    "data": null,
-    "error": "string"
+  "assistantClickTracking": {
+    "endpoint": {
+      "method": "POST",
+      "path": "/api/assistant/track-click"
+    },
+    "request": {
+      "source": "hero|widget (required)",
+      "clickType": "quick-action|suggested-action|related-link|recommended-event (required)",
+      "label": "string (required)",
+      "target": "string route/url (required)",
+      "actionType": "string (optional)",
+      "interactionId": "number (optional)",
+      "sessionId": "string (optional)",
+      "language": "en|es|de (optional)",
+      "pageContext": "home|events|event-detail|about|book|contact|host-event (optional)",
+      "pageSlug": "string (optional)",
+      "pageIntent": "string (optional)",
+      "recommendedEventSlug": "string (optional)"
+    },
+    "response": {
+      "success": true,
+      "data": {
+        "tracked": "boolean",
+        "clickId": "number|null"
+      },
+      "error": null
+    }
+  },
+  "adminInsights": {
+    "endpoint": {
+      "method": "GET",
+      "path": "/api/admin/assistant/insights?days=30&limit=200",
+      "auth": "x-admin-key header required"
+    }
   },
   "frontendResponsibility": {
     "must": [
       "render answer, intent, confidence, actions, links and recommendation",
+      "send language + pageContext + pageSlug",
       "sanitize malformed arrays defensively",
-      "handle loading and error UX"
+      "report key CTA clicks"
     ],
     "mustNot": [
-      "create business fallbacks for intent/actions/recommendation",
-      "invent CTAs not provided by backend",
-      "duplicate retrieval logic"
+      "invent business fallback actions",
+      "duplicate backend retrieval or recommendation logic"
     ]
-  },
-  "requestExample": {
-    "message": "Quiero saber por donde empezar y si hay un evento recomendado",
-    "language": "es",
-    "sessionId": "session-001",
-    "pageContext": "home"
-  },
-  "responseExample": {
-    "success": true,
-    "data": {
-      "answer": "Si quieres empezar con claridad, te recomiendo revisar los proximos eventos y elegir el formato que mejor encaje contigo.",
-      "language": "es",
-      "pageIntent": "event_discovery",
-      "confidence": 0.87,
-      "suggestedActions": [
-        {
-          "type": "route",
-          "label": "Ver eventos",
-          "target": "/events"
-        },
-        {
-          "type": "contact",
-          "label": "Contactar con David",
-          "target": "/contact"
-        }
-      ],
-      "relatedLinks": [
-        {
-          "label": "Ver eventos",
-          "target": "/events"
-        },
-        {
-          "label": "Contactar con David",
-          "target": "/contact"
-        }
-      ],
-      "recommendedEventSlug": "deawakening-valencia",
-      "intent": "event_discovery",
-      "knowledgeStatus": {
-        "site": "ok",
-        "documents": "ok"
-      }
-    },
-    "error": null
   }
 }

@@ -490,6 +490,7 @@ export async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS assistant_interactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at TEXT NOT NULL,
+      interaction_type TEXT NOT NULL,
       session_id TEXT,
       language TEXT NOT NULL,
       page_context TEXT,
@@ -533,22 +534,18 @@ export async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_assistant_interactions_created_at
     ON assistant_interactions(created_at)
   `);
-
   await run(`
     CREATE INDEX IF NOT EXISTS idx_assistant_interactions_language
     ON assistant_interactions(language)
   `);
-
   await run(`
     CREATE INDEX IF NOT EXISTS idx_assistant_interactions_intent
     ON assistant_interactions(page_intent)
   `);
-
   await run(`
     CREATE INDEX IF NOT EXISTS idx_assistant_clicks_created_at
     ON assistant_clicks(created_at)
   `);
-
   await run(`
     CREATE INDEX IF NOT EXISTS idx_assistant_clicks_target
     ON assistant_clicks(target)

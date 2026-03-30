@@ -7,6 +7,7 @@ import contentRoutes from "./routes/contentRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import adminContentRoutes from "./routes/adminContentRoutes.js";
 import adminEventsRoutes from "./routes/adminEventsRoutes.js";
+import adminAssistantRoutes from "./routes/adminAssistantRoutes.js";
 import assistantRoutes from "./routes/assistantRoutes.js";
 import eventsRoutes from "./routes/eventsRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -39,6 +40,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/admin/events", requireAdminAuth, adminEventsRoutes);
 app.use("/api/admin/content", requireAdminAuth, adminContentRoutes);
+app.use("/api/admin/assistant", requireAdminAuth, adminAssistantRoutes);
 app.use(errorHandler);
 
 await initializeDatabase();

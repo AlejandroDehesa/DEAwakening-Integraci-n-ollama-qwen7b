@@ -3,8 +3,8 @@ import {
   validateAssistantChatPayload
 } from "../services/assistantService.js";
 import {
-  saveAssistantInteraction,
   saveAssistantClick,
+  saveAssistantInteraction,
   validateAssistantClickPayload
 } from "../services/assistantTelemetryService.js";
 import { sendError, sendSuccess } from "../utils/httpResponses.js";
@@ -43,7 +43,7 @@ export async function chatWithAssistant(req, res, next) {
     }
 
     console.log(
-      `[assistant] success language=${language} pageContext=${pageContext || "n/a"} intent=${data.pageIntent} docs=${data.knowledgeStatus?.documents || "n/a"} durationMs=${durationMs}`
+      `[assistant] success language=${language} pageContext=${pageContext || "n/a"} intent=${data.pageIntent} docs=${data.knowledgeStatus?.documents || "n/a"} durationMs=${durationMs} interactionId=${interactionId || "n/a"}`
     );
     return sendSuccess(res, {
       ...data,

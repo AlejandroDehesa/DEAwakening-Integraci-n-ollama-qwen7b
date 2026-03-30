@@ -5,16 +5,19 @@ const PREVIEW_QUERIES = [
   {
     language: "es",
     pageContext: "book",
+    pageSlug: null,
     query: "Quiero saber de que trata el libro de David"
   },
   {
     language: "en",
     pageContext: "events",
+    pageSlug: "deawakening-valencia",
     query: "How does group DEA work and which event should I start with?"
   },
   {
     language: "de",
     pageContext: "home",
+    pageSlug: null,
     query: "Ich mochte den Ansatz von DEAwakening besser verstehen"
   }
 ];
@@ -29,13 +32,15 @@ async function run() {
   console.log(`status: ${loaded.status}`);
   console.log(`source: ${loaded.source}`);
   console.log(`documents: ${loaded.documents.length}`);
+  console.log(`warnings: ${loaded.metadata?.warnings?.length || 0}`);
 
   for (const preview of PREVIEW_QUERIES) {
     const snippets = retrieveDocumentSnippets({
       documents: loaded.documents,
       query: preview.query,
       language: preview.language,
-      pageContext: preview.pageContext
+      pageContext: preview.pageContext,
+      pageSlug: preview.pageSlug
     });
 
     printHeader(`${preview.language.toUpperCase()} / ${preview.pageContext}`);
@@ -47,6 +52,7 @@ async function run() {
 
     for (const snippet of snippets) {
       console.log(`- ${snippet.title} [${snippet.language}] score=${snippet.relevance}`);
+      console.log(`  source: ${snippet.sourcePath}`);
       console.log(`  ${snippet.excerpt.slice(0, 180)}...`);
     }
   }

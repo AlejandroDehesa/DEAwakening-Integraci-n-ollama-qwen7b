@@ -1,73 +1,63 @@
-# Assistant Materials - Practical Guide
-
-## Purpose
-This file explains how to add real project materials to the assistant without introducing heavy infrastructure.
+# Assistant Materials - Operational Guide
 
 ## Folder
-Place materials in:
+Store assistant knowledge files in:
 
 `backend/knowledge/documents`
 
-## Supported formats
+Subfolders are supported.
+
+## Allowed formats
 - `.md`
 - `.txt`
 - `.json`
 
-## Markdown format (recommended)
-Use optional front matter:
-
+## Recommended metadata
+### Markdown front matter
 ```md
 ---
-id: unique-id
-title: Human title
+id: finding-resosense-es
+title: Notas del libro
 language: es
-tags: filosofia, guia, david
-pageContexts: home,about
+tags: libro, resosense, david
+pageContexts: book,home
 ---
-Main content...
+Contenido...
 ```
 
-## JSON format
+### JSON format
 ```json
 {
-  "id": "book-notes-es",
-  "title": "Notas libro",
-  "language": "es",
-  "tags": ["libro", "resosense"],
-  "pageContexts": ["book", "home"],
-  "content": "Texto principal..."
+  "id": "dea-guide-en",
+  "title": "Guide",
+  "language": "en",
+  "tags": ["guide", "events"],
+  "pageContexts": ["home", "events"],
+  "content": "Main text..."
 }
 ```
 
-## Quality rules for materials
-- Keep each document focused on one topic.
-- Prefer clear facts over marketing noise.
-- Keep language-specific versions when possible.
-- Avoid duplicate copies of the same text.
+## Quality rules
+- Keep one topic per document.
+- Write factual, practical, non-redundant text.
+- Add language-specific versions when possible (`en`, `es`, `de`).
+- Prefer explicit `tags` and `pageContexts`.
+- Avoid repeating the same material with different filenames.
 
-## How retrieval works
-- The system scores documents by:
-  - user query terms
-  - language match
-  - pageContext match
-  - title/tags relevance
-- Top snippets are sent to the prompt.
+## Common mistakes to avoid
+- Missing `id` or duplicated `id` in same language.
+- Very short content (weak retrieval quality).
+- No `tags` and no `pageContexts`.
+- Mixing unrelated topics in one file.
+
+## Validation and checks
+- Preview retrieval quality:
+  - `npm run assistant:docs:preview`
+- Validate materials consistency:
+  - `npm run assistant:materials:validate`
 
 ## Fallback behavior
-If material loading or retrieval fails:
-- assistant still answers using site knowledge
-- backend logs the issue
-- response includes `knowledgeStatus.documents = "unavailable"`
-
-## Quick checks
-Run:
-
-```bash
-npm run assistant:docs:preview
-```
-
-Then test assistant endpoint normally:
-
-```bash
-npm run assistant:smoke
-```
+If documents fail to load or parse:
+- assistant continues with site knowledge
+- backend logs warning
+- `knowledgeStatus.documents` becomes `unavailable`

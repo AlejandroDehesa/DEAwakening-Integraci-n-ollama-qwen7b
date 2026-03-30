@@ -22,6 +22,15 @@ function AssistantMessageList({
   className = "",
   feedRef
 }) {
+  function buildMeta(message, clickType) {
+    return {
+      interactionId: message.interactionId || null,
+      pageIntent: message.pageIntent || null,
+      recommendedEventSlug: message.recommendedEventSlug || null,
+      clickType
+    };
+  }
+
   return (
     <div className={`assistant-feed ${className}`.trim()} ref={feedRef} aria-live="polite">
       {Array.isArray(messages) && messages.length > 0 ? (
@@ -61,7 +70,7 @@ function AssistantMessageList({
                       type: "event",
                       label: openRecommendationLabel,
                       target: `/events/${message.recommendedEventSlug}`
-                    })
+                    }, buildMeta(message, "recommended-event"))
                   }
                 >
                   {openRecommendationLabel}
@@ -77,7 +86,7 @@ function AssistantMessageList({
                     key={`${action.type}-${action.target}-${action.label}`}
                     type="button"
                     className="assistant-action"
-                    onClick={() => onActionClick(action)}
+                    onClick={() => onActionClick(action, buildMeta(message, "suggested-action"))}
                   >
                     {action.label}
                   </button>
@@ -100,7 +109,7 @@ function AssistantMessageList({
                             type: "route",
                             label: link.label,
                             target: link.target
-                          })
+                          }, buildMeta(message, "related-link"))
                         }
                       >
                         {link.label}
@@ -109,14 +118,23 @@ function AssistantMessageList({
                   }
 
                   return (
-                    <a
+                    <button
                       key={`${link.label}-${link.target}`}
-                      href={link.target}
-                      target="_blank"
-                      rel="noreferrer"
+                      type="button"
+                      className="assistant-link-button"
+                      onClick={() =>
+                        onActionClick(
+                          {
+                            type: "external",
+                            label: link.label,
+                            target: link.target
+                          },
+                          buildMeta(message, "related-link")
+                        )
+                      }
                     >
                       {link.label}
-                    </a>
+                    </button>
                   );
                 })}
               </div>

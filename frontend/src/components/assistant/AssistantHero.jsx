@@ -7,9 +7,9 @@ import AssistantQuickActions from "./AssistantQuickActions";
 import {
   getAssistantQuickActions,
   getAssistantUiCopy,
-  getPageContextFromPath,
-  normalizeActionTarget
+  getPageContextFromPath
 } from "./assistantConfig";
+import { useAssistantActionRouter } from "./useAssistantActionRouter";
 import { useAssistantConversation } from "./useAssistantConversation";
 
 function AssistantHero() {
@@ -32,6 +32,14 @@ function AssistantHero() {
     pageSlug: context.pageSlug,
     welcomeMessage: uiCopy.welcome
   });
+  const actionRouter = useAssistantActionRouter({
+    source: "hero",
+    language: currentLanguage,
+    pageContext: context.pageContext,
+    pageSlug: context.pageSlug,
+    sessionId: conversation.sessionId,
+    navigate
+  });
 
   useEffect(() => {
     conversation.ensureWelcomeMessage();
@@ -45,21 +53,8 @@ function AssistantHero() {
     feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [conversation.messages, conversation.isSending]);
 
-  function handleActionClick(action) {
-    const target = normalizeActionTarget(action);
-    if (!target) {
-      return;
-    }
-
-    if (/^https?:\/\//i.test(target)) {
-      window.open(target, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    navigate(target);
-  }
-
   async function handleQuickAction(promptText) {
+    actionRouter.handleQuickActionClick(promptText);
     try {
       await conversation.sendQuickAction(promptText);
     } catch {
@@ -98,7 +93,7 @@ function AssistantHero() {
         intentLabels={uiCopy.intentLabels}
         recommendationLabel={uiCopy.recommendationLabel}
         openRecommendationLabel={uiCopy.openRecommendation}
-        onActionClick={handleActionClick}
+        onActionClick={actionRouter.handleActionClick}
         emptyState={uiCopy.emptyState}
         className="assistant-feed-hero"
         feedRef={feedRef}

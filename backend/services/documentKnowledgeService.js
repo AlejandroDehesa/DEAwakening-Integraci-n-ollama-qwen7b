@@ -7,8 +7,19 @@ const __dirname = path.dirname(__filename);
 
 const DEFAULT_DOCUMENTS_DIR = path.join(__dirname, "..", "knowledge", "documents");
 const SUPPORTED_EXTENSIONS = new Set([".md", ".txt", ".json"]);
+const VALID_LANGUAGES = new Set(["en", "es", "de"]);
+const VALID_PAGE_CONTEXTS = new Set([
+  "home",
+  "events",
+  "event-detail",
+  "about",
+  "book",
+  "contact",
+  "host-event"
+]);
 
 let cachedDocuments = null;
+let cachedMetadata = null;
 let cachedFingerprint = null;
 
 function normalizeLanguage(value) {
@@ -17,14 +28,10 @@ function normalizeLanguage(value) {
   }
 
   const normalized = value.trim().toLowerCase();
-  if (normalized === "es" || normalized === "de" || normalized === "en") {
-    return normalized;
-  }
-
-  return "en";
+  return VALID_LANGUAGES.has(normalized) ? normalized : "en";
 }
 
-function toArray(value) {
+function splitToArray(value) {
   if (!value) {
     return [];
   }
@@ -35,12 +42,27 @@ function toArray(value) {
 
   if (typeof value === "string") {
     return value
-      .split(",")
+      .split(/[,;|]/)
       .map((item) => item.trim())
       .filter(Boolean);
   }
 
   return [];
+}
+
+function normalizeTags(value) {
+  return Array.from(
+    new Set(
+      splitToArray(value)
+        .map((item) => item.toLowerCase())
+        .filter(Boolean)
+    )
+  );
+}
+
+function normalizePageContexts(value) {
+  const items = splitToArray(value).map((item) => item.toLowerCase());
+  return Array.from(new Set(items.filter((item) => VALID_PAGE_CONTEXTS.has(item))));
 }
 
 function parseFrontMatter(rawContent) {
@@ -84,48 +106,128 @@ function parseFrontMatter(rawContent) {
   };
 }
 
-function parseDocumentFromJson(fileName, rawContent) {
+function normalizeContent(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function createDocumentRecord({
+  fileName,
+  sourcePath,
+  id,
+  title,
+  language,
+  tags,
+  pageContexts,
+  content
+}) {
+  const normalizedContent = normalizeContent(content);
+  if (normalizedContent.length < 40) {
+    return null;
+  }
+
+  const normalizedId = String(id || fileName.replace(/\.[^.]+$/, ""))
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, "-")
+    .replace(/-+/g, "-");
+
+  const normalizedTitle = String(title || fileName).trim();
+
+  return {
+    id: normalizedId || fileName.replace(/\.[^.]+$/, ""),
+    title: normalizedTitle || fileName,
+    language: normalizeLanguage(language),
+    tags: normalizeTags(tags),
+    pageContexts: normalizePageContexts(pageContexts),
+    content: normalizedContent,
+    contentLength: normalizedContent.length,
+    sourcePath
+  };
+}
+
+function parseDocumentFromJson(file, rawContent) {
   const parsed = JSON.parse(rawContent);
   if (!parsed || typeof parsed !== "object") {
     return null;
   }
 
-  const content = typeof parsed.content === "string" ? parsed.content.trim() : "";
-  if (!content) {
-    return null;
-  }
-
-  return {
-    id: parsed.id || fileName.replace(/\.[^.]+$/, ""),
-    title: parsed.title || fileName,
-    language: normalizeLanguage(parsed.language),
-    tags: toArray(parsed.tags),
-    pageContexts: toArray(parsed.pageContexts),
-    content
-  };
+  return createDocumentRecord({
+    fileName: file.name,
+    sourcePath: file.relativePath,
+    id: parsed.id,
+    title: parsed.title,
+    language: parsed.language,
+    tags: parsed.tags,
+    pageContexts: parsed.pageContexts,
+    content: parsed.content
+  });
 }
 
-function parseDocumentFromText(fileName, rawContent) {
+function parseDocumentFromText(file, rawContent) {
   const parsed = parseFrontMatter(rawContent);
-  const content = parsed.body.trim();
-  if (!content) {
-    return null;
+
+  return createDocumentRecord({
+    fileName: file.name,
+    sourcePath: file.relativePath,
+    id: parsed.meta.id,
+    title: parsed.meta.title,
+    language: parsed.meta.language,
+    tags: parsed.meta.tags,
+    pageContexts: parsed.meta.pageContexts,
+    content: parsed.body
+  });
+}
+
+async function listFilesRecursive(baseDir, currentDir = baseDir) {
+  const entries = await fs.readdir(currentDir, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const absolutePath = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      const nested = await listFilesRecursive(baseDir, absolutePath);
+      files.push(...nested);
+      continue;
+    }
+
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    const ext = path.extname(entry.name).toLowerCase();
+    if (!SUPPORTED_EXTENSIONS.has(ext)) {
+      continue;
+    }
+
+    files.push({
+      name: entry.name,
+      ext,
+      fullPath: absolutePath,
+      relativePath: path.relative(baseDir, absolutePath).replace(/\\/g, "/")
+    });
   }
 
-  return {
-    id: parsed.meta.id || fileName.replace(/\.[^.]+$/, ""),
-    title: parsed.meta.title || fileName,
-    language: normalizeLanguage(parsed.meta.language),
-    tags: toArray(parsed.meta.tags),
-    pageContexts: toArray(parsed.meta.pageContexts),
-    content
-  };
+  return files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
 }
 
 async function scanDocumentsFolder(documentsDir) {
-  let entries;
   try {
-    entries = await fs.readdir(documentsDir, { withFileTypes: true });
+    const files = await listFilesRecursive(documentsDir);
+    const statParts = [];
+
+    for (const file of files) {
+      const stat = await fs.stat(file.fullPath);
+      statParts.push(`${file.relativePath}:${stat.mtimeMs}:${stat.size}`);
+    }
+
+    return {
+      files,
+      fingerprint: statParts.join("|")
+    };
   } catch (error) {
     if (error?.code === "ENOENT") {
       return {
@@ -136,65 +238,92 @@ async function scanDocumentsFolder(documentsDir) {
 
     throw error;
   }
-
-  const files = entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => ({
-      name: entry.name,
-      fullPath: path.join(documentsDir, entry.name),
-      ext: path.extname(entry.name).toLowerCase()
-    }))
-    .filter((file) => SUPPORTED_EXTENSIONS.has(file.ext))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  const statParts = [];
-  for (const file of files) {
-    const stat = await fs.stat(file.fullPath);
-    statParts.push(`${file.name}:${stat.mtimeMs}:${stat.size}`);
-  }
-
-  return {
-    files,
-    fingerprint: statParts.join("|")
-  };
 }
 
 async function parseDocumentFile(file) {
   const rawContent = await fs.readFile(file.fullPath, "utf8");
-
   if (file.ext === ".json") {
-    return parseDocumentFromJson(file.name, rawContent);
+    return parseDocumentFromJson(file, rawContent);
   }
 
-  return parseDocumentFromText(file.name, rawContent);
+  return parseDocumentFromText(file, rawContent);
+}
+
+function dedupeDocuments(documents, warnings) {
+  const map = new Map();
+
+  for (const doc of documents) {
+    const key = `${doc.language}:${doc.id}`;
+    const existing = map.get(key);
+
+    if (!existing) {
+      map.set(key, doc);
+      continue;
+    }
+
+    const keepCurrent = doc.contentLength > existing.contentLength;
+    map.set(key, keepCurrent ? doc : existing);
+    warnings.push(
+      `Duplicate id "${doc.id}" for language "${doc.language}". Kept ${keepCurrent ? doc.sourcePath : existing.sourcePath}.`
+    );
+  }
+
+  return Array.from(map.values());
+}
+
+function buildMetadata(documents, warnings) {
+  const byLanguage = documents.reduce((accumulator, doc) => {
+    accumulator[doc.language] = (accumulator[doc.language] || 0) + 1;
+    return accumulator;
+  }, {});
+
+  return {
+    warnings,
+    totalDocuments: documents.length,
+    byLanguage
+  };
 }
 
 export async function loadDocumentKnowledge() {
   const documentsDir = process.env.ASSISTANT_DOCUMENTS_DIR || DEFAULT_DOCUMENTS_DIR;
   const scanned = await scanDocumentsFolder(documentsDir);
 
-  if (cachedDocuments && cachedFingerprint === scanned.fingerprint) {
+  if (cachedDocuments && cachedMetadata && cachedFingerprint === scanned.fingerprint) {
     return {
-      status: "ok",
+      status: cachedDocuments.length > 0 ? "ok" : "empty",
       source: documentsDir,
-      documents: cachedDocuments
+      documents: cachedDocuments,
+      metadata: cachedMetadata
     };
   }
 
-  const documents = [];
+  const warnings = [];
+  const parsedDocuments = [];
+
   for (const file of scanned.files) {
-    const parsed = await parseDocumentFile(file);
-    if (parsed) {
-      documents.push(parsed);
+    try {
+      const parsed = await parseDocumentFile(file);
+      if (parsed) {
+        parsedDocuments.push(parsed);
+      } else {
+        warnings.push(`Skipped "${file.relativePath}" because content is too short.`);
+      }
+    } catch (error) {
+      warnings.push(`Skipped "${file.relativePath}" due to parse error: ${error.message}`);
     }
   }
 
-  cachedDocuments = documents;
+  const deduped = dedupeDocuments(parsedDocuments, warnings);
+  const metadata = buildMetadata(deduped, warnings);
+
+  cachedDocuments = deduped;
+  cachedMetadata = metadata;
   cachedFingerprint = scanned.fingerprint;
 
   return {
-    status: scanned.files.length > 0 ? "ok" : "empty",
+    status: deduped.length > 0 ? "ok" : "empty",
     source: documentsDir,
-    documents
+    documents: deduped,
+    metadata
   };
 }
