@@ -2418,7 +2418,7 @@ li {
   width: min(400px, calc(100vw - 2.3rem));
   max-height: min(72vh, 640px);
   display: grid;
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-rows: auto auto 1fr auto auto;
   overflow: hidden;
   border-radius: 20px;
   border: 1px solid rgba(41, 54, 68, 0.2);
@@ -2437,6 +2437,103 @@ li {
   gap: 1rem;
   padding: 1rem 1rem 0.8rem;
   border-bottom: 1px solid rgba(41, 54, 68, 0.14);
+}
+
+.assistant-hero-card {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: clamp(1.2rem, 2.2vw, 1.9rem);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(242, 236, 225, 0.9) 100%
+  );
+  border: 1px solid rgba(42, 111, 120, 0.22);
+  box-shadow: 0 20px 42px rgba(24, 36, 49, 0.11);
+  display: grid;
+  gap: 0.95rem;
+}
+
+.assistant-hero-header {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.assistant-hero-title {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1.14;
+}
+
+.assistant-hero-subtitle {
+  margin: 0;
+  max-width: 78ch;
+  font-size: clamp(0.96rem, 1.02vw, 1.05rem);
+  line-height: 1.65;
+  color: #425060;
+}
+
+.assistant-quick-actions {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.assistant-quick-actions-widget {
+  padding: 0.82rem 1rem 0.72rem;
+  border-bottom: 1px solid rgba(41, 54, 68, 0.12);
+  background: rgba(247, 242, 232, 0.44);
+}
+
+.assistant-quick-actions-title {
+  margin: 0;
+  color: #2d3f4d;
+  font-size: 0.79rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.assistant-quick-actions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.assistant-quick-action-button {
+  min-height: 35px;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid rgba(41, 54, 68, 0.18);
+  background: rgba(255, 255, 255, 0.84);
+  color: #244f56;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.assistant-quick-action-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(35, 90, 97, 0.38);
+  background: rgba(233, 242, 244, 0.94);
+  color: #193d44;
+}
+
+.assistant-empty-state {
+  padding: 0.82rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(41, 54, 68, 0.22);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.assistant-empty-state p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #596776;
 }
 
 .assistant-panel-title {
@@ -2513,6 +2610,54 @@ li {
   gap: 0.45rem;
 }
 
+.assistant-recommendation-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.62rem 0.66rem;
+  border-radius: 12px;
+  border: 1px solid rgba(35, 90, 97, 0.24);
+  background: linear-gradient(
+    145deg,
+    rgba(235, 244, 245, 0.84) 0%,
+    rgba(255, 255, 255, 0.82) 100%
+  );
+}
+
+.assistant-recommendation-label {
+  margin: 0;
+  color: #2b5a62;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.assistant-recommendation-title {
+  margin: 0;
+  color: #1f3342;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.38;
+}
+
+.assistant-recommendation-button {
+  width: fit-content;
+  min-height: 33px;
+  padding: 0.34rem 0.66rem;
+  border-radius: 999px;
+  border: 1px solid rgba(35, 90, 97, 0.26);
+  background: rgba(255, 255, 255, 0.9);
+  color: #214850;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.assistant-recommendation-button:hover {
+  border-color: rgba(35, 90, 97, 0.38);
+  background: rgba(233, 242, 244, 0.94);
+}
+
 .assistant-action,
 .assistant-link-button {
   padding: 0.45rem 0.7rem;
@@ -2582,6 +2727,17 @@ li {
   padding: 0.65rem 1rem;
 }
 
+.assistant-feed-hero {
+  min-height: 220px;
+  max-height: min(46vh, 360px);
+  padding: 0.2rem 0.05rem;
+}
+
+.assistant-form-hero {
+  padding: 0.75rem 0 0;
+  border-top: 1px solid rgba(41, 54, 68, 0.14);
+}
+
 @media (max-width: 768px) {
   .assistant-widget-shell {
     right: 0.8rem;
@@ -2595,5 +2751,17 @@ li {
 
   .assistant-feed {
     max-height: min(46vh, 360px);
+  }
+
+  .assistant-hero-card {
+    padding: 1.15rem 1rem;
+  }
+
+  .assistant-hero-subtitle {
+    max-width: none;
+  }
+
+  .assistant-feed-hero {
+    max-height: min(42vh, 320px);
   }
 }

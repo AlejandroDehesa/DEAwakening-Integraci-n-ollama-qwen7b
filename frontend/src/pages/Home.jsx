@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AssistantHero from "../components/assistant/AssistantHero";
 import { useLanguage } from "../context/LanguageContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 import {
@@ -114,6 +115,8 @@ function Home() {
     <>
       <section className="section hero-section">
         <div className="container hero-stack">
+          <AssistantHero />
+
           <div className="hero-top-row">
             <div className="hero-panel">
               <div className="hero-portrait-wrap">
