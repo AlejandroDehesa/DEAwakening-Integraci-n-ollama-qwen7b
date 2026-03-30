@@ -30,8 +30,7 @@ function AssistantHero() {
     language: currentLanguage,
     pageContext: context.pageContext,
     pageSlug: context.pageSlug,
-    welcomeMessage: uiCopy.welcome,
-    recommendationLabel: uiCopy.recommendationLabel
+    welcomeMessage: uiCopy.welcome
   });
 
   useEffect(() => {

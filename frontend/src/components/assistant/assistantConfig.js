@@ -5,170 +5,116 @@ export const assistantUiCopy = {
     launcher: "Guide",
     heroEyebrow: "AI Guide",
     widgetTitle: "DEAwakening Guide",
-    widgetSubtitle: "Ask anything about events, David, or the work.",
+    widgetSubtitle: "Ask about events, David's work, or the right next step for you.",
     heroTitle: "Start with your personal guide",
     heroSubtitle:
-      "Tell us what you need and get a clear next step: events, book, about David, or contact.",
+      "Share what you need and get a clear next step: event, book, deeper context, or contact.",
     welcome:
-      "Hi, I am your DEAwakening guide. I can help you find events, understand the approach, or navigate the site.",
+      "Welcome. I am your DEAwakening guide. I can help you understand the work, discover events, and choose your next step.",
     inputLabel: "Assistant message",
-    placeholder: "Ask your question...",
+    placeholder: "Write your question...",
     send: "Send",
     thinking: "Thinking...",
     close: "Close assistant",
-    error: "I could not answer right now. Please try again in a moment.",
-    emptyState: "Start with a quick action or type your question.",
-    quickActionsTitle: "Start quickly",
+    error:
+      "I could not complete that right now. Please try again in a moment.",
+    emptyState: "Choose a quick action or ask your question.",
+    quickActionsTitle: "Quick start",
     recommendationLabel: "Recommended event",
-    openRecommendation: "Open recommended event",
+    openRecommendation: "View recommended event",
     intentLabels: {
-      general_info: "General info",
-      event_discovery: "Event discovery",
-      book_interest: "Book interest",
-      contact_interest: "Contact intent",
+      general_info: "General guidance",
+      event_discovery: "Event guidance",
+      book_interest: "Book guidance",
+      contact_interest: "Contact guidance",
       about_david: "About David",
-      guidance: "Guidance"
+      guidance: "Next step"
     }
   },
   es: {
-    launcher: "Guia",
-    heroEyebrow: "Guia IA",
-    widgetTitle: "Guia DEAwakening",
-    widgetSubtitle: "Pregunta sobre eventos, David o el enfoque.",
-    heroTitle: "Empieza con tu guia personal",
+    launcher: "Guía",
+    heroEyebrow: "Guía IA",
+    widgetTitle: "Guía DEAwakening",
+    widgetSubtitle: "Pregunta sobre eventos, el enfoque de David o tu mejor siguiente paso.",
+    heroTitle: "Empieza con tu guía personal",
     heroSubtitle:
-      "Cuentame que necesitas y te doy el siguiente paso claro: eventos, libro, sobre David o contacto.",
+      "Cuéntame qué necesitas y te doy un siguiente paso claro: evento, libro, contexto o contacto.",
     welcome:
-      "Hola, soy tu guia de DEAwakening. Puedo ayudarte a encontrar eventos, entender el enfoque o navegar la web.",
+      "Bienvenido. Soy tu guía de DEAwakening. Puedo ayudarte a entender el enfoque, descubrir eventos y elegir tu siguiente paso.",
     inputLabel: "Mensaje al asistente",
     placeholder: "Escribe tu pregunta...",
     send: "Enviar",
     thinking: "Pensando...",
     close: "Cerrar asistente",
-    error: "Ahora mismo no he podido responder. Intentalo de nuevo en unos segundos.",
-    emptyState: "Empieza con una accion rapida o escribe tu pregunta.",
-    quickActionsTitle: "Empieza rapido",
+    error:
+      "Ahora mismo no he podido completarlo. Inténtalo de nuevo en unos segundos.",
+    emptyState: "Elige una acción rápida o escribe tu pregunta.",
+    quickActionsTitle: "Inicio rápido",
     recommendationLabel: "Evento recomendado",
-    openRecommendation: "Abrir evento recomendado",
+    openRecommendation: "Ver evento recomendado",
     intentLabels: {
-      general_info: "Info general",
-      event_discovery: "Busqueda de eventos",
-      book_interest: "Interes por el libro",
-      contact_interest: "Interes en contacto",
+      general_info: "Orientación general",
+      event_discovery: "Orientación de eventos",
+      book_interest: "Orientación del libro",
+      contact_interest: "Orientación de contacto",
       about_david: "Sobre David",
-      guidance: "Orientacion"
+      guidance: "Siguiente paso"
     }
   },
   de: {
     launcher: "Guide",
     heroEyebrow: "KI Guide",
     widgetTitle: "DEAwakening Guide",
-    widgetSubtitle: "Frage nach Events, David oder dem Ansatz.",
-    heroTitle: "Starte mit deinem persoenlichen Guide",
+    widgetSubtitle: "Frage nach Events, Davids Ansatz oder deinem nächsten klaren Schritt.",
+    heroTitle: "Starte mit deinem persönlichen Guide",
     heroSubtitle:
-      "Sag mir, was du brauchst, und du bekommst den klaren naechsten Schritt.",
+      "Sag mir, was du brauchst, und ich zeige dir den klaren nächsten Schritt.",
     welcome:
-      "Hallo, ich bin dein DEAwakening Guide. Ich helfe dir bei Events, dem Ansatz und der Navigation auf der Seite.",
+      "Willkommen. Ich bin dein DEAwakening Guide. Ich helfe dir, den Ansatz zu verstehen, passende Events zu finden und den nächsten Schritt zu wählen.",
     inputLabel: "Nachricht an den Assistenten",
     placeholder: "Stelle deine Frage...",
     send: "Senden",
     thinking: "Wird vorbereitet...",
-    close: "Assistent schliessen",
-    error: "Ich konnte gerade nicht antworten. Bitte versuche es gleich erneut.",
-    emptyState: "Starte mit einer Schnellaktion oder schreibe deine Frage.",
-    quickActionsTitle: "Schnell starten",
+    close: "Assistent schließen",
+    error:
+      "Ich konnte das gerade nicht abschließen. Bitte versuche es gleich erneut.",
+    emptyState: "Wähle eine Schnellaktion oder stelle deine Frage.",
+    quickActionsTitle: "Schnellstart",
     recommendationLabel: "Empfohlenes Event",
-    openRecommendation: "Empfohlenes Event oeffnen",
+    openRecommendation: "Empfohlenes Event ansehen",
     intentLabels: {
-      general_info: "Allgemeine Info",
-      event_discovery: "Event Suche",
-      book_interest: "Buch Interesse",
-      contact_interest: "Kontakt Interesse",
-      about_david: "Ueber David",
-      guidance: "Orientierung"
+      general_info: "Allgemeine Orientierung",
+      event_discovery: "Event Orientierung",
+      book_interest: "Buch Orientierung",
+      contact_interest: "Kontakt Orientierung",
+      about_david: "Über David",
+      guidance: "Nächster Schritt"
     }
   }
 };
 
 export const assistantQuickActionsByLanguage = {
   en: [
-    "I want to understand David's work",
-    "Help me find the right event",
-    "Where should I start?",
+    "I want to understand David's approach",
+    "Help me choose the right event",
+    "Where should I start today?",
     "Tell me about the book",
     "I want to contact David"
   ],
   es: [
-    "Quiero entender el trabajo de David",
-    "Ayudame a encontrar el evento adecuado",
-    "Por donde deberia empezar?",
-    "Cuentame sobre el libro",
+    "Quiero entender el enfoque de David",
+    "Ayúdame a elegir el evento adecuado",
+    "¿Por dónde debería empezar hoy?",
+    "Cuéntame sobre el libro",
     "Quiero contactar con David"
   ],
   de: [
-    "Ich moechte Davids Arbeit verstehen",
-    "Hilf mir, das richtige Event zu finden",
-    "Wo sollte ich anfangen?",
-    "Erzaehl mir vom Buch",
-    "Ich moechte David kontaktieren"
+    "Ich möchte Davids Ansatz verstehen",
+    "Hilf mir, das passende Event zu wählen",
+    "Wo sollte ich heute anfangen?",
+    "Erzähl mir vom Buch",
+    "Ich möchte David kontaktieren"
   ]
-};
-
-const fallbackActionsByIntent = {
-  general_info: {
-    type: "route",
-    target: "/about",
-    labels: {
-      en: "About David",
-      es: "Sobre David",
-      de: "Ueber David"
-    }
-  },
-  event_discovery: {
-    type: "route",
-    target: "/events",
-    labels: {
-      en: "View events",
-      es: "Ver eventos",
-      de: "Events ansehen"
-    }
-  },
-  book_interest: {
-    type: "book",
-    target: "/mi-libro",
-    labels: {
-      en: "Open my book",
-      es: "Ver mi libro",
-      de: "Mein Buch oeffnen"
-    }
-  },
-  contact_interest: {
-    type: "contact",
-    target: "/contact",
-    labels: {
-      en: "Go to contact",
-      es: "Ir a contacto",
-      de: "Zu Kontakt"
-    }
-  },
-  about_david: {
-    type: "route",
-    target: "/about",
-    labels: {
-      en: "Learn about David",
-      es: "Conocer a David",
-      de: "Mehr ueber David"
-    }
-  },
-  guidance: {
-    type: "route",
-    target: "/events",
-    labels: {
-      en: "See where to start",
-      es: "Ver por donde empezar",
-      de: "Wo anfangen?"
-    }
-  }
 };
 
 export function getAssistantUiCopy(language) {
@@ -177,19 +123,6 @@ export function getAssistantUiCopy(language) {
 
 export function getAssistantQuickActions(language) {
   return assistantQuickActionsByLanguage[language] || assistantQuickActionsByLanguage.en;
-}
-
-export function getFallbackActionByIntent(intent, language) {
-  const selected = fallbackActionsByIntent[intent];
-  if (!selected) {
-    return null;
-  }
-
-  return {
-    type: selected.type,
-    target: selected.target,
-    label: selected.labels[language] || selected.labels.en
-  };
 }
 
 export function getPageContextFromPath(pathname) {

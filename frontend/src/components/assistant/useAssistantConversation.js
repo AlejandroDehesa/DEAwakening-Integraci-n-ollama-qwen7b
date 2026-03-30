@@ -1,9 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { sendAssistantChat } from "../../services/assistantService";
-import {
-  SESSION_STORAGE_KEY,
-  getFallbackActionByIntent
-} from "./assistantConfig";
+import { SESSION_STORAGE_KEY } from "./assistantConfig";
 
 const MAX_HISTORY = 16;
 
@@ -38,98 +35,40 @@ function messageId() {
   return `msg-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 }
 
-function normalizeActions(rawActions) {
-  if (!Array.isArray(rawActions)) {
+function sanitizeActions(items) {
+  if (!Array.isArray(items)) {
     return [];
   }
 
-  return rawActions
-    .filter((action) => action && typeof action === "object")
-    .map((action) => ({
-      type: typeof action.type === "string" ? action.type : "route",
-      label: typeof action.label === "string" ? action.label : "",
-      target: typeof action.target === "string" ? action.target : ""
+  return items
+    .filter((item) => item && typeof item === "object")
+    .map((item) => ({
+      type: typeof item.type === "string" ? item.type : "route",
+      label: typeof item.label === "string" ? item.label : "",
+      target: typeof item.target === "string" ? item.target : ""
     }))
-    .filter((action) => action.label && action.target);
+    .filter((item) => item.label && item.target);
 }
 
-function normalizeRelatedLinks(rawLinks) {
-  if (!Array.isArray(rawLinks)) {
+function sanitizeLinks(items) {
+  if (!Array.isArray(items)) {
     return [];
   }
 
-  return rawLinks
-    .filter((link) => link && typeof link === "object")
-    .map((link) => ({
-      label: typeof link.label === "string" ? link.label : "",
-      target: typeof link.target === "string" ? link.target : ""
+  return items
+    .filter((item) => item && typeof item === "object")
+    .map((item) => ({
+      label: typeof item.label === "string" ? item.label : "",
+      target: typeof item.target === "string" ? item.target : ""
     }))
-    .filter((link) => link.label && link.target);
-}
-
-function mergeLinksFromActions(links, actions) {
-  const items = [
-    ...links,
-    ...actions.map((action) => ({
-      label: action.label,
-      target: action.target
-    }))
-  ];
-
-  const seen = new Set();
-  return items.filter((item) => {
-    if (seen.has(item.target)) {
-      return false;
-    }
-
-    seen.add(item.target);
-    return true;
-  });
-}
-
-function addRecommendedEventIfNeeded(
-  actions,
-  relatedLinks,
-  recommendedEventSlug,
-  recommendationLabel
-) {
-  if (!recommendedEventSlug) {
-    return { actions, relatedLinks };
-  }
-
-  const target = `/events/${recommendedEventSlug}`;
-  const nextActions = [...actions];
-  const nextLinks = [...relatedLinks];
-
-  const hasAction = nextActions.some((action) => action.target === target);
-  if (!hasAction) {
-    nextActions.unshift({
-      type: "event",
-      label: recommendationLabel,
-      target
-    });
-  }
-
-  const hasLink = nextLinks.some((link) => link.target === target);
-  if (!hasLink) {
-    nextLinks.unshift({
-      label: recommendationLabel,
-      target
-    });
-  }
-
-  return {
-    actions: nextActions,
-    relatedLinks: nextLinks
-  };
+    .filter((item) => item.label && item.target);
 }
 
 export function useAssistantConversation({
   language,
   pageContext,
   pageSlug,
-  welcomeMessage,
-  recommendationLabel
+  welcomeMessage
 }) {
   const [sessionId] = useState(getOrCreateSessionId);
   const [messages, setMessages] = useState([]);
@@ -165,47 +104,26 @@ export function useAssistantConversation({
 
   const addAssistantMessage = useCallback(
     (assistantData) => {
-      const pageIntent = assistantData.pageIntent || assistantData.intent || "guidance";
-      const fallbackAction = getFallbackActionByIntent(pageIntent, language);
-      const recommendedEventSlug =
-        typeof assistantData.recommendedEventSlug === "string"
-          ? assistantData.recommendedEventSlug
-          : null;
-
-      let actions = normalizeActions(
-        assistantData.suggestedActions || assistantData.suggestedCtas || []
-      );
-      if (actions.length === 0 && fallbackAction) {
-        actions = [fallbackAction];
-      }
-
-      let relatedLinks = normalizeRelatedLinks(assistantData.relatedLinks || []);
-      relatedLinks = mergeLinksFromActions(relatedLinks, actions);
-
-      const recommendation = addRecommendedEventIfNeeded(
-        actions,
-        relatedLinks,
-        recommendedEventSlug,
-        recommendationLabel
-      );
-
       appendMessages([
         {
           id: messageId(),
           role: "assistant",
           text: assistantData.answer,
-          pageIntent,
+          pageIntent: assistantData.pageIntent || assistantData.intent || "guidance",
           confidence:
             typeof assistantData.confidence === "number"
               ? assistantData.confidence
               : null,
-          suggestedActions: recommendation.actions,
-          relatedLinks: recommendation.relatedLinks,
-          recommendedEventSlug
+          suggestedActions: sanitizeActions(assistantData.suggestedActions),
+          relatedLinks: sanitizeLinks(assistantData.relatedLinks),
+          recommendedEventSlug:
+            typeof assistantData.recommendedEventSlug === "string"
+              ? assistantData.recommendedEventSlug
+              : null
         }
       ]);
     },
-    [appendMessages, language, recommendationLabel]
+    [appendMessages]
   );
 
   const sendMessage = useCallback(

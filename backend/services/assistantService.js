@@ -1,9 +1,9 @@
 import { normalizeLanguage } from "./languageUtils.js";
+import { buildAssistantKnowledge } from "./assistantKnowledgeOrchestrator.js";
 import {
   buildAssistantMessages,
   parseAssistantOutput
 } from "./promptBuilder.js";
-import { fetchSiteKnowledge } from "./siteKnowledgeService.js";
 
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_SESSION_ID_LENGTH = 120;
@@ -52,21 +52,22 @@ export function validateAssistantChatPayload(payload) {
   }
 
   const rawLanguage = payload.language;
+  const hasLanguageInput =
+    rawLanguage !== undefined && rawLanguage !== null && rawLanguage !== "";
   const language =
-    rawLanguage === undefined || rawLanguage === null || rawLanguage === ""
+    !hasLanguageInput
       ? "en"
       : normalizeLanguage(rawLanguage);
 
-  if (
-    rawLanguage !== undefined &&
-    rawLanguage !== null &&
-    rawLanguage !== "" &&
-    !["en", "es", "de"].includes(rawLanguage)
-  ) {
-    return {
-      success: false,
-      error: "language must be one of: en, es, de"
-    };
+  if (hasLanguageInput) {
+    const languageInput =
+      typeof rawLanguage === "string" ? rawLanguage.trim().toLowerCase() : "";
+    if (!["en", "es", "de"].includes(languageInput)) {
+      return {
+        success: false,
+        error: "language must be one of: en, es, de"
+      };
+    }
   }
 
   const sessionId =
@@ -218,13 +219,14 @@ async function callOpenAI(messages) {
 }
 
 export async function generateAssistantChatResponse(input) {
-  let knowledge;
+  let assistantKnowledge;
 
   try {
-    knowledge = await fetchSiteKnowledge({
+    assistantKnowledge = await buildAssistantKnowledge({
       language: input.language,
       pageContext: input.pageContext,
-      pageSlug: input.pageSlug
+      pageSlug: input.pageSlug,
+      message: input.message
     });
   } catch {
     throw createAssistantError({
@@ -240,7 +242,8 @@ export async function generateAssistantChatResponse(input) {
     sessionId: input.sessionId,
     pageContext: input.pageContext,
     pageSlug: input.pageSlug,
-    knowledge
+    siteKnowledge: assistantKnowledge.siteKnowledge,
+    documentKnowledge: assistantKnowledge.documentKnowledge
   });
 
   const rawModelOutput = await callOpenAI(messages);
@@ -251,7 +254,7 @@ export async function generateAssistantChatResponse(input) {
       rawModelOutput,
       {
         language: input.language,
-        availableEventSlugs: knowledge.availableEventSlugs
+        availableEventSlugs: assistantKnowledge.availableEventSlugs
       }
     );
   } catch (error) {
@@ -269,10 +272,13 @@ export async function generateAssistantChatResponse(input) {
     confidence: parsedOutput.confidence,
     suggestedActions: parsedOutput.suggestedActions,
     relatedLinks: parsedOutput.relatedLinks,
+    recommendedEventSlug: parsedOutput.recommendedEventSlug,
 
-    // Backward compatibility aliases for the previous contract.
-    intent: parsedOutput.intent,
-    suggestedCtas: parsedOutput.suggestedCtas,
-    recommendedEventSlug: parsedOutput.recommendedEventSlug
+    // Backward compatibility alias.
+    intent: parsedOutput.pageIntent,
+    knowledgeStatus: {
+      site: "ok",
+      documents: assistantKnowledge.documentKnowledge.status
+    }
   };
 }

@@ -9,6 +9,63 @@ const VALID_PAGE_INTENTS = [
 
 const VALID_ACTION_TYPES = ["route", "event", "contact", "book", "external"];
 
+const FALLBACK_ACTIONS_BY_INTENT = {
+  general_info: {
+    type: "route",
+    target: "/about",
+    labelByLanguage: {
+      en: "Learn about David",
+      es: "Conocer a David",
+      de: "Mehr uber David"
+    }
+  },
+  event_discovery: {
+    type: "route",
+    target: "/events",
+    labelByLanguage: {
+      en: "Explore events",
+      es: "Ver eventos",
+      de: "Events ansehen"
+    }
+  },
+  book_interest: {
+    type: "book",
+    target: "/mi-libro",
+    labelByLanguage: {
+      en: "Discover the book",
+      es: "Descubrir el libro",
+      de: "Zum Buch"
+    }
+  },
+  contact_interest: {
+    type: "contact",
+    target: "/contact",
+    labelByLanguage: {
+      en: "Contact David",
+      es: "Contactar con David",
+      de: "David kontaktieren"
+    }
+  },
+  about_david: {
+    type: "route",
+    target: "/about",
+    labelByLanguage: {
+      en: "Read David's approach",
+      es: "Ver enfoque de David",
+      de: "Davids Ansatz lesen"
+    }
+  },
+  guidance: {
+    type: "route",
+    target: "/events",
+    labelByLanguage: {
+      en: "Start with events",
+      es: "Empezar por eventos",
+      de: "Mit Events starten"
+    }
+  }
+};
+
 function trimText(value, maxLength = 2400) {
   if (typeof value !== "string") {
     return "";
@@ -22,9 +79,9 @@ function trimText(value, maxLength = 2400) {
   return `${trimmed.slice(0, maxLength)}...`;
 }
 
-function compactKnowledge(knowledge) {
+function compactKnowledge(siteKnowledge) {
   const sections = Object.fromEntries(
-    Object.entries(knowledge.content || {}).map(([sectionKey, section]) => [
+    Object.entries(siteKnowledge.content || {}).map(([sectionKey, section]) => [
       sectionKey,
       {
         title: trimText(section.title, 220),
@@ -34,7 +91,7 @@ function compactKnowledge(knowledge) {
     ])
   );
 
-  const events = (knowledge.events?.upcoming || []).map((eventItem) => ({
+  const events = (siteKnowledge.events?.upcoming || []).map((eventItem) => ({
     slug: eventItem.slug,
     title: trimText(eventItem.title, 160),
     date: eventItem.date,
@@ -43,15 +100,35 @@ function compactKnowledge(knowledge) {
   }));
 
   return {
-    language: knowledge.language,
-    navigation: knowledge.navigation,
+    language: siteKnowledge.language,
+    navigation: siteKnowledge.navigation,
     sections,
     events: {
-      total: knowledge.events?.total || events.length,
+      total: siteKnowledge.events?.total || events.length,
       upcoming: events
     },
-    contact: knowledge.contact,
-    page: knowledge.page
+    contact: siteKnowledge.contact,
+    page: siteKnowledge.page
+  };
+}
+
+function compactDocumentKnowledge(documentKnowledge) {
+  const snippets = Array.isArray(documentKnowledge?.snippets)
+    ? documentKnowledge.snippets.slice(0, 4).map((snippet) => ({
+        id: snippet.id,
+        title: trimText(snippet.title, 140),
+        language: snippet.language,
+        excerpt: trimText(snippet.excerpt, 520),
+        relevance: snippet.relevance
+      }))
+    : [];
+
+  return {
+    status: documentKnowledge?.status || "empty",
+    totalDocuments: Number.isInteger(documentKnowledge?.totalDocuments)
+      ? documentKnowledge.totalDocuments
+      : 0,
+    snippets
   };
 }
 
@@ -195,26 +272,111 @@ function clampConfidence(value) {
   return Math.max(0, Math.min(1, Number(value.toFixed(2))));
 }
 
+function fallbackActionByIntent(intent, language) {
+  const fallback = FALLBACK_ACTIONS_BY_INTENT[intent];
+  if (!fallback) {
+    return null;
+  }
+
+  return {
+    type: fallback.type,
+    target: fallback.target,
+    label: fallback.labelByLanguage[language] || fallback.labelByLanguage.en
+  };
+}
+
+function ensureActionCoverage({
+  actions,
+  relatedLinks,
+  pageIntent,
+  language,
+  recommendedEventSlug
+}) {
+  const nextActions = Array.isArray(actions) ? [...actions] : [];
+  const nextRelated = Array.isArray(relatedLinks) ? [...relatedLinks] : [];
+
+  const fallbackAction = fallbackActionByIntent(pageIntent, language);
+  if (nextActions.length === 0 && fallbackAction) {
+    nextActions.push(fallbackAction);
+  }
+
+  if (recommendedEventSlug) {
+    const eventTarget = `/events/${recommendedEventSlug}`;
+    const hasEventAction = nextActions.some((action) => action.target === eventTarget);
+    if (!hasEventAction) {
+      nextActions.unshift({
+        type: "event",
+        label:
+          language === "es"
+            ? "Ver evento recomendado"
+            : language === "de"
+              ? "Empfohlenes Event ansehen"
+              : "View recommended event",
+        target: eventTarget
+      });
+    }
+  }
+
+  const relatedFromActions = nextActions.map((action) => ({
+    label: action.label,
+    target: action.target
+  }));
+
+  return {
+    actions: nextActions,
+    relatedLinks: dedupeByTarget([...nextRelated, ...relatedFromActions])
+  };
+}
+
+function resolveRecommendedEventSlug(parsed, availableEventSlugs, actions) {
+  let recommendedEventSlug = null;
+
+  if (parsed.recommendedEventSlug !== null && parsed.recommendedEventSlug !== undefined) {
+    if (typeof parsed.recommendedEventSlug === "string") {
+      const trimmedSlug = parsed.recommendedEventSlug.trim();
+      if (availableEventSlugs.includes(trimmedSlug)) {
+        recommendedEventSlug = trimmedSlug;
+      }
+    }
+  }
+
+  if (!recommendedEventSlug) {
+    const eventAction = actions.find((action) => action.type === "event");
+    if (eventAction?.target) {
+      const match = eventAction.target.match(/^\/events\/([a-z0-9-]+)$/i);
+      if (match && availableEventSlugs.includes(match[1])) {
+        recommendedEventSlug = match[1];
+      }
+    }
+  }
+
+  return recommendedEventSlug;
+}
+
 export function buildAssistantMessages({
   language,
   message,
   sessionId,
   pageContext,
   pageSlug,
-  knowledge
+  siteKnowledge,
+  documentKnowledge
 }) {
-  const compact = compactKnowledge(knowledge);
+  const compactSite = compactKnowledge(siteKnowledge);
+  const compactDocs = compactDocumentKnowledge(documentKnowledge);
 
   const systemPrompt = `
 You are the DEAwakening website guide assistant.
-Tone: warm, clear, premium, human and orienting.
-Rules:
-- Always reply in: ${language}.
-- Use only facts present in the provided knowledge.
-- Never invent events, dates, prices, addresses or claims.
-- If information is missing, say so clearly and redirect to a real page or contact.
-- Keep answers concise: 2 to 5 short sentences.
-- Behave as a site guide, not as a therapist or medical advisor.
+Tone: warm, clear, premium, human, and orienting.
+
+Core rules:
+- Always reply in ${language}.
+- Use only facts present in SITE_KNOWLEDGE and DOCUMENT_KNOWLEDGE snippets.
+- Never invent events, dates, prices, addresses, medical claims, or unavailable offers.
+- If information is missing, say it clearly and guide the user to a real page or contact.
+- Keep answers concise and useful: 2-6 short sentences.
+- Stay practical and conversion-oriented: explain and guide the next best step.
+- Do not output Markdown lists unless needed for clarity.
 
 Return ONLY valid JSON with this exact shape:
 {
@@ -237,7 +399,8 @@ Return ONLY valid JSON with this exact shape:
     pageContext: pageContext || null,
     pageSlug: pageSlug || null,
     userMessage: message,
-    knowledge: compact
+    siteKnowledge: compactSite,
+    documentKnowledge: compactDocs
   };
 
   return [
@@ -299,11 +462,9 @@ export function parseAssistantOutput(
 
   const rawActions = Array.isArray(parsed.suggestedActions)
     ? parsed.suggestedActions
-    : Array.isArray(parsed.suggestedCtas)
-      ? parsed.suggestedCtas
-      : [];
+    : [];
 
-  const suggestedActions = rawActions
+  const normalizedActions = rawActions
     .map((action) =>
       normalizeAction(action, {
         language,
@@ -313,45 +474,30 @@ export function parseAssistantOutput(
     .filter(Boolean);
 
   const rawRelated = Array.isArray(parsed.relatedLinks) ? parsed.relatedLinks : [];
-  const relatedFromModel = rawRelated
+  const normalizedRelated = rawRelated
     .map(normalizeRelatedLink)
     .filter(Boolean);
 
-  const relatedFromActions = suggestedActions.map((action) => ({
-    label: action.label,
-    target: action.target
-  }));
+  const recommendedEventSlug = resolveRecommendedEventSlug(
+    parsed,
+    availableEventSlugs,
+    normalizedActions
+  );
 
-  const relatedLinks = dedupeByTarget([...relatedFromModel, ...relatedFromActions]);
-
-  let recommendedEventSlug = null;
-  if (parsed.recommendedEventSlug !== null && parsed.recommendedEventSlug !== undefined) {
-    if (typeof parsed.recommendedEventSlug === "string") {
-      const trimmedSlug = parsed.recommendedEventSlug.trim();
-      if (availableEventSlugs.includes(trimmedSlug)) {
-        recommendedEventSlug = trimmedSlug;
-      }
-    }
-  }
-
-  if (!recommendedEventSlug) {
-    const eventAction = suggestedActions.find((action) => action.type === "event");
-    if (eventAction?.target) {
-      const match = eventAction.target.match(/^\/events\/([a-z0-9-]+)$/i);
-      if (match && availableEventSlugs.includes(match[1])) {
-        recommendedEventSlug = match[1];
-      }
-    }
-  }
+  const covered = ensureActionCoverage({
+    actions: normalizedActions,
+    relatedLinks: normalizedRelated,
+    pageIntent,
+    language,
+    recommendedEventSlug
+  });
 
   return {
     answer,
     pageIntent,
     confidence,
-    suggestedActions,
-    relatedLinks,
-    intent: pageIntent,
-    suggestedCtas: suggestedActions,
+    suggestedActions: covered.actions,
+    relatedLinks: covered.relatedLinks,
     recommendedEventSlug
   };
 }

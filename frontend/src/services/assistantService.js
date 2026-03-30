@@ -31,7 +31,7 @@ export function sendAssistantChat(payload) {
           : "guidance",
     confidence: typeof data?.confidence === "number" ? data.confidence : null,
     suggestedActions: normalizeAssistantArray(
-      data?.suggestedActions || data?.suggestedCtas,
+      data?.suggestedActions,
       ["type", "label", "target"]
     ),
     relatedLinks: normalizeAssistantArray(data?.relatedLinks, ["label", "target"]),

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --env-file=.env app.js",
     "start": "node --env-file=.env app.js",
-    "assistant:smoke": "node scripts/assistantSmoke.js"
+    "assistant:smoke": "node scripts/assistantSmoke.js",
+    "assistant:docs:preview": "node scripts/assistantDocsPreview.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

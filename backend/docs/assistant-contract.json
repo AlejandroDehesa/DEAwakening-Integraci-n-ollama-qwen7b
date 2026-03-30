@@ -30,9 +30,12 @@
           "target": "string"
         }
       ],
-      "intent": "legacy alias of pageIntent",
-      "suggestedCtas": "legacy alias of suggestedActions",
-      "recommendedEventSlug": "string|null"
+      "recommendedEventSlug": "string|null",
+      "intent": "deprecated alias of pageIntent",
+      "knowledgeStatus": {
+        "site": "ok",
+        "documents": "ok|empty|unavailable"
+      }
     },
     "error": null
   },
@@ -41,19 +44,31 @@
     "data": null,
     "error": "string"
   },
+  "frontendResponsibility": {
+    "must": [
+      "render answer, intent, confidence, actions, links and recommendation",
+      "sanitize malformed arrays defensively",
+      "handle loading and error UX"
+    ],
+    "mustNot": [
+      "create business fallbacks for intent/actions/recommendation",
+      "invent CTAs not provided by backend",
+      "duplicate retrieval logic"
+    ]
+  },
   "requestExample": {
-    "message": "Quiero un evento para empezar en Mallorca",
+    "message": "Quiero saber por donde empezar y si hay un evento recomendado",
     "language": "es",
     "sessionId": "session-001",
-    "pageContext": "events"
+    "pageContext": "home"
   },
   "responseExample": {
     "success": true,
     "data": {
-      "answer": "Si quieres empezar, puedo orientarte hacia los proximos encuentros y ayudarte a elegir el formato mas adecuado para ti.",
+      "answer": "Si quieres empezar con claridad, te recomiendo revisar los proximos eventos y elegir el formato que mejor encaje contigo.",
       "language": "es",
       "pageIntent": "event_discovery",
-      "confidence": 0.84,
+      "confidence": 0.87,
       "suggestedActions": [
         {
           "type": "route",
@@ -62,7 +77,7 @@
         },
         {
           "type": "contact",
-          "label": "Contactar",
+          "label": "Contactar con David",
           "target": "/contact"
         }
       ],
@@ -72,24 +87,16 @@
           "target": "/events"
         },
         {
-          "label": "Contactar",
+          "label": "Contactar con David",
           "target": "/contact"
         }
       ],
+      "recommendedEventSlug": "deawakening-valencia",
       "intent": "event_discovery",
-      "suggestedCtas": [
-        {
-          "type": "route",
-          "label": "Ver eventos",
-          "target": "/events"
-        },
-        {
-          "type": "contact",
-          "label": "Contactar",
-          "target": "/contact"
-        }
-      ],
-      "recommendedEventSlug": null
+      "knowledgeStatus": {
+        "site": "ok",
+        "documents": "ok"
+      }
     },
     "error": null
   }

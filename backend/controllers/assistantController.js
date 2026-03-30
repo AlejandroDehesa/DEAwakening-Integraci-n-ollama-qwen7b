@@ -24,7 +24,7 @@ export async function chatWithAssistant(req, res, next) {
     const data = await generateAssistantChatResponse(validation.data);
     const durationMs = Date.now() - startedAt;
     console.log(
-      `[assistant] success language=${language} pageContext=${pageContext || "n/a"} durationMs=${durationMs}`
+      `[assistant] success language=${language} pageContext=${pageContext || "n/a"} intent=${data.pageIntent} docs=${data.knowledgeStatus?.documents || "n/a"} durationMs=${durationMs}`
     );
     return sendSuccess(res, data);
   } catch (error) {

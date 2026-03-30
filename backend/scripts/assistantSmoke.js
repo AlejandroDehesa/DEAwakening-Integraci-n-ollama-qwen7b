@@ -32,7 +32,8 @@ function hasStableShape(payload) {
     typeof data.pageIntent === "string" &&
     typeof data.confidence === "number" &&
     Array.isArray(data.suggestedActions) &&
-    Array.isArray(data.relatedLinks)
+    Array.isArray(data.relatedLinks) &&
+    ("recommendedEventSlug" in data)
   );
 }
 
@@ -111,6 +112,28 @@ async function run() {
       false,
       `status=${validWithContext.status}`
     );
+    failed = true;
+  }
+
+  const validDe = await callAssistant({
+    message: "Ich mochte verstehen, wo ich anfangen soll",
+    language: "de",
+    pageContext: "home"
+  });
+
+  if (validDe.status === 200 && hasStableShape(validDe.payload)) {
+    printResult("valid_de", true);
+  } else if (validDe.status === 503 && EXPECT_MISSING_KEY) {
+    printResult("valid_de", true, "skipped because missing API key is expected");
+  } else if (validDe.status === 503 && !EXPECT_MISSING_KEY) {
+    printResult(
+      "valid_de",
+      false,
+      "assistant not configured (OPENAI vars missing)"
+    );
+    failed = true;
+  } else {
+    printResult("valid_de", false, `status=${validDe.status}`);
     failed = true;
   }
 

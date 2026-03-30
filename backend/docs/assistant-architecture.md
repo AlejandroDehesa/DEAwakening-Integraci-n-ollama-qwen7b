@@ -1,39 +1,70 @@
-# DEAwakening Assistant - Architecture (Phase 1.5 + Frontend v1)
+# DEAwakening Assistant - Architecture (Phase 3.5 + Phase 4)
 
 ## Scope
-- Harden existing assistant backend (no rewrite).
-- Keep Express + SQLite + current project structure.
-- Add first frontend assistant UI integrated into current layout.
-- Keep implementation simple, maintainable and production-small ready.
+- Consolidate the current assistant without rewriting the project.
+- Keep current Express + SQLite architecture.
+- Keep AssistantHero and global AssistantWidget behavior.
+- Add a modular document-knowledge layer with clean fallback.
+
+## Final responsibility split
+### Backend (source of assistant intelligence)
+- Validate payload and enforce contract shape.
+- Build site knowledge from current content/events/contact services.
+- Load and retrieve relevant document knowledge.
+- Orchestrate prompt context.
+- Normalize model output into stable assistant actions/links/recommendation.
+
+### Frontend (presentation and UX)
+- Render assistant response clearly.
+- Send language + page context + page slug.
+- Handle loading/error states and minor defensive sanitization.
+- Do not invent fallback business actions.
 
 ## Backend flow
-1. `POST /api/assistant/chat` enters through `assistantRoutes`.
-2. `assistantController` validates input and logs request summary.
-3. `assistantService`:
-   - validates payload with strict rules
-   - builds site knowledge from existing services (`content/events/contact`)
-   - builds prompt with language + page context
-   - calls OpenAI with timeout
-   - parses and normalizes model output into stable JSON
-4. Controller returns standard envelope:
-   - `{ success, data, error }`
+1. `POST /api/assistant/chat` enters through route/controller.
+2. `assistantService` validates body.
+3. `assistantKnowledgeOrchestrator` builds:
+   - `siteKnowledge` (existing source of truth)
+   - `documentKnowledge` (retrieved snippets from materials folder)
+4. `promptBuilder` composes strict JSON prompt.
+5. OpenAI call is executed with timeout.
+6. `promptBuilder.parseAssistantOutput` normalizes:
+   - `pageIntent`
+   - `suggestedActions`
+   - `relatedLinks`
+   - `recommendedEventSlug`
+   - `confidence`
+7. Controller returns envelope `{ success, data, error }`.
 
-## Output contract
-Primary assistant fields:
-- `answer`
-- `language`
-- `pageIntent`
-- `confidence`
-- `suggestedActions[]`
-- `relatedLinks[]`
+## Knowledge layers
+### Site knowledge (base, always present if backend is healthy)
+- content sections
+- events (including event-detail context)
+- contact info
+- navigation labels
+- current page context summary
 
-Backward-compatible aliases:
-- `intent` (alias of `pageIntent`)
-- `suggestedCtas` (alias of `suggestedActions`)
-- `recommendedEventSlug`
+### Document knowledge (expanded, optional, fallback-safe)
+- Source folder: `backend/knowledge/documents`
+- Supported formats: `.md`, `.txt`, `.json`
+- Retrieval: lightweight keyword scoring by query + language + page context
+- If retrieval layer fails:
+  - assistant still runs with site knowledge
+  - logs warning
+  - returns `knowledgeStatus.documents = "unavailable"`
 
-Contract source:
-- `backend/docs/assistant-contract.json`
+## Contract simplification notes
+- Canonical fields:
+  - `answer`
+  - `language`
+  - `pageIntent`
+  - `confidence`
+  - `suggestedActions`
+  - `relatedLinks`
+  - `recommendedEventSlug`
+- Compatibility:
+  - `intent` remains as deprecated alias of `pageIntent`
+  - `suggestedCtas` removed from backend output to reduce duplication noise
 
 ## Error handling (controlled)
 - Missing `OPENAI_API_KEY`: `503`
@@ -44,58 +75,36 @@ Contract source:
 - Knowledge build failure: `500`
 - Invalid request body: `400`
 
-All errors are returned in envelope format without stack traces in API responses.
-
-## Logging (minimal and useful)
-Controller logs:
+## Logging
+Controller logs include:
 - language
 - pageContext
 - message length
-- success/failure
-- error code/status
-- operation duration (ms)
-
-## Site knowledge design
-Knowledge is built only from existing project data:
-- content sections
-- events list + selected event context
-- contact info
-- navigation map (from `ui.navbar`)
-- current page context summary
-
-No RAG/vector store in this phase.
-
-## Frontend integration (v1)
-Assistant UI is isolated in its own component/service:
-- launcher button (floating)
-- open/close panel
-- short message history
-- loading/error states
-- context-aware request payload (`language`, `pageContext`, `pageSlug`)
-- suggested actions + related links rendering
-
-No changes to existing page business logic were required.
+- pageIntent
+- document knowledge status
+- duration
 
 ## Environment variables
-Add to `backend/.env`:
-
 ```env
-OPENAI_API_KEY=your-openai-api-key
+PORT=5000
+ADMIN_KEY=...
+OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-4.1-mini
 OPENAI_TIMEOUT_MS=15000
+ASSISTANT_DOCUMENTS_DIR=./knowledge/documents
 ```
 
-## Smoke tests
-Script:
-- `npm run assistant:smoke`
+## Material ingestion
+- Add curated materials into `backend/knowledge/documents`.
+- Recommended metadata in markdown front matter:
+  - `id`
+  - `title`
+  - `language` (`en|es|de`)
+  - `tags` (comma-separated)
+  - `pageContexts` (comma-separated)
 
-Covers:
-- valid ES
-- valid EN
-- valid with pageContext
-- invalid body (`400`)
-- API key failure probe (`503` when expected)
-
-Use:
-- `ASSISTANT_BASE_URL` to target another backend URL
-- `ASSISTANT_EXPECT_MISSING_KEY=true` when testing missing API key scenario
+## Verification commands
+- Assistant smoke:
+  - `npm run assistant:smoke`
+- Document retrieval preview:
+  - `npm run assistant:docs:preview`

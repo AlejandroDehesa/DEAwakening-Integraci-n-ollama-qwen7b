@@ -31,8 +31,7 @@ function AssistantWidget() {
     language: currentLanguage,
     pageContext: context.pageContext,
     pageSlug: context.pageSlug,
-    welcomeMessage: uiCopy.welcome,
-    recommendationLabel: uiCopy.recommendationLabel
+    welcomeMessage: uiCopy.welcome
   });
 
   const isAdminArea = location.pathname.startsWith("/admin");
