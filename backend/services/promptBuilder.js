@@ -268,6 +268,23 @@ function dedupeByTarget(items) {
   return Array.from(map.values());
 }
 
+function dedupeActionsByTypeAndTarget(items) {
+  const map = new Map();
+
+  for (const item of items) {
+    if (!item?.type || !item?.target) {
+      continue;
+    }
+
+    const key = `${item.type}:${item.target}`;
+    if (!map.has(key)) {
+      map.set(key, item);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 function clampConfidence(value) {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return 0.72;
@@ -296,7 +313,7 @@ function ensureActionCoverage({
   language,
   recommendedEventSlug
 }) {
-  const nextActions = Array.isArray(actions) ? [...actions] : [];
+  const nextActions = dedupeActionsByTypeAndTarget(Array.isArray(actions) ? [...actions] : []);
   const nextRelated = Array.isArray(relatedLinks) ? [...relatedLinks] : [];
 
   const fallbackAction = fallbackActionByIntent(pageIntent, language);
@@ -321,14 +338,14 @@ function ensureActionCoverage({
     }
   }
 
-  const relatedFromActions = nextActions.map((action) => ({
-    label: action.label,
-    target: action.target
-  }));
+  const actionTargets = new Set(nextActions.map((action) => action.target));
+  const filteredRelated = dedupeByTarget(nextRelated).filter(
+    (link) => !actionTargets.has(link.target)
+  );
 
   return {
     actions: nextActions,
-    relatedLinks: dedupeByTarget([...nextRelated, ...relatedFromActions])
+    relatedLinks: filteredRelated
   };
 }
 
@@ -377,6 +394,7 @@ Core rules:
 - Always reply in ${language}.
 - Use only facts present in SITE_KNOWLEDGE and DOCUMENT_KNOWLEDGE snippets.
 - Never invent events, dates, prices, addresses, medical claims, or unavailable offers.
+- Never claim personal preferences (for example: "my favorite event").
 - If information is missing, say it clearly and guide the user to a real page or contact.
 - Keep answers concise and useful: 2-6 short sentences.
 - Stay practical and conversion-oriented: explain and guide the next best step.

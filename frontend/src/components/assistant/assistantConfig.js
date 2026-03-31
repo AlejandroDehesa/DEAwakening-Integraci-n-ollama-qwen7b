@@ -56,7 +56,7 @@ export const assistantUiCopy = {
       book_interest: "Orientación sobre el libro",
       contact_interest: "Orientación de contacto",
       about_david: "Sobre David",
-      guidance: "Siguiente paso"
+      guidance: ""
     }
   },
   de: {

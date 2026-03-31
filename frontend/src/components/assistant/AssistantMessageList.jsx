@@ -25,6 +25,19 @@ function AssistantMessageList({
   assistantAvatarSrc = "",
   assistantAvatarAlt = "Assistant avatar"
 }) {
+  function getIntentLabel(intentKey) {
+    if (!intentKey || !intentLabels || typeof intentLabels !== "object") {
+      return "";
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(intentLabels, intentKey)) {
+      return "";
+    }
+
+    const label = intentLabels[intentKey];
+    return typeof label === "string" ? label.trim() : "";
+  }
+
   function buildMeta(message, clickType) {
     return {
       interactionId: message.interactionId || null,
@@ -37,7 +50,50 @@ function AssistantMessageList({
   return (
     <div className={`assistant-feed ${className}`.trim()} ref={feedRef} aria-live="polite">
       {Array.isArray(messages) && messages.length > 0 ? (
-        messages.map((message) => (
+        messages.map((message) => {
+          const intentLabel = getIntentLabel(message.pageIntent);
+          const recommendedEventTarget =
+            message.role === "assistant" &&
+            typeof message.recommendedEventSlug === "string" &&
+            message.recommendedEventSlug.trim()
+              ? `/events/${message.recommendedEventSlug.trim()}`
+              : null;
+          const visibleActions = Array.isArray(message.suggestedActions)
+            ? message.suggestedActions.filter((action) => {
+                if (!action?.target) {
+                  return false;
+                }
+
+                if (
+                  recommendedEventTarget &&
+                  action.target === recommendedEventTarget
+                ) {
+                  return false;
+                }
+
+                return true;
+              })
+            : [];
+          const actionTargets = new Set(visibleActions.map((action) => action.target));
+          const visibleLinks = Array.isArray(message.relatedLinks)
+            ? message.relatedLinks.filter((link) => {
+                if (!link?.target) {
+                  return false;
+                }
+
+                if (recommendedEventTarget && link.target === recommendedEventTarget) {
+                  return false;
+                }
+
+                if (actionTargets.has(link.target)) {
+                  return false;
+                }
+
+                return true;
+              })
+            : [];
+
+          return (
           <article
             key={message.id}
             className={
@@ -64,18 +120,16 @@ function AssistantMessageList({
             >
               <p>{message.text}</p>
 
-              {message.role === "assistant" && message.pageIntent ? (
+              {message.role === "assistant" && intentLabel ? (
                 <small className="assistant-meta">
-                  {intentLabels?.[message.pageIntent] || message.pageIntent}
+                  {intentLabel}
                   {typeof message.confidence === "number"
                     ? ` - ${Math.round(message.confidence * 100)}%`
                     : ""}
                 </small>
               ) : null}
 
-              {message.role === "assistant" &&
-              typeof message.recommendedEventSlug === "string" &&
-              message.recommendedEventSlug.trim() ? (
+              {recommendedEventTarget ? (
                 <div className="assistant-recommendation-card">
                   <p className="assistant-recommendation-label">{recommendationLabel}</p>
                   <p className="assistant-recommendation-title">
@@ -85,11 +139,14 @@ function AssistantMessageList({
                     type="button"
                     className="assistant-recommendation-button"
                     onClick={() =>
-                      onActionClick({
-                        type: "event",
-                        label: openRecommendationLabel,
-                        target: `/events/${message.recommendedEventSlug}`
-                      }, buildMeta(message, "recommended-event"))
+                      onActionClick(
+                        {
+                          type: "event",
+                          label: openRecommendationLabel,
+                          target: recommendedEventTarget
+                        },
+                        buildMeta(message, "recommended-event")
+                      )
                     }
                   >
                     {openRecommendationLabel}
@@ -97,10 +154,9 @@ function AssistantMessageList({
                 </div>
               ) : null}
 
-              {Array.isArray(message.suggestedActions) &&
-              message.suggestedActions.length > 0 ? (
+              {visibleActions.length > 0 ? (
                 <div className="assistant-actions">
-                  {message.suggestedActions.map((action) => (
+                  {visibleActions.map((action) => (
                     <button
                       key={`${action.type}-${action.target}-${action.label}`}
                       type="button"
@@ -113,9 +169,9 @@ function AssistantMessageList({
                 </div>
               ) : null}
 
-              {Array.isArray(message.relatedLinks) && message.relatedLinks.length > 0 ? (
+              {visibleLinks.length > 0 ? (
                 <div className="assistant-links">
-                  {message.relatedLinks.map((link) => {
+                  {visibleLinks.map((link) => {
                     const isInternal = link.target.startsWith("/");
                     if (isInternal) {
                       return (
@@ -160,7 +216,8 @@ function AssistantMessageList({
               ) : null}
             </div>
           </article>
-        ))
+          );
+        })
       ) : (
         <article className="assistant-empty-state">
           <p>{emptyState}</p>

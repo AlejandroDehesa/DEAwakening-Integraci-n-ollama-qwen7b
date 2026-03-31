@@ -22,7 +22,6 @@ function AssistantWidget() {
   const uiCopy = getAssistantUiCopy(currentLanguage);
   const quickActions = getAssistantQuickActions(currentLanguage);
   const [isOpen, setIsOpen] = useState(false);
-  const [isVoiceUiEnabled, setIsVoiceUiEnabled] = useState(false);
   const assistantAvatarSrc = "/david-hero.jpg";
   const assistantName = "David";
   const assistantTagline =
@@ -201,37 +200,6 @@ function AssistantWidget() {
               disabled={conversation.isSending}
               className="assistant-quick-actions-widget assistant-quick-actions-widget-bottom"
             />
-
-            <section className="assistant-voice-card" aria-label="Voice UI preview">
-              <div>
-                <p className="assistant-voice-title">
-                  {currentLanguage === "es"
-                    ? "Escuchar respuestas"
-                    : currentLanguage === "de"
-                      ? "Antworten anhören"
-                      : "Listen to responses"}
-                </p>
-                <p className="assistant-voice-subtitle">
-                  {currentLanguage === "es"
-                    ? "Activa la voz para oír a David al responder."
-                    : currentLanguage === "de"
-                      ? "Aktiviere die Stimme, um Davids Antworten zu hören."
-                      : "Enable voice to hear David's replies."}
-                </p>
-              </div>
-              <button
-                type="button"
-                className={
-                  isVoiceUiEnabled
-                    ? "assistant-voice-toggle assistant-voice-toggle-on"
-                    : "assistant-voice-toggle"
-                }
-                onClick={() => setIsVoiceUiEnabled((current) => !current)}
-                aria-pressed={isVoiceUiEnabled}
-              >
-                <span className="assistant-voice-knob" />
-              </button>
-            </section>
 
             <AssistantComposer
               inputId="assistant-input"

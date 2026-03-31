@@ -137,6 +137,394 @@ function trimTrailingSlashes(value) {
   return String(value || "").replace(/\/+$/, "");
 }
 
+function normalizeText(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function dedupeActions(items) {
+  const result = [];
+  const seen = new Set();
+
+  for (const item of Array.isArray(items) ? items : []) {
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+
+    const type = typeof item.type === "string" ? item.type : "";
+    const target = typeof item.target === "string" ? item.target : "";
+    const label = typeof item.label === "string" ? item.label : "";
+
+    if (!type || !target || !label) {
+      continue;
+    }
+
+    const key = `${type}:${target}`;
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    result.push({ type, target, label });
+  }
+
+  return result;
+}
+
+function dedupeLinks(items, actionTargets = new Set()) {
+  const result = [];
+  const seen = new Set();
+
+  for (const item of Array.isArray(items) ? items : []) {
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+
+    const label = typeof item.label === "string" ? item.label : "";
+    const target = typeof item.target === "string" ? item.target : "";
+    if (!label || !target || actionTargets.has(target)) {
+      continue;
+    }
+
+    if (seen.has(target)) {
+      continue;
+    }
+
+    seen.add(target);
+    result.push({ label, target });
+  }
+
+  return result;
+}
+
+const EVENT_QUERY_HINTS = [
+  "evento",
+  "evento ",
+  "eventos",
+  "event",
+  "events",
+  "veranstaltung",
+  "veranstaltungen",
+  "fecha",
+  "date",
+  "ticket",
+  "tickets",
+  "entrada",
+  "entradas",
+  "resofusion",
+  "dea"
+];
+
+const FAVORITE_QUERY_HINTS = [
+  "favorito",
+  "favorita",
+  "favorite",
+  "favourite",
+  "liebling"
+];
+
+const LIST_EVENTS_QUERY_HINTS = [
+  "dime todos los eventos",
+  "todos los eventos",
+  "que eventos hay",
+  "cuales son los eventos",
+  "list events",
+  "all events",
+  "show events",
+  "alle veranstaltungen",
+  "alle events",
+  "welche events"
+];
+
+function isEventFocusedQuery(message, pageContext) {
+  if (pageContext === "events" || pageContext === "event-detail") {
+    return true;
+  }
+
+  const normalizedMessage = normalizeText(message);
+  if (!normalizedMessage) {
+    return false;
+  }
+
+  return EVENT_QUERY_HINTS.some((hint) => normalizedMessage.includes(hint));
+}
+
+function isFavoriteStyleQuery(message) {
+  const normalizedMessage = normalizeText(message);
+  if (!normalizedMessage) {
+    return false;
+  }
+
+  return FAVORITE_QUERY_HINTS.some((hint) => normalizedMessage.includes(hint));
+}
+
+function isListEventsQuery(message) {
+  const normalizedMessage = normalizeText(message);
+  if (!normalizedMessage) {
+    return false;
+  }
+
+  return LIST_EVENTS_QUERY_HINTS.some((hint) => normalizedMessage.includes(hint));
+}
+
+function formatEventDate(date, language) {
+  if (!date) {
+    return "";
+  }
+
+  try {
+    const locale = language === "es" ? "es-ES" : language === "de" ? "de-DE" : "en-GB";
+    return new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }).format(new Date(date));
+  } catch {
+    return String(date);
+  }
+}
+
+function scoreEventForQuery(eventItem, normalizedMessage) {
+  if (!eventItem || !normalizedMessage) {
+    return 0;
+  }
+
+  const haystack = normalizeText(
+    `${eventItem.slug || ""} ${eventItem.title || ""} ${eventItem.location || ""} ${eventItem.description || ""}`
+  );
+
+  if (!haystack) {
+    return 0;
+  }
+
+  const tokens = normalizedMessage.split(" ").filter((token) => token.length > 2);
+  let score = 0;
+
+  for (const token of tokens) {
+    if (haystack.includes(token)) {
+      score += 1;
+    }
+  }
+
+  return score;
+}
+
+function getRecommendedEventSlug({ message, pageContext, pageSlug, siteKnowledge, parsedOutput }) {
+  const upcomingEvents = Array.isArray(siteKnowledge?.events?.upcoming)
+    ? siteKnowledge.events.upcoming
+    : [];
+
+  const availableEventSlugs = upcomingEvents
+    .map((eventItem) => eventItem?.slug)
+    .filter((slug) => typeof slug === "string" && slug.trim());
+
+  if (availableEventSlugs.length === 0) {
+    return null;
+  }
+
+  if (pageContext === "event-detail" && pageSlug && availableEventSlugs.includes(pageSlug)) {
+    return pageSlug;
+  }
+
+  const normalizedMessage = normalizeText(message);
+
+  if (
+    typeof parsedOutput?.recommendedEventSlug === "string" &&
+    availableEventSlugs.includes(parsedOutput.recommendedEventSlug)
+  ) {
+    const suggestedEvent = upcomingEvents.find(
+      (eventItem) => eventItem.slug === parsedOutput.recommendedEventSlug
+    );
+    const suggestedScore = scoreEventForQuery(suggestedEvent, normalizedMessage);
+    if (suggestedScore > 0) {
+      return parsedOutput.recommendedEventSlug;
+    }
+  }
+
+  const ranked = upcomingEvents
+    .map((eventItem) => ({
+      slug: eventItem.slug,
+      score: scoreEventForQuery(eventItem, normalizedMessage)
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  if (ranked[0]?.score > 0 && ranked[0]?.slug) {
+    return ranked[0].slug;
+  }
+
+  return null;
+}
+
+function eventActionLabelByLanguage(language) {
+  if (language === "es") {
+    return "Ver evento recomendado";
+  }
+
+  if (language === "de") {
+    return "Empfohlenes Event ansehen";
+  }
+
+  return "View recommended event";
+}
+
+function routeToEventsAction(language) {
+  if (language === "es") {
+    return { type: "route", label: "Ver eventos", target: "/events" };
+  }
+
+  if (language === "de") {
+    return { type: "route", label: "Events ansehen", target: "/events" };
+  }
+
+  return { type: "route", label: "Explore events", target: "/events" };
+}
+
+function buildFavoriteQueryAnswer(language, upcomingEvents) {
+  const topTitles = (Array.isArray(upcomingEvents) ? upcomingEvents : [])
+    .map((eventItem) => eventItem?.title)
+    .filter((title) => typeof title === "string" && title.trim())
+    .slice(0, 3);
+
+  if (language === "es") {
+    if (topTitles.length === 0) {
+      return "No tengo eventos favoritos. Puedo ayudarte a elegir segun ciudad, fecha o formato con la lista actual.";
+    }
+
+    return `No tengo un evento favorito. Ahora mismo puedes revisar: ${topTitles.join(", ")}. Si quieres, te ayudo a elegir el mejor para ti.`;
+  }
+
+  if (language === "de") {
+    if (topTitles.length === 0) {
+      return "Ich habe kein Lieblings-Event. Ich kann dir helfen, nach Stadt, Datum oder Format aus den aktuellen Veranstaltungen zu wahlen.";
+    }
+
+    return `Ich habe kein Lieblings-Event. Aktuelle Optionen sind: ${topTitles.join(", ")}. Wenn du willst, helfe ich dir bei der Auswahl.`;
+  }
+
+  if (topTitles.length === 0) {
+    return "I do not have a favorite event. I can help you choose by city, date, or format from current events.";
+  }
+
+  return `I do not have a favorite event. Current options include: ${topTitles.join(", ")}. If you want, I can help you choose the best fit.`;
+}
+
+function buildListEventsAnswer(language, upcomingEvents) {
+  const items = (Array.isArray(upcomingEvents) ? upcomingEvents : [])
+    .map((eventItem) => ({
+      title: typeof eventItem?.title === "string" ? eventItem.title.trim() : "",
+      location: typeof eventItem?.location === "string" ? eventItem.location.trim() : "",
+      date: formatEventDate(eventItem?.date, language)
+    }))
+    .filter((eventItem) => eventItem.title)
+    .slice(0, 14);
+
+  if (items.length === 0) {
+    if (language === "es") {
+      return "Ahora mismo no hay eventos publicados. Si quieres, puedo avisarte de los próximos en cuanto estén visibles.";
+    }
+    if (language === "de") {
+      return "Aktuell sind keine Veranstaltungen veröffentlicht. Ich kann dir bei den nächsten Terminen helfen, sobald sie sichtbar sind.";
+    }
+    return "There are no published events right now. I can help you review upcoming ones as soon as they are available.";
+  }
+
+  const compact = items
+    .map((item) => `${item.title} (${item.location}${item.date ? `, ${item.date}` : ""})`)
+    .join(" · ");
+
+  if (language === "es") {
+    return `Ahora mismo hay ${items.length} eventos publicados: ${compact}. Si quieres, te ayudo a elegir el mejor para ti.`;
+  }
+
+  if (language === "de") {
+    return `Aktuell gibt es ${items.length} veröffentlichte Veranstaltungen: ${compact}. Wenn du willst, helfe ich dir bei der Auswahl.`;
+  }
+
+  return `There are currently ${items.length} published events: ${compact}. If you want, I can help you choose the best fit.`;
+}
+
+function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
+  const eventFocused = isEventFocusedQuery(input.message, input.pageContext);
+  const favoriteStyleQuery = isFavoriteStyleQuery(input.message);
+  const listEventsQuery = isListEventsQuery(input.message);
+  const upcomingEvents = Array.isArray(siteKnowledge?.events?.upcoming)
+    ? siteKnowledge.events.upcoming
+    : [];
+
+  const next = {
+    ...parsedOutput,
+    suggestedActions: dedupeActions(parsedOutput.suggestedActions),
+    relatedLinks: Array.isArray(parsedOutput.relatedLinks) ? [...parsedOutput.relatedLinks] : []
+  };
+
+  if (!eventFocused) {
+    next.recommendedEventSlug = null;
+    next.suggestedActions = next.suggestedActions.filter((action) => {
+      if (action.type === "event") {
+        return false;
+      }
+
+      return !/^\/events\/[a-z0-9-]+$/i.test(action.target);
+    });
+  } else {
+    const slug = getRecommendedEventSlug({
+      message: input.message,
+      pageContext: input.pageContext,
+      pageSlug: input.pageSlug,
+      siteKnowledge,
+      parsedOutput
+    });
+
+    next.recommendedEventSlug = slug;
+
+    if (slug) {
+      const eventTarget = `/events/${slug}`;
+      const hasEventAction = next.suggestedActions.some(
+        (action) => action.target === eventTarget
+      );
+
+      if (!hasEventAction) {
+        next.suggestedActions.unshift({
+          type: "event",
+          label: eventActionLabelByLanguage(input.language),
+          target: eventTarget
+        });
+      }
+    }
+  }
+
+  if (favoriteStyleQuery) {
+    next.answer = buildFavoriteQueryAnswer(input.language, upcomingEvents);
+    next.pageIntent = "event_discovery";
+    next.recommendedEventSlug = null;
+    next.suggestedActions = [routeToEventsAction(input.language)];
+    next.relatedLinks = [];
+  }
+
+  if (listEventsQuery) {
+    next.answer = buildListEventsAnswer(input.language, upcomingEvents);
+    next.pageIntent = "event_discovery";
+    next.recommendedEventSlug = null;
+    next.suggestedActions = [routeToEventsAction(input.language)];
+    next.relatedLinks = [];
+  }
+
+  next.suggestedActions = dedupeActions(next.suggestedActions).slice(0, 5);
+  const actionTargets = new Set(next.suggestedActions.map((action) => action.target));
+  next.relatedLinks = dedupeLinks(next.relatedLinks, actionTargets).slice(0, 5);
+
+  return next;
+}
+
 async function callProvider(messages) {
   const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
   const model = process.env.OPENROUTER_MODEL || process.env.OPENAI_MODEL;
@@ -288,18 +676,24 @@ export async function generateAssistantChatResponse(input) {
     });
   }
 
+  const finalOutput = postProcessAssistantOutput({
+    parsedOutput,
+    input,
+    siteKnowledge: assistantKnowledge.siteKnowledge
+  });
+
   return {
     contractVersion: "assistant.v2",
-    answer: parsedOutput.answer,
+    answer: finalOutput.answer,
     language: input.language,
-    pageIntent: parsedOutput.pageIntent,
-    confidence: parsedOutput.confidence,
-    suggestedActions: parsedOutput.suggestedActions,
-    relatedLinks: parsedOutput.relatedLinks,
-    recommendedEventSlug: parsedOutput.recommendedEventSlug,
+    pageIntent: finalOutput.pageIntent,
+    confidence: finalOutput.confidence,
+    suggestedActions: finalOutput.suggestedActions,
+    relatedLinks: finalOutput.relatedLinks,
+    recommendedEventSlug: finalOutput.recommendedEventSlug,
 
     // Backward compatibility alias.
-    intent: parsedOutput.pageIntent,
+    intent: finalOutput.pageIntent,
     knowledgeStatus: {
       site: "ok",
       documents: assistantKnowledge.documentKnowledge.status

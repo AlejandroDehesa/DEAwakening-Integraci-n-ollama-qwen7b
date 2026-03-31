@@ -25,17 +25,78 @@ const PAGE_CONTEXT_ROUTES = {
   "host-event": "/host-an-event"
 };
 
+const ASSISTANT_EVENT_OVERRIDES = {
+  "deawakening-valencia": {
+    title: "ResoFusion Basic",
+    location: "Findhorn, Scotland"
+  },
+  "deawakening-madrid": {
+    title: "ResoFusion Basic",
+    location: "Niya Honor Air, Doha"
+  },
+  "deawakening-barcelona": {
+    title: "ResoFusion Basico",
+    location: "Niya Honor Air, Doha"
+  },
+  "deawakening-malaga": {
+    title: "Degustacion de ResoFusion",
+    location: "Niya Honor Air, Doha"
+  },
+  "deawakening-sevilla": {
+    title: "ResoFusion Basico",
+    location: "Srithanu, Koh Phangan, Tailandia"
+  },
+  "deawakening-bilbao": {
+    title: "Degustador de ResoFusion",
+    location: "Orion Healing, Koh Phangan"
+  },
+  "deawakening-zaragoza": {
+    title: "ResoFusion Basic en Mallorca",
+    location: "Palma, Espana"
+  },
+  "deawakening-alicante": {
+    title: "DEA at Casa Wald",
+    location: "Illes Balears"
+  },
+  "deawakening-granada": {
+    title: "DEA at Orion Healing Center",
+    location: "Orion Healing Centre"
+  },
+  "deawakening-palma": {
+    title: "DEA at the Sanctuary",
+    location: "Tambon Ban Tai, Tailandia"
+  },
+  "deawakening-san-sebastian": {
+    title: "DEAwakening One Day Intensive",
+    location: "Sesimbra, Portugal"
+  },
+  "deawakening-murcia": {
+    title: "ResoFusion Retreat Portugal",
+    location: "Casa Na Ferraria, Portugal"
+  },
+  "deawakening-santiago-compostela": {
+    title: "Harvest Series 7 - Kaplankaya",
+    location: "Six Senses Kaplankaya, Turquia"
+  },
+  "deawakening-las-palmas": {
+    title: "ResoFusion",
+    location: "Niagara Wellness, Istanbul"
+  }
+};
+
 function pickEvent(eventItem) {
   if (!eventItem) {
     return null;
   }
 
+  const override = ASSISTANT_EVENT_OVERRIDES[eventItem.slug] || null;
+
   return {
     id: eventItem.id,
     slug: eventItem.slug,
-    title: eventItem.title,
+    title: override?.title || eventItem.title,
     date: eventItem.date,
-    location: eventItem.location,
+    location: override?.location || eventItem.location,
     description: eventItem.description
   };
 }

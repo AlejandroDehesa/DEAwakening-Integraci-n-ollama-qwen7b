@@ -1960,13 +1960,13 @@ function EventDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitState, setSubmitState] = useState("idle");
+  const eventCustomBySlug = specialEventDetails[slug];
   const customDetails =
-    currentLanguage === "de"
-      ? specialEventDetails[slug]?.de ?? null
-      : specialEventDetails[slug]?.[currentLanguage] ??
-        specialEventDetails[slug]?.es ??
-        specialEventDetails[slug]?.en ??
-        null;
+    eventCustomBySlug?.[currentLanguage] ??
+    (currentLanguage === "de" ? eventCustomBySlug?.en : null) ??
+    eventCustomBySlug?.es ??
+    eventCustomBySlug?.en ??
+    null;
   const eventDetails = event
     ? customDetails ?? buildDefaultEventDetails(event, currentLanguage, copy)
     : null;
