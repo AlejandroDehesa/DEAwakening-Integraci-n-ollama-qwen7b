@@ -156,7 +156,7 @@ async function run() {
 
     const ok =
       missingKeyProbe.status === 503 &&
-      String(missingKeyProbe.payload?.error || "").includes("OPENAI_API_KEY");
+      String(missingKeyProbe.payload?.error || "").includes("OPENROUTER_API_KEY");
     printResult("missing_api_key_503", ok, `status=${missingKeyProbe.status}`);
     if (!ok) {
       failed = true;

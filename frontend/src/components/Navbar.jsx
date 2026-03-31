@@ -5,6 +5,7 @@ import { getSectionExtra } from "../services/contentService";
 
 const fallbackLabelsByLanguage = {
   en: {
+    assistant: "AI GUIDE",
     home: "HOME",
     events: "EVENTS",
     about: "ABOUT",
@@ -13,6 +14,7 @@ const fallbackLabelsByLanguage = {
     contact: "CONTACT"
   },
   es: {
+    assistant: "GUÍA IA",
     home: "INICIO",
     events: "EVENTOS",
     about: "SOBRE MI",
@@ -21,6 +23,7 @@ const fallbackLabelsByLanguage = {
     contact: "CONTACTO"
   },
   de: {
+    assistant: "KI GUIDE",
     home: "START",
     events: "VERANSTALTUNGEN",
     about: "UBER MICH",
@@ -75,6 +78,14 @@ function Navbar() {
     { to: "/contact", label: copy.contact }
   ];
 
+  function handleOpenAssistant() {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent("assistant:open"));
+  }
+
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -85,6 +96,14 @@ function Navbar() {
             alt="DEAwakening"
           />
         </NavLink>
+
+        <button
+          type="button"
+          className="assistant-navbar-trigger"
+          onClick={handleOpenAssistant}
+        >
+          {copy.assistant}
+        </button>
 
         <div className="header-tools">
           <nav className="main-nav" aria-label="Primary navigation">

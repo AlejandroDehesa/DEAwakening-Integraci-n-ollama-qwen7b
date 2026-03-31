@@ -20,7 +20,10 @@ function AssistantMessageList({
   onActionClick,
   emptyState,
   className = "",
-  feedRef
+  feedRef,
+  showAssistantAvatar = false,
+  assistantAvatarSrc = "",
+  assistantAvatarAlt = "Assistant avatar"
 }) {
   function buildMeta(message, clickType) {
     return {
@@ -39,106 +42,123 @@ function AssistantMessageList({
             key={message.id}
             className={
               message.role === "user"
-                ? "assistant-message assistant-message-user"
-                : "assistant-message assistant-message-assistant"
+                ? "assistant-message-row assistant-message-row-user"
+                : "assistant-message-row assistant-message-row-assistant"
             }
           >
-            <p>{message.text}</p>
-
-            {message.role === "assistant" && message.pageIntent ? (
-              <small className="assistant-meta">
-                {intentLabels?.[message.pageIntent] || message.pageIntent}
-                {typeof message.confidence === "number"
-                  ? ` - ${Math.round(message.confidence * 100)}%`
-                  : ""}
-              </small>
+            {message.role === "assistant" && showAssistantAvatar ? (
+              <img
+                className="assistant-message-avatar"
+                src={assistantAvatarSrc}
+                alt={assistantAvatarAlt}
+                loading="lazy"
+              />
             ) : null}
 
-            {message.role === "assistant" &&
-            typeof message.recommendedEventSlug === "string" &&
-            message.recommendedEventSlug.trim() ? (
-              <div className="assistant-recommendation-card">
-                <p className="assistant-recommendation-label">{recommendationLabel}</p>
-                <p className="assistant-recommendation-title">
-                  {formatSlugLabel(message.recommendedEventSlug)}
-                </p>
-                <button
-                  type="button"
-                  className="assistant-recommendation-button"
-                  onClick={() =>
-                    onActionClick({
-                      type: "event",
-                      label: openRecommendationLabel,
-                      target: `/events/${message.recommendedEventSlug}`
-                    }, buildMeta(message, "recommended-event"))
-                  }
-                >
-                  {openRecommendationLabel}
-                </button>
-              </div>
-            ) : null}
+            <div
+              className={
+                message.role === "user"
+                  ? "assistant-message assistant-message-user"
+                  : "assistant-message assistant-message-assistant"
+              }
+            >
+              <p>{message.text}</p>
 
-            {Array.isArray(message.suggestedActions) &&
-            message.suggestedActions.length > 0 ? (
-              <div className="assistant-actions">
-                {message.suggestedActions.map((action) => (
+              {message.role === "assistant" && message.pageIntent ? (
+                <small className="assistant-meta">
+                  {intentLabels?.[message.pageIntent] || message.pageIntent}
+                  {typeof message.confidence === "number"
+                    ? ` - ${Math.round(message.confidence * 100)}%`
+                    : ""}
+                </small>
+              ) : null}
+
+              {message.role === "assistant" &&
+              typeof message.recommendedEventSlug === "string" &&
+              message.recommendedEventSlug.trim() ? (
+                <div className="assistant-recommendation-card">
+                  <p className="assistant-recommendation-label">{recommendationLabel}</p>
+                  <p className="assistant-recommendation-title">
+                    {formatSlugLabel(message.recommendedEventSlug)}
+                  </p>
                   <button
-                    key={`${action.type}-${action.target}-${action.label}`}
                     type="button"
-                    className="assistant-action"
-                    onClick={() => onActionClick(action, buildMeta(message, "suggested-action"))}
+                    className="assistant-recommendation-button"
+                    onClick={() =>
+                      onActionClick({
+                        type: "event",
+                        label: openRecommendationLabel,
+                        target: `/events/${message.recommendedEventSlug}`
+                      }, buildMeta(message, "recommended-event"))
+                    }
                   >
-                    {action.label}
+                    {openRecommendationLabel}
                   </button>
-                ))}
-              </div>
-            ) : null}
+                </div>
+              ) : null}
 
-            {Array.isArray(message.relatedLinks) && message.relatedLinks.length > 0 ? (
-              <div className="assistant-links">
-                {message.relatedLinks.map((link) => {
-                  const isInternal = link.target.startsWith("/");
-                  if (isInternal) {
+              {Array.isArray(message.suggestedActions) &&
+              message.suggestedActions.length > 0 ? (
+                <div className="assistant-actions">
+                  {message.suggestedActions.map((action) => (
+                    <button
+                      key={`${action.type}-${action.target}-${action.label}`}
+                      type="button"
+                      className="assistant-action"
+                      onClick={() => onActionClick(action, buildMeta(message, "suggested-action"))}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {Array.isArray(message.relatedLinks) && message.relatedLinks.length > 0 ? (
+                <div className="assistant-links">
+                  {message.relatedLinks.map((link) => {
+                    const isInternal = link.target.startsWith("/");
+                    if (isInternal) {
+                      return (
+                        <button
+                          key={`${link.label}-${link.target}`}
+                          type="button"
+                          className="assistant-link-button"
+                          onClick={() =>
+                            onActionClick({
+                              type: "route",
+                              label: link.label,
+                              target: link.target
+                            }, buildMeta(message, "related-link"))
+                          }
+                        >
+                          {link.label}
+                        </button>
+                      );
+                    }
+
                     return (
                       <button
                         key={`${link.label}-${link.target}`}
                         type="button"
                         className="assistant-link-button"
                         onClick={() =>
-                          onActionClick({
-                            type: "route",
-                            label: link.label,
-                            target: link.target
-                          }, buildMeta(message, "related-link"))
+                          onActionClick(
+                            {
+                              type: "external",
+                              label: link.label,
+                              target: link.target
+                            },
+                            buildMeta(message, "related-link")
+                          )
                         }
                       >
                         {link.label}
                       </button>
                     );
-                  }
-
-                  return (
-                    <button
-                      key={`${link.label}-${link.target}`}
-                      type="button"
-                      className="assistant-link-button"
-                      onClick={() =>
-                        onActionClick(
-                          {
-                            type: "external",
-                            label: link.label,
-                            target: link.target
-                          },
-                          buildMeta(message, "related-link")
-                        )
-                      }
-                    >
-                      {link.label}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
+                  })}
+                </div>
+              ) : null}
+            </div>
           </article>
         ))
       ) : (
@@ -148,8 +168,18 @@ function AssistantMessageList({
       )}
 
       {isSending ? (
-        <article className="assistant-message assistant-message-assistant">
-          <p>{thinkingLabel}</p>
+        <article className="assistant-message-row assistant-message-row-assistant">
+          {showAssistantAvatar ? (
+            <img
+              className="assistant-message-avatar"
+              src={assistantAvatarSrc}
+              alt={assistantAvatarAlt}
+              loading="lazy"
+            />
+          ) : null}
+          <div className="assistant-message assistant-message-assistant">
+            <p>{thinkingLabel}</p>
+          </div>
         </article>
       ) : null}
     </div>

@@ -22,6 +22,15 @@ function AssistantWidget() {
   const uiCopy = getAssistantUiCopy(currentLanguage);
   const quickActions = getAssistantQuickActions(currentLanguage);
   const [isOpen, setIsOpen] = useState(false);
+  const [isVoiceUiEnabled, setIsVoiceUiEnabled] = useState(false);
+  const assistantAvatarSrc = "/david-hero.jpg";
+  const assistantName = "David";
+  const assistantTagline =
+    currentLanguage === "es"
+      ? "Asistente de bienestar, eventos y primera visita"
+      : currentLanguage === "de"
+        ? "Assistent für Wohlbefinden, Events und den ersten Besuch"
+        : "Wellbeing assistant for events and first-time guidance";
 
   const context = useMemo(
     () => getPageContextFromPath(location.pathname),
@@ -89,9 +98,14 @@ function AssistantWidget() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen]);
 
-  function handleToggle() {
-    setIsOpen((current) => !current);
-  }
+  useEffect(() => {
+    function onOpenRequest() {
+      setIsOpen(true);
+    }
+
+    window.addEventListener("assistant:open", onOpenRequest);
+    return () => window.removeEventListener("assistant:open", onOpenRequest);
+  }, []);
 
   function handleClose() {
     setIsOpen(false);
@@ -126,72 +140,112 @@ function AssistantWidget() {
 
   return (
     <div className="assistant-widget-shell">
-      <button
-        type="button"
-        className="assistant-launcher"
-        onClick={handleToggle}
-        aria-expanded={isOpen}
-        aria-controls="assistant-panel"
-      >
-        {uiCopy.launcher}
-      </button>
-
       {isOpen ? (
-        <section
-          id="assistant-panel"
-          className="assistant-panel"
-          role="dialog"
-          aria-label={uiCopy.widgetTitle}
-        >
-          <header className="assistant-panel-header">
-            <div>
-              <p className="assistant-panel-title">{uiCopy.widgetTitle}</p>
-              <p className="assistant-panel-subtitle">{uiCopy.widgetSubtitle}</p>
-            </div>
-            <button
-              type="button"
-              className="assistant-close"
-              onClick={handleClose}
-              aria-label={uiCopy.close}
-            >
-              x
-            </button>
-          </header>
-
-          <AssistantQuickActions
-            title={uiCopy.quickActionsTitle}
-            actions={quickActions}
-            onSelect={handleQuickAction}
-            disabled={conversation.isSending}
-            className="assistant-quick-actions-widget"
+        <>
+          <button
+            type="button"
+            className="assistant-backdrop"
+            onClick={handleClose}
+            aria-label={uiCopy.close}
           />
+          <section
+            id="assistant-panel"
+            className="assistant-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={uiCopy.widgetTitle}
+          >
+            <header className="assistant-panel-header">
+              <div className="assistant-agent">
+                <img
+                  className="assistant-agent-avatar"
+                  src={assistantAvatarSrc}
+                  alt={assistantName}
+                />
+                <div className="assistant-agent-meta">
+                  <p className="assistant-panel-title">{assistantName}</p>
+                  <p className="assistant-panel-subtitle">{assistantTagline}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="assistant-close"
+                onClick={handleClose}
+                aria-label={uiCopy.close}
+              >
+                ×
+              </button>
+            </header>
 
-          <AssistantMessageList
-            messages={conversation.messages}
-            isSending={conversation.isSending}
-            thinkingLabel={uiCopy.thinking}
-            intentLabels={uiCopy.intentLabels}
-            recommendationLabel={uiCopy.recommendationLabel}
-            openRecommendationLabel={uiCopy.openRecommendation}
-            onActionClick={actionRouter.handleActionClick}
-            emptyState={uiCopy.emptyState}
-            feedRef={feedRef}
-          />
+            <AssistantMessageList
+              messages={conversation.messages}
+              isSending={conversation.isSending}
+              thinkingLabel={uiCopy.thinking}
+              intentLabels={uiCopy.intentLabels}
+              recommendationLabel={uiCopy.recommendationLabel}
+              openRecommendationLabel={uiCopy.openRecommendation}
+              onActionClick={actionRouter.handleActionClick}
+              emptyState={uiCopy.emptyState}
+              feedRef={feedRef}
+              showAssistantAvatar
+              assistantAvatarSrc={assistantAvatarSrc}
+              assistantAvatarAlt={assistantName}
+            />
 
-          {conversation.error ? <p className="assistant-error">{conversation.error}</p> : null}
+            {conversation.error ? <p className="assistant-error">{conversation.error}</p> : null}
 
-          <AssistantComposer
-            inputId="assistant-input"
-            inputLabel={uiCopy.inputLabel}
-            placeholder={uiCopy.placeholder}
-            value={conversation.inputValue}
-            onChange={conversation.setInputValue}
-            onSubmit={handleSubmit}
-            isSending={conversation.isSending}
-            sendLabel={uiCopy.send}
-            inputRef={inputRef}
-          />
-        </section>
+            <AssistantQuickActions
+              title={null}
+              actions={quickActions}
+              onSelect={handleQuickAction}
+              disabled={conversation.isSending}
+              className="assistant-quick-actions-widget assistant-quick-actions-widget-bottom"
+            />
+
+            <section className="assistant-voice-card" aria-label="Voice UI preview">
+              <div>
+                <p className="assistant-voice-title">
+                  {currentLanguage === "es"
+                    ? "Escuchar respuestas"
+                    : currentLanguage === "de"
+                      ? "Antworten anhören"
+                      : "Listen to responses"}
+                </p>
+                <p className="assistant-voice-subtitle">
+                  {currentLanguage === "es"
+                    ? "Activa la voz para oír a David al responder."
+                    : currentLanguage === "de"
+                      ? "Aktiviere die Stimme, um Davids Antworten zu hören."
+                      : "Enable voice to hear David's replies."}
+                </p>
+              </div>
+              <button
+                type="button"
+                className={
+                  isVoiceUiEnabled
+                    ? "assistant-voice-toggle assistant-voice-toggle-on"
+                    : "assistant-voice-toggle"
+                }
+                onClick={() => setIsVoiceUiEnabled((current) => !current)}
+                aria-pressed={isVoiceUiEnabled}
+              >
+                <span className="assistant-voice-knob" />
+              </button>
+            </section>
+
+            <AssistantComposer
+              inputId="assistant-input"
+              inputLabel={uiCopy.inputLabel}
+              placeholder={uiCopy.placeholder}
+              value={conversation.inputValue}
+              onChange={conversation.setInputValue}
+              onSubmit={handleSubmit}
+              isSending={conversation.isSending}
+              sendLabel={uiCopy.send}
+              inputRef={inputRef}
+            />
+          </section>
+        </>
       ) : null}
     </div>
   );

@@ -133,16 +133,29 @@ export function validateAssistantChatPayload(payload) {
   };
 }
 
-async function callOpenAI(messages) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL;
-  const timeoutMs = Number(process.env.OPENAI_TIMEOUT_MS || 15000);
+function trimTrailingSlashes(value) {
+  return String(value || "").replace(/\/+$/, "");
+}
+
+async function callProvider(messages) {
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+  const model = process.env.OPENROUTER_MODEL || process.env.OPENAI_MODEL;
+  const baseUrl = trimTrailingSlashes(
+    process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1"
+  );
+  const siteUrl = process.env.OPENROUTER_SITE_URL || "";
+  const appName = process.env.OPENROUTER_APP_NAME || "";
+  const timeoutMs = Number(
+    process.env.OPENROUTER_TIMEOUT_MS ||
+    process.env.OPENAI_TIMEOUT_MS ||
+    15000
+  );
 
   if (!apiKey) {
     throw createAssistantError({
       status: 503,
       code: "assistant_missing_api_key",
-      message: "Assistant is not configured: missing OPENAI_API_KEY"
+      message: "Assistant is not configured: missing OPENROUTER_API_KEY"
     });
   }
 
@@ -150,7 +163,7 @@ async function callOpenAI(messages) {
     throw createAssistantError({
       status: 503,
       code: "assistant_missing_model",
-      message: "Assistant is not configured: missing OPENAI_MODEL"
+      message: "Assistant is not configured: missing OPENROUTER_MODEL"
     });
   }
 
@@ -161,12 +174,22 @@ async function callOpenAI(messages) {
   let payload = null;
 
   try {
-    response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    };
+
+    if (siteUrl) {
+      headers["HTTP-Referer"] = siteUrl;
+    }
+
+    if (appName) {
+      headers["X-Title"] = appName;
+    }
+
+    response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
+      headers,
       body: JSON.stringify({
         model,
         temperature: 0.2,
@@ -198,7 +221,7 @@ async function callOpenAI(messages) {
     const apiMessage =
       payload?.error?.message ||
       payload?.message ||
-      `OpenAI request failed with status ${response.status}`;
+      `Provider request failed with status ${response.status}`;
     throw createAssistantError({
       status: 502,
       code: "assistant_provider_error",
@@ -246,7 +269,7 @@ export async function generateAssistantChatResponse(input) {
     documentKnowledge: assistantKnowledge.documentKnowledge
   });
 
-  const rawModelOutput = await callOpenAI(messages);
+  const rawModelOutput = await callProvider(messages);
 
   let parsedOutput;
   try {
