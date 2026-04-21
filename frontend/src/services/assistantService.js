@@ -54,7 +54,9 @@ export function sendAssistantChat(payload) {
         ? data.interactionId
         : null,
     recommendedEventSlug:
-      typeof data?.recommendedEventSlug === "string" ? data.recommendedEventSlug : null
+      typeof data?.recommendedEventSlug === "string" ? data.recommendedEventSlug : null,
+    recommendedEventTitle:
+      typeof data?.recommendedEventTitle === "string" ? data.recommendedEventTitle : null
   }));
 }
 

@@ -8,7 +8,9 @@ import {
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_SESSION_ID_LENGTH = 120;
 const MAX_PAGE_SLUG_LENGTH = 180;
+const MAX_USER_NAME_LENGTH = 60;
 const SLUG_PATTERN = /^[a-z0-9-]+$/i;
+const USER_NAME_PATTERN = /^[a-zA-ZÀ-ÿ\u00f1\u00d1' -]+$/;
 
 const VALID_PAGE_CONTEXTS = new Set([
   "home",
@@ -121,6 +123,27 @@ export function validateAssistantChatPayload(payload) {
     };
   }
 
+  const userName =
+    typeof payload.userName === "string" && payload.userName.trim()
+      ? payload.userName.trim().replace(/\s+/g, " ").slice(0, MAX_USER_NAME_LENGTH)
+      : null;
+
+  if (userName) {
+    if (userName.length < 2) {
+      return {
+        success: false,
+        error: "userName must be at least 2 characters"
+      };
+    }
+
+    if (!USER_NAME_PATTERN.test(userName)) {
+      return {
+        success: false,
+        error: "userName has an invalid format"
+      };
+    }
+  }
+
   return {
     success: true,
     data: {
@@ -128,7 +151,8 @@ export function validateAssistantChatPayload(payload) {
       language,
       sessionId,
       pageContext,
-      pageSlug
+      pageSlug,
+      userName
     }
   };
 }
@@ -220,8 +244,7 @@ const EVENT_QUERY_HINTS = [
   "tickets",
   "entrada",
   "entradas",
-  "resofusion",
-  "dea"
+  "resofusion"
 ];
 
 const FAVORITE_QUERY_HINTS = [
@@ -232,18 +255,6 @@ const FAVORITE_QUERY_HINTS = [
   "liebling"
 ];
 
-const LIST_EVENTS_QUERY_HINTS = [
-  "dime todos los eventos",
-  "todos los eventos",
-  "que eventos hay",
-  "cuales son los eventos",
-  "list events",
-  "all events",
-  "show events",
-  "alle veranstaltungen",
-  "alle events",
-  "welche events"
-];
 
 function isEventFocusedQuery(message, pageContext) {
   if (pageContext === "events" || pageContext === "event-detail") {
@@ -265,32 +276,6 @@ function isFavoriteStyleQuery(message) {
   }
 
   return FAVORITE_QUERY_HINTS.some((hint) => normalizedMessage.includes(hint));
-}
-
-function isListEventsQuery(message) {
-  const normalizedMessage = normalizeText(message);
-  if (!normalizedMessage) {
-    return false;
-  }
-
-  return LIST_EVENTS_QUERY_HINTS.some((hint) => normalizedMessage.includes(hint));
-}
-
-function formatEventDate(date, language) {
-  if (!date) {
-    return "";
-  }
-
-  try {
-    const locale = language === "es" ? "es-ES" : language === "de" ? "de-DE" : "en-GB";
-    return new Intl.DateTimeFormat(locale, {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    }).format(new Date(date));
-  } catch {
-    return String(date);
-  }
 }
 
 function scoreEventForQuery(eventItem, normalizedMessage) {
@@ -364,6 +349,19 @@ function getRecommendedEventSlug({ message, pageContext, pageSlug, siteKnowledge
   return null;
 }
 
+function getEventTitleBySlug(siteKnowledge, slug) {
+  if (!slug || !siteKnowledge?.events?.upcoming) {
+    return null;
+  }
+
+  const match = siteKnowledge.events.upcoming.find((eventItem) => eventItem.slug === slug);
+  if (!match || typeof match.title !== "string" || !match.title.trim()) {
+    return null;
+  }
+
+  return match.title.trim();
+}
+
 function eventActionLabelByLanguage(language) {
   if (language === "es") {
     return "Ver evento recomendado";
@@ -388,36 +386,7 @@ function routeToEventsAction(language) {
   return { type: "route", label: "Explore events", target: "/events" };
 }
 
-function buildFavoriteQueryAnswer(language, upcomingEvents) {
-  const topTitles = (Array.isArray(upcomingEvents) ? upcomingEvents : [])
-    .map((eventItem) => eventItem?.title)
-    .filter((title) => typeof title === "string" && title.trim())
-    .slice(0, 3);
-
-  if (language === "es") {
-    if (topTitles.length === 0) {
-      return "No tengo eventos favoritos. Puedo ayudarte a elegir segun ciudad, fecha o formato con la lista actual.";
-    }
-
-    return `No tengo un evento favorito. Ahora mismo puedes revisar: ${topTitles.join(", ")}. Si quieres, te ayudo a elegir el mejor para ti.`;
-  }
-
-  if (language === "de") {
-    if (topTitles.length === 0) {
-      return "Ich habe kein Lieblings-Event. Ich kann dir helfen, nach Stadt, Datum oder Format aus den aktuellen Veranstaltungen zu wahlen.";
-    }
-
-    return `Ich habe kein Lieblings-Event. Aktuelle Optionen sind: ${topTitles.join(", ")}. Wenn du willst, helfe ich dir bei der Auswahl.`;
-  }
-
-  if (topTitles.length === 0) {
-    return "I do not have a favorite event. I can help you choose by city, date, or format from current events.";
-  }
-
-  return `I do not have a favorite event. Current options include: ${topTitles.join(", ")}. If you want, I can help you choose the best fit.`;
-}
-
-function buildListEventsAnswer(language, upcomingEvents) {
+/* function buildListEventsAnswer(language, upcomingEvents) {
   const items = (Array.isArray(upcomingEvents) ? upcomingEvents : [])
     .map((eventItem) => ({
       title: typeof eventItem?.title === "string" ? eventItem.title.trim() : "",
@@ -450,15 +419,13 @@ function buildListEventsAnswer(language, upcomingEvents) {
   }
 
   return `There are currently ${items.length} published events: ${compact}. If you want, I can help you choose the best fit.`;
-}
+} */
 
 function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
   const eventFocused = isEventFocusedQuery(input.message, input.pageContext);
   const favoriteStyleQuery = isFavoriteStyleQuery(input.message);
-  const listEventsQuery = isListEventsQuery(input.message);
-  const upcomingEvents = Array.isArray(siteKnowledge?.events?.upcoming)
-    ? siteKnowledge.events.upcoming
-    : [];
+  const isEventIntent = parsedOutput.pageIntent === "event_discovery";
+  const shouldRecommendEvent = eventFocused && isEventIntent && !favoriteStyleQuery;
 
   const next = {
     ...parsedOutput,
@@ -466,8 +433,9 @@ function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
     relatedLinks: Array.isArray(parsedOutput.relatedLinks) ? [...parsedOutput.relatedLinks] : []
   };
 
-  if (!eventFocused) {
+  if (!shouldRecommendEvent) {
     next.recommendedEventSlug = null;
+    next.recommendedEventTitle = null;
     next.suggestedActions = next.suggestedActions.filter((action) => {
       if (action.type === "event") {
         return false;
@@ -485,6 +453,7 @@ function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
     });
 
     next.recommendedEventSlug = slug;
+    next.recommendedEventTitle = getEventTitleBySlug(siteKnowledge, slug);
 
     if (slug) {
       const eventTarget = `/events/${slug}`;
@@ -503,19 +472,19 @@ function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
   }
 
   if (favoriteStyleQuery) {
-    next.answer = buildFavoriteQueryAnswer(input.language, upcomingEvents);
-    next.pageIntent = "event_discovery";
     next.recommendedEventSlug = null;
-    next.suggestedActions = [routeToEventsAction(input.language)];
-    next.relatedLinks = [];
-  }
+    next.recommendedEventTitle = null;
+    next.suggestedActions = next.suggestedActions.filter((action) => {
+      if (action.type === "event") {
+        return false;
+      }
 
-  if (listEventsQuery) {
-    next.answer = buildListEventsAnswer(input.language, upcomingEvents);
-    next.pageIntent = "event_discovery";
-    next.recommendedEventSlug = null;
-    next.suggestedActions = [routeToEventsAction(input.language)];
-    next.relatedLinks = [];
+      return !/^\/events\/[a-z0-9-]+$/i.test(action.target);
+    });
+
+    if (!next.suggestedActions.some((action) => action.target === "/events")) {
+      next.suggestedActions.unshift(routeToEventsAction(input.language));
+    }
   }
 
   next.suggestedActions = dedupeActions(next.suggestedActions).slice(0, 5);
@@ -653,6 +622,7 @@ export async function generateAssistantChatResponse(input) {
     sessionId: input.sessionId,
     pageContext: input.pageContext,
     pageSlug: input.pageSlug,
+    userName: input.userName,
     siteKnowledge: assistantKnowledge.siteKnowledge,
     documentKnowledge: assistantKnowledge.documentKnowledge
   });
@@ -691,6 +661,7 @@ export async function generateAssistantChatResponse(input) {
     suggestedActions: finalOutput.suggestedActions,
     relatedLinks: finalOutput.relatedLinks,
     recommendedEventSlug: finalOutput.recommendedEventSlug,
+    recommendedEventTitle: finalOutput.recommendedEventTitle || null,
 
     // Backward compatibility alias.
     intent: finalOutput.pageIntent,

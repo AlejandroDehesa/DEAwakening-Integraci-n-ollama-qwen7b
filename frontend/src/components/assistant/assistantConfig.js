@@ -1,4 +1,5 @@
 export const SESSION_STORAGE_KEY = "deawakening-assistant-session-id";
+export const ASSISTANT_USER_NAME_STORAGE_KEY = "deawakening-assistant-user-name";
 
 export const assistantUiCopy = {
   en: {
@@ -9,8 +10,20 @@ export const assistantUiCopy = {
     heroTitle: "Start with your personal guide",
     heroSubtitle:
       "Share what you need and get a clear next step: event, book, deeper context, or contact.",
+    portalTitle: "Welcome to your DEAwakening guide",
+    portalSubtitle:
+      "Open the assistant when you are ready. I can help with events, the book, and your next step.",
+    portalAction: "Open guide",
+    portalNameTitle: "Before we begin, what is your name?",
+    portalNameSubtitle:
+      "I will use it to give you a more personal and human guidance experience.",
+    portalNamePlaceholder: "Write your name...",
+    portalNameAction: "Start guide",
+    portalNameRequired: "Please enter your name to continue.",
     welcome:
       "Welcome. I am your DEAwakening guide. I can help you understand the work, discover events, and choose your next step.",
+    welcomeNamed:
+      "Welcome, {name}. I am your DEAwakening guide. I can help you understand the work, discover events, and choose your next step.",
     inputLabel: "Assistant message",
     placeholder: "Write your question...",
     send: "Send",
@@ -31,30 +44,42 @@ export const assistantUiCopy = {
     }
   },
   es: {
-    launcher: "Guía",
-    heroEyebrow: "Guía IA",
-    widgetTitle: "Guía DEAwakening",
+    launcher: "Guia",
+    heroEyebrow: "Guia IA",
+    widgetTitle: "Guia DEAwakening",
     widgetSubtitle: "Pregunta por eventos, el enfoque de David o tu siguiente paso ideal.",
-    heroTitle: "Empieza con tu guía personal",
+    heroTitle: "Empieza con tu guia personal",
     heroSubtitle:
-      "Cuéntame qué necesitas y te mostraré un siguiente paso claro: evento, libro, contexto o contacto.",
+      "Cuentame que necesitas y te mostrare un siguiente paso claro: evento, libro, contexto o contacto.",
+    portalTitle: "Tu guia IA de DEAwakening",
+    portalSubtitle:
+      "Cuando quieras, abre el asistente y te ayudo a encontrar tu mejor siguiente paso.",
+    portalAction: "Entrar en la guia",
+    portalNameTitle: "Antes de empezar, como te gustaria que te llame?",
+    portalNameSubtitle:
+      "Tu nombre solo se usa para personalizar la experiencia dentro de la guia IA.",
+    portalNamePlaceholder: "Escribe tu nombre...",
+    portalNameAction: "Entrar a la guia",
+    portalNameRequired: "Necesito tu nombre para activar la guia IA.",
     welcome:
-      "Bienvenido. Soy tu guía de DEAwakening. Puedo ayudarte a comprender el enfoque, descubrir eventos y elegir tu próximo paso con claridad.",
+      "Bienvenido. Soy tu guia de DEAwakening. Puedo ayudarte a comprender el enfoque, descubrir eventos y elegir tu proximo paso con claridad.",
+    welcomeNamed:
+      "Bienvenido, {name}. Soy tu guia de DEAwakening. Puedo ayudarte a comprender el enfoque, descubrir eventos y elegir tu proximo paso con claridad.",
     inputLabel: "Mensaje al asistente",
     placeholder: "Escribe tu pregunta...",
     send: "Enviar",
     thinking: "Pensando...",
     close: "Cerrar asistente",
-    error: "Ahora mismo no he podido completarlo. Inténtalo de nuevo en unos segundos.",
-    emptyState: "Elige una acción rápida o escribe tu pregunta.",
-    quickActionsTitle: "Inicio rápido",
+    error: "Ahora mismo no he podido completarlo. Intentalo de nuevo en unos segundos.",
+    emptyState: "Elige una accion rapida o escribe tu pregunta.",
+    quickActionsTitle: "Inicio rapido",
     recommendationLabel: "Evento recomendado",
     openRecommendation: "Ver evento recomendado",
     intentLabels: {
-      general_info: "Orientación general",
-      event_discovery: "Orientación sobre eventos",
-      book_interest: "Orientación sobre el libro",
-      contact_interest: "Orientación de contacto",
+      general_info: "Orientacion general",
+      event_discovery: "Orientacion sobre eventos",
+      book_interest: "Orientacion sobre el libro",
+      contact_interest: "Orientacion de contacto",
       about_david: "Sobre David",
       guidance: ""
     }
@@ -63,18 +88,30 @@ export const assistantUiCopy = {
     launcher: "Guide",
     heroEyebrow: "KI Guide",
     widgetTitle: "DEAwakening Guide",
-    widgetSubtitle: "Frage nach Events, Davids Ansatz oder deinem nächsten klaren Schritt.",
-    heroTitle: "Starte mit deinem persönlichen Guide",
-    heroSubtitle: "Sag mir, was du brauchst, und ich zeige dir den nächsten klaren Schritt.",
+    widgetSubtitle: "Frage nach Events, Davids Ansatz oder deinem naechsten klaren Schritt.",
+    heroTitle: "Starte mit deinem persoenlichen Guide",
+    heroSubtitle: "Sag mir, was du brauchst, und ich zeige dir den naechsten klaren Schritt.",
+    portalTitle: "Dein DEAwakening Guide",
+    portalSubtitle:
+      "Wenn du bereit bist, oeffne den Assistenten. Ich begleite dich mit einem klaren naechsten Schritt.",
+    portalAction: "Guide starten",
+    portalNameTitle: "Bevor wir starten: Wie darf ich dich nennen?",
+    portalNameSubtitle:
+      "Dein Name wird nur verwendet, um die Begleitung persoenlicher zu gestalten.",
+    portalNamePlaceholder: "Schreibe deinen Namen...",
+    portalNameAction: "Guide betreten",
+    portalNameRequired: "Bitte gib deinen Namen ein, um fortzufahren.",
     welcome:
-      "Willkommen. Ich bin dein DEAwakening Guide. Ich helfe dir, den Ansatz zu verstehen, passende Events zu finden und den nächsten Schritt mit Klarheit zu wählen.",
+      "Willkommen. Ich bin dein DEAwakening Guide. Ich helfe dir, den Ansatz zu verstehen, passende Events zu finden und den naechsten Schritt mit Klarheit zu waehlen.",
+    welcomeNamed:
+      "Willkommen, {name}. Ich bin dein DEAwakening Guide. Ich helfe dir, den Ansatz zu verstehen, passende Events zu finden und den naechsten Schritt mit Klarheit zu waehlen.",
     inputLabel: "Nachricht an den Assistenten",
     placeholder: "Stelle deine Frage...",
     send: "Senden",
     thinking: "Wird vorbereitet...",
-    close: "Assistent schließen",
-    error: "Ich konnte das gerade nicht abschließen. Bitte versuche es gleich erneut.",
-    emptyState: "Wähle eine Schnellaktion oder stelle deine Frage.",
+    close: "Assistent schliessen",
+    error: "Ich konnte das gerade nicht abschliessen. Bitte versuche es gleich erneut.",
+    emptyState: "Waehle eine Schnellaktion oder stelle deine Frage.",
     quickActionsTitle: "Schnellstart",
     recommendationLabel: "Empfohlenes Event",
     openRecommendation: "Empfohlenes Event ansehen",
@@ -83,8 +120,8 @@ export const assistantUiCopy = {
       event_discovery: "Event Orientierung",
       book_interest: "Buch Orientierung",
       contact_interest: "Kontakt Orientierung",
-      about_david: "Über David",
-      guidance: "Nächster Schritt"
+      about_david: "Ueber David",
+      guidance: "Naechster Schritt"
     }
   }
 };
@@ -99,17 +136,17 @@ export const assistantQuickActionsByLanguage = {
   ],
   es: [
     { id: "understand-david", prompt: "Quiero entender el enfoque de David" },
-    { id: "choose-event", prompt: "Ayúdame a elegir el evento adecuado" },
-    { id: "where-to-start", prompt: "¿Por dónde debería empezar hoy?" },
-    { id: "about-book", prompt: "Cuéntame sobre el libro" },
+    { id: "choose-event", prompt: "Ayudame a elegir el evento adecuado" },
+    { id: "where-to-start", prompt: "Por donde deberia empezar hoy?" },
+    { id: "about-book", prompt: "Cuentame sobre el libro" },
     { id: "contact-david", prompt: "Quiero contactar con David" }
   ],
   de: [
-    { id: "understand-david", prompt: "Ich möchte Davids Ansatz verstehen" },
-    { id: "choose-event", prompt: "Hilf mir, das passende Event zu wählen" },
+    { id: "understand-david", prompt: "Ich moechte Davids Ansatz verstehen" },
+    { id: "choose-event", prompt: "Hilf mir, das passende Event zu waehlen" },
     { id: "where-to-start", prompt: "Wo sollte ich heute anfangen?" },
-    { id: "about-book", prompt: "Erzähl mir vom Buch" },
-    { id: "contact-david", prompt: "Ich möchte David kontaktieren" }
+    { id: "about-book", prompt: "Erzaehl mir vom Buch" },
+    { id: "contact-david", prompt: "Ich moechte David kontaktieren" }
   ]
 };
 

@@ -33,17 +33,25 @@ export function validateContactPayload(payload) {
   return null;
 }
 
-export async function saveContactMessage(payload) {
+export function normalizeContactPayload(payload) {
+  return {
+    name: payload.name.trim(),
+    email: payload.email.trim(),
+    message: payload.message.trim()
+  };
+}
+
+export async function saveContactMessage(payload, createdAt = new Date().toISOString()) {
   await run(
     `
       INSERT INTO contact_messages (name, email, message, created_at)
       VALUES (?, ?, ?, ?)
     `,
     [
-      payload.name.trim(),
-      payload.email.trim(),
-      payload.message.trim(),
-      new Date().toISOString()
+      payload.name,
+      payload.email,
+      payload.message,
+      createdAt
     ]
   );
 }

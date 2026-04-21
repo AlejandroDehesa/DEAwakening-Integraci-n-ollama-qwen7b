@@ -14,7 +14,6 @@ function AssistantMessageList({
   messages,
   isSending,
   thinkingLabel,
-  intentLabels,
   recommendationLabel,
   openRecommendationLabel,
   onActionClick,
@@ -25,24 +24,12 @@ function AssistantMessageList({
   assistantAvatarSrc = "",
   assistantAvatarAlt = "Assistant avatar"
 }) {
-  function getIntentLabel(intentKey) {
-    if (!intentKey || !intentLabels || typeof intentLabels !== "object") {
-      return "";
-    }
-
-    if (!Object.prototype.hasOwnProperty.call(intentLabels, intentKey)) {
-      return "";
-    }
-
-    const label = intentLabels[intentKey];
-    return typeof label === "string" ? label.trim() : "";
-  }
-
   function buildMeta(message, clickType) {
     return {
       interactionId: message.interactionId || null,
       pageIntent: message.pageIntent || null,
       recommendedEventSlug: message.recommendedEventSlug || null,
+      recommendedEventTitle: message.recommendedEventTitle || null,
       clickType
     };
   }
@@ -51,7 +38,6 @@ function AssistantMessageList({
     <div className={`assistant-feed ${className}`.trim()} ref={feedRef} aria-live="polite">
       {Array.isArray(messages) && messages.length > 0 ? (
         messages.map((message) => {
-          const intentLabel = getIntentLabel(message.pageIntent);
           const recommendedEventTarget =
             message.role === "assistant" &&
             typeof message.recommendedEventSlug === "string" &&
@@ -120,20 +106,14 @@ function AssistantMessageList({
             >
               <p>{message.text}</p>
 
-              {message.role === "assistant" && intentLabel ? (
-                <small className="assistant-meta">
-                  {intentLabel}
-                  {typeof message.confidence === "number"
-                    ? ` - ${Math.round(message.confidence * 100)}%`
-                    : ""}
-                </small>
-              ) : null}
-
               {recommendedEventTarget ? (
                 <div className="assistant-recommendation-card">
                   <p className="assistant-recommendation-label">{recommendationLabel}</p>
                   <p className="assistant-recommendation-title">
-                    {formatSlugLabel(message.recommendedEventSlug)}
+                    {typeof message.recommendedEventTitle === "string" &&
+                    message.recommendedEventTitle.trim()
+                      ? message.recommendedEventTitle
+                      : formatSlugLabel(message.recommendedEventSlug)}
                   </p>
                   <button
                     type="button"

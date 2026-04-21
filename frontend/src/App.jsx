@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
+import AdminKeyAccess from "./components/admin/AdminKeyAccess";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import AdminContent from "./pages/admin/AdminContent";
@@ -22,9 +23,30 @@ function App() {
         <Route path="/mi-libro" element={<MyBook />} />
         <Route path="/host-an-event" element={<HostEvent />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/events" element={<AdminEvents />} />
-        <Route path="/admin/content" element={<AdminContent />} />
+        <Route
+          path="/admin"
+          element={(
+            <AdminKeyAccess>
+              <AdminDashboard />
+            </AdminKeyAccess>
+          )}
+        />
+        <Route
+          path="/admin/events"
+          element={(
+            <AdminKeyAccess>
+              <AdminEvents />
+            </AdminKeyAccess>
+          )}
+        />
+        <Route
+          path="/admin/content"
+          element={(
+            <AdminKeyAccess>
+              <AdminContent />
+            </AdminKeyAccess>
+          )}
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

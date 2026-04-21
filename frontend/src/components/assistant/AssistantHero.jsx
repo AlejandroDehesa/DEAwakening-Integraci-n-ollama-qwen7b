@@ -51,8 +51,14 @@ function AssistantHero() {
       return;
     }
 
-    feedRef.current.scrollTop = feedRef.current.scrollHeight;
-  }, [conversation.messages, conversation.isSending]);
+    const feedNode = feedRef.current;
+    if (conversation.messages.length <= 1 && !conversation.isSending) {
+      feedNode.scrollTop = 0;
+      return;
+    }
+
+    feedNode.scrollTop = feedNode.scrollHeight;
+  }, [conversation.isSending, conversation.messages]);
 
   async function handleQuickAction(actionItem) {
     const promptText = getQuickActionPrompt(actionItem);

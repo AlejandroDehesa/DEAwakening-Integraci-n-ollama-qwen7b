@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { sendAssistantChat } from "../../services/assistantService";
 import { SESSION_STORAGE_KEY } from "./assistantConfig";
 
@@ -68,6 +68,7 @@ export function useAssistantConversation({
   language,
   pageContext,
   pageSlug,
+  userName,
   welcomeMessage
 }) {
   const [sessionId] = useState(getOrCreateSessionId);
@@ -79,6 +80,34 @@ export function useAssistantConversation({
   const appendMessages = useCallback((nextMessages) => {
     setMessages((current) => [...current, ...nextMessages].slice(-MAX_HISTORY));
   }, []);
+
+  useEffect(() => {
+    setMessages((current) => {
+      if (current.length === 0) {
+        return current;
+      }
+
+      const hasRealConversation = current.some((message) => !message.isWelcome);
+      if (hasRealConversation) {
+        return current;
+      }
+
+      let changed = false;
+      const next = current.map((message) => {
+        if (!message?.isWelcome || message.text === welcomeMessage) {
+          return message;
+        }
+
+        changed = true;
+        return {
+          ...message,
+          text: welcomeMessage
+        };
+      });
+
+      return changed ? next : current;
+    });
+  }, [welcomeMessage]);
 
   const ensureWelcomeMessage = useCallback(() => {
     setMessages((current) => {
@@ -97,11 +126,18 @@ export function useAssistantConversation({
           suggestedActions: [],
           relatedLinks: [],
           recommendedEventSlug: null,
+          recommendedEventTitle: null,
           interactionId: null
         }
       ];
     });
   }, [welcomeMessage]);
+
+  const resetConversation = useCallback(() => {
+    setMessages([]);
+    setInputValue("");
+    setError("");
+  }, []);
 
   const addAssistantMessage = useCallback(
     (assistantData) => {
@@ -120,6 +156,10 @@ export function useAssistantConversation({
           recommendedEventSlug:
             typeof assistantData.recommendedEventSlug === "string"
               ? assistantData.recommendedEventSlug
+              : null,
+          recommendedEventTitle:
+            typeof assistantData.recommendedEventTitle === "string"
+              ? assistantData.recommendedEventTitle
               : null,
           interactionId:
             Number.isInteger(assistantData.interactionId) && assistantData.interactionId > 0
@@ -156,7 +196,8 @@ export function useAssistantConversation({
           language,
           sessionId,
           pageContext,
-          pageSlug
+          pageSlug,
+          userName
         });
 
         addAssistantMessage(assistantData);
@@ -177,6 +218,7 @@ export function useAssistantConversation({
       language,
       pageContext,
       pageSlug,
+      userName,
       sessionId
     ]
   );
@@ -197,8 +239,7 @@ export function useAssistantConversation({
   );
 
   const latestAssistantMessage = useMemo(
-    () =>
-      [...messages].reverse().find((message) => message.role === "assistant") || null,
+    () => [...messages].reverse().find((message) => message.role === "assistant") || null,
     [messages]
   );
 
@@ -214,6 +255,7 @@ export function useAssistantConversation({
     ensureWelcomeMessage,
     sendMessage,
     sendInputMessage,
-    sendQuickAction
+    sendQuickAction,
+    resetConversation
   };
 }

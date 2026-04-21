@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { ASSISTANT_USER_NAME_STORAGE_KEY } from "./assistant/assistantConfig";
 import { getSectionExtra } from "../services/contentService";
 
 const fallbackLabelsByLanguage = {
@@ -14,7 +15,7 @@ const fallbackLabelsByLanguage = {
     contact: "CONTACT"
   },
   es: {
-    assistant: "GUÍA IA",
+    assistant: "GUIA IA",
     home: "INICIO",
     events: "EVENTOS",
     about: "SOBRE MI",
@@ -33,9 +34,60 @@ const fallbackLabelsByLanguage = {
   }
 };
 
+const REMOVED_ASSISTANT_USER_NAMES = new Set(["maricarmen"]);
+
+function sanitizeUserName(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.trim().replace(/\s+/g, " ").slice(0, 60);
+}
+
+function shouldRemoveStoredUserName(value) {
+  return REMOVED_ASSISTANT_USER_NAMES.has(String(value || "").trim().toLowerCase());
+}
+
+function getStoredAssistantUserName() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  try {
+    const storedUserName = sanitizeUserName(
+      window.localStorage.getItem(ASSISTANT_USER_NAME_STORAGE_KEY) || ""
+    );
+    if (shouldRemoveStoredUserName(storedUserName)) {
+      window.localStorage.removeItem(ASSISTANT_USER_NAME_STORAGE_KEY);
+      return "";
+    }
+
+    return storedUserName;
+  } catch {
+    return "";
+  }
+}
+
+function getGreetingText(language, userName) {
+  if (!userName) {
+    return "";
+  }
+
+  if (language === "es") {
+    return `Bienvenido, ${userName}`;
+  }
+
+  if (language === "de") {
+    return `Willkommen, ${userName}`;
+  }
+
+  return `Welcome, ${userName}`;
+}
+
 function Navbar() {
   const { currentLanguage, setLanguage } = useLanguage();
   const [copy, setCopy] = useState(fallbackLabelsByLanguage.en);
+  const [assistantUserName, setAssistantUserName] = useState(getStoredAssistantUserName);
 
   useEffect(() => {
     let ignore = false;
@@ -69,6 +121,28 @@ function Navbar() {
     };
   }, [currentLanguage]);
 
+  useEffect(() => {
+    function syncAssistantUserName() {
+      setAssistantUserName(getStoredAssistantUserName());
+    }
+
+    function onStorage(event) {
+      if (event.key && event.key !== ASSISTANT_USER_NAME_STORAGE_KEY) {
+        return;
+      }
+
+      syncAssistantUserName();
+    }
+
+    window.addEventListener("assistant:user-name-updated", syncAssistantUserName);
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("assistant:user-name-updated", syncAssistantUserName);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
   const links = [
     { to: "/", label: copy.home },
     { to: "/events", label: copy.events },
@@ -88,7 +162,13 @@ function Navbar() {
 
   return (
     <header className="site-header">
-      <div className="container header-inner">
+      <div
+        className={
+          assistantUserName
+            ? "container header-inner header-inner-with-name"
+            : "container header-inner"
+        }
+      >
         <NavLink className="brand-mark" to="/" aria-label="DEAwakening">
           <img
             className="brand-logo brand-logo-full"
@@ -96,6 +176,12 @@ function Navbar() {
             alt="DEAwakening"
           />
         </NavLink>
+
+        {assistantUserName ? (
+          <p className="assistant-navbar-greeting">
+            {getGreetingText(currentLanguage, assistantUserName)}
+          </p>
+        ) : null}
 
         <button
           type="button"

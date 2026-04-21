@@ -3,6 +3,11 @@ dist
 *.log
 backend/database/*.sqlite
 .env
-.env.local
+.env.*
 backend/.env
+backend/.env.*
 frontend/.env
+frontend/.env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example

@@ -27,23 +27,23 @@ const PAGE_CONTEXT_ROUTES = {
 
 const ASSISTANT_EVENT_OVERRIDES = {
   "deawakening-valencia": {
-    title: "ResoFusion Basic",
-    location: "Findhorn, Scotland"
+    title: "ResoFusion Basic - Findhorn",
+    location: "Findhorn, Escocia"
   },
   "deawakening-madrid": {
-    title: "ResoFusion Basic",
+    title: "ResoFusion Basic - Doha",
     location: "Niya Honor Air, Doha"
   },
   "deawakening-barcelona": {
-    title: "ResoFusion Basico",
+    title: "ResoFusion Básico - Doha",
     location: "Niya Honor Air, Doha"
   },
   "deawakening-malaga": {
-    title: "Degustacion de ResoFusion",
+    title: "Degustación de ResoFusion",
     location: "Niya Honor Air, Doha"
   },
   "deawakening-sevilla": {
-    title: "ResoFusion Basico",
+    title: "ResoFusion Básico",
     location: "Srithanu, Koh Phangan, Tailandia"
   },
   "deawakening-bilbao": {
@@ -52,7 +52,7 @@ const ASSISTANT_EVENT_OVERRIDES = {
   },
   "deawakening-zaragoza": {
     title: "ResoFusion Basic en Mallorca",
-    location: "Palma, Espana"
+    location: "Palma, España"
   },
   "deawakening-alicante": {
     title: "DEA at Casa Wald",
@@ -76,7 +76,7 @@ const ASSISTANT_EVENT_OVERRIDES = {
   },
   "deawakening-santiago-compostela": {
     title: "Harvest Series 7 - Kaplankaya",
-    location: "Six Senses Kaplankaya, Turquia"
+    location: "Six Senses Kaplankaya, Turquía"
   },
   "deawakening-las-palmas": {
     title: "ResoFusion",

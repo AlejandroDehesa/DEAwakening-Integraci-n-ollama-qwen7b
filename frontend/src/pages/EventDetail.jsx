@@ -1901,6 +1901,742 @@ const specialEventDetails = {
   }
 };
 
+const specialEventDetailsDe = {
+  "deawakening-valencia": {
+    ...specialEventDetails["deawakening-valencia"].es,
+    subtitle: "Findhorn, Schottland",
+    intro:
+      "Du und dein K\u00f6rper so, wie sie gemeint sind. Lerne, dich \u00fcber sanfte Resosense-Bewegungen in spezifischen Frequenzen mit deiner Essenz zu verbinden. Integriere neue M\u00f6glichkeiten in deinen K\u00f6rper und dein Leben durch DEA-Gruppensitzungen. Erhalte die Werkzeuge, die du brauchst, um die Ver\u00e4nderung zu schaffen, die du dir w\u00fcnschst.",
+    heroImageAlt: "ResoFusion Basic in Findhorn",
+    timePlaceTitle: "Zeit und Ort",
+    timePlaceRange: "30. Mai 2025, 17:00 - 1. Juni 2025, 16:00",
+    venue:
+      "Findhorn, Findhorn Village Centre, Old School Church Place, Findhorn, Forres IV36 3YR, Vereinigtes K\u00f6nigreich",
+    guestsTitle: "G\u00e4ste",
+    guestsAction: "Alle ansehen",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "\u00dcberblick" },
+      {
+        type: "p",
+        text: "ResoFusion Basic ist ein praxisnahes 2,5-Tage-Training, in dem du lernst, k\u00f6rperliche Resonanz zu nutzen und die energetische Arbeit von DEA (Deep Energetic Awakening) zu empfangen."
+      },
+      { type: "heading", text: "Was du lernen wirst" },
+      {
+        type: "list",
+        items: [
+          "Resonanzwellen mit deinen eigenen Muskeln in deiner Grundfrequenz und drei zus\u00e4tzlichen Harmonischen zu aktivieren.",
+          "Resonanz zu nutzen, um Denk-, Verhaltens- und Spannungmuster zu l\u00f6sen.",
+          "Reale Ver\u00e4nderungen in K\u00f6rper, Energie und Alltag zu integrieren."
+        ]
+      },
+      { type: "heading", text: "Wie gearbeitet wird" },
+      {
+        type: "list",
+        items: [
+          "5 DEA-Gruppensitzungen w\u00e4hrend des Trainings.",
+          "W\u00e4hrend ein Teil der Gruppe empf\u00e4ngt, h\u00e4lt der Rest den Raum mit Pr\u00e4senz.",
+          "Dieses Format schafft ein energetisches Feld, das tiefere Transformation unterst\u00fctzt."
+        ]
+      },
+      { type: "heading", text: "Unterkunft" },
+      {
+        type: "p",
+        text: "Im Findhorn Village Centre gibt es Hostel-Unterk\u00fcnfte, und in der Umgebung findest du viele sch\u00f6ne M\u00f6glichkeiten zum \u00dcbernachten."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Resosense-Basiskurs mit Handbuch.",
+      "5 DEA-Sitzungen.",
+      "Wasser und leichte Erfrischungen."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Transport.", "Mahlzeiten.", "Unterkunft."],
+    ticketsTitle: "Tickets",
+    ticketTypeTitle: "Ticketart",
+    ticketTypeValue: "Fr\u00fchbucher-Anzahlung: 100 GBP",
+    ticketInfoTitle: "Mehr Informationen",
+    ticketInfoValue:
+      "Der Fr\u00fchbucherpreis gilt bis Mitternacht am 31. M\u00e4rz. Du sparst 70 GBP. Nur 350 GBP statt 420 GBP f\u00fcr das gesamte Programm. Die restlichen 250 GBP werden bar an der T\u00fcr bezahlt. Tickets sind nicht erstattungsf\u00e4hig, aber \u00fcbertragbar.",
+    priceTitle: "Preis",
+    priceValue: "100,00 GBP",
+    statusMessage: "Der Verkauf ist beendet.",
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-valencia"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Fr\u00fchbucher-Anzahlung: 100 GBP",
+      currencyHint: "(britische pfund)",
+      infoLines: [
+        "Fr\u00fchbuchung: bis Mitternacht am 31. M\u00e4rz.",
+        "Ersparnis: 70 GBP (350 GBP statt 420 GBP).",
+        "Restzahlung vor Ort: 250 GBP in bar.",
+        "Bedingung: nicht erstattungsf\u00e4hig, aber \u00fcbertragbar."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-madrid": {
+    ...specialEventDetails["deawakening-madrid"].es,
+    intro:
+      "Du und dein K\u00f6rper so, wie sie gemeint sind. Finde \u00fcber sanfte Resosense-Bewegungen in spezifischen Frequenzen Zugang zu deiner Essenz. Integriere diese neuen M\u00f6glichkeiten in deinen K\u00f6rper und dein Leben durch DEA-Gruppensitzungen.",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "\u00dcberblick" },
+      {
+        type: "p",
+        text: "ResoFusion Basic ist ein praxisnahes 2,5-Tage-Training, in dem du lernst, stehende Resonanzwellen in deinem K\u00f6rper in deiner Grundfrequenz und drei zus\u00e4tzlichen Harmonischen zu erzeugen."
+      },
+      {
+        type: "p",
+        text: "Das Eintreten in Resonanz mit deiner Grundfrequenz kann Denk- und Verhaltensmuster sowie k\u00f6rperliche Verzerrungen l\u00f6sen, die als Reaktion auf Lebenserfahrungen entstanden sind."
+      },
+      { type: "heading", text: "Gruppenerfahrung" },
+      {
+        type: "p",
+        text: "W\u00e4hrend des Trainings empf\u00e4ngst du 5 DEA-Sitzungen. W\u00e4hrend ein Teil der Gruppe empf\u00e4ngt, h\u00e4lt der Rest den Raum mit seiner Pr\u00e4senz und schafft so ein Feld f\u00fcr tiefgreifende Ver\u00e4nderung."
+      },
+      { type: "heading", text: "Reservierung" },
+      {
+        type: "p",
+        text: "Preis: 2000 QR. Um deinen Platz zu reservieren, kontaktiere NIYA TEAM direkt \u00fcber WhatsApp \u00fcber den Reservierungslink."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Resosense-Basiskurs mit Handbuch.",
+      "5 DEA-Sitzungen.",
+      "Wasser und leichte Erfrischungen."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-madrid"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Reservierungspreis: 2000 QR",
+      currencyHint: "(katarische riyal)",
+      infoLines: [
+        "Reserviere deinen Platz mit NIYA TEAM \u00fcber WhatsApp.",
+        "Direktlink: https://wa.link/qrn627",
+        "Enth\u00e4lt Resosense Basic + 5 DEA-Sitzungen.",
+        "Mahlzeiten und Unterkunft sind nicht inbegriffen."
+      ],
+      statusMessage: "Reservierung per Direktkontakt."
+    }
+  },
+  "deawakening-barcelona": {
+    ...specialEventDetails["deawakening-barcelona"].es,
+    title: "ResoFusion Basic - Doha Oktober Edition",
+    intro:
+      "Du und dein K\u00f6rper so, wie sie gemeint sind. Lerne, \u00fcber sanfte Resosense-Bewegungen in spezifischen Frequenzen Zugang zu deiner Essenz zu finden. Integriere diese neuen M\u00f6glichkeiten in deinen K\u00f6rper und dein Leben durch DEA-Gruppensitzungen.",
+    heroImageAlt: "ResoFusion Basic Doha Oktober",
+    timePlaceRange: "17. Okt. 2024, 14:00 - 19. Okt. 2024, 17:00",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "\u00dcberblick" },
+      {
+        type: "p",
+        text: "ResoFusion Basic ist ein praxisnahes 2,5-Tage-Training, das sich auf Resonanz, K\u00f6rperbewusstsein und tiefe energetische Integration konzentriert."
+      },
+      { type: "heading", text: "Was du lernen wirst" },
+      {
+        type: "list",
+        items: [
+          "Stehende Resonanzwellen in deinem K\u00f6rper mit deiner Grundfrequenz und drei zus\u00e4tzlichen Harmonischen zu erzeugen.",
+          "Denk- und Verhaltensmuster zu l\u00f6sen, die mit k\u00f6rperlichen und energetischen Verzerrungen verbunden sind.",
+          "Eine einfache pers\u00f6nliche Praxis anzuwenden, die tief und nachhaltig wirkt."
+        ]
+      },
+      { type: "heading", text: "Gruppenprozess" },
+      {
+        type: "p",
+        text: "W\u00e4hrend des Trainings empf\u00e4ngst du 5 DEA-Gruppensitzungen. W\u00e4hrend ein Teil der Gruppe empf\u00e4ngt, h\u00e4lt der Rest den Raum mit Pr\u00e4senz und verst\u00e4rkt den Ver\u00e4nderungsprozess."
+      },
+      { type: "heading", text: "Integration" },
+      {
+        type: "p",
+        text: "Wenn du sp\u00fcrst, dass dich das unterst\u00fctzen kann, liegst du richtig. Dieser Prozess ist darauf ausgerichtet, dich auf authentische und ganzheitliche Weise zur\u00fcck in deine Mitte zu bringen."
+      }
+    ],
+    moreInfo: "<<Vollst\u00e4ndiges Programm hier>>",
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Resosense-Basiskurs mit Handbuch.",
+      "5 DEA-Sitzungen.",
+      "Wasser und leichte Erfrischungen."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-barcelona"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Reservierungspreis: 2000 QR",
+      currencyHint: "(katarische riyal)",
+      infoLines: [
+        "Reservierung per Direktkontakt mit NIYA TEAM.",
+        "WhatsApp: https://wa.link/qrn627",
+        "Enth\u00e4lt Resosense Basic + 5 DEA-Sitzungen.",
+        "Mahlzeiten und Unterkunft sind nicht inbegriffen."
+      ],
+      statusMessage: "Reservierung per Direktkontakt."
+    }
+  },
+  "deawakening-malaga": {
+    ...specialEventDetails["deawakening-malaga"].es,
+    title: "ResoFusion Kennenlern-Session - Doha",
+    intro:
+      "Komm, beobachte und erlebe ResoFusion selbst. Lerne, \u00fcber sanfte Resosense-Bewegungen in spezifischen Frequenzen Zugang zu deiner Essenz zu finden, und integriere neue M\u00f6glichkeiten durch DEA-Gruppensitzungen.",
+    heroImageAlt: "ResoFusion Kennenlern-Session Doha",
+    timePlaceRange: "17. Oktober 2024, 13:00 - 16:00",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Einf\u00fchrungsprogramm" },
+      {
+        type: "p",
+        text: "Ein 3-st\u00fcndiges ResoFusion-Einf\u00fchrungsprogramm, um die Kraft der Resonanz zu entdecken und zu lernen, wie du sie nutzen kannst, um deinen K\u00f6rper und dein Leben zu ver\u00e4ndern."
+      },
+      {
+        type: "list",
+        items: [
+          "2 kollektive DEA-Sitzungen.",
+          "PEAK-Praxis, um deinen Zustand in weniger als einer Minute zu ver\u00e4ndern."
+        ]
+      },
+      { type: "heading", text: "N\u00e4chster Schritt" },
+      {
+        type: "p",
+        text: "Nach dieser Kennenlern-Session kannst du mit ResoFusion Basic weitermachen, einem erfahrungsorientierten 2,5-Tage-Training mit tieferer Resonanz- und Integrationsarbeit."
+      },
+      { type: "heading", text: "Preis und Reservierung" },
+      {
+        type: "p",
+        text: "Preis: 4000 QR. Wenn du dich f\u00fcr das Gesamtprogramm entscheidest, zahlst du nur den Restbetrag von 1600 QR (je nach Verf\u00fcgbarkeit)."
+      }
+    ],
+    moreInfo: "<<Vollst\u00e4ndiges Programm hier>>",
+    includesTitle: "Inklusive",
+    includesItems: [
+      "ResoFusion-Einf\u00fchrungsprogramm (3 Stunden).",
+      "2 kollektive DEA-Sitzungen.",
+      "PEAK-Praxis."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-malaga"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Reservierungspreis: 4000 QR",
+      currencyHint: "(katarische riyal)",
+      infoLines: [
+        "Wenn du mit dem Gesamtprogramm weitermachst, betr\u00e4gt der Restbetrag 1600 QR.",
+        "Abh\u00e4ngig von verf\u00fcgbaren Pl\u00e4tzen.",
+        "Reservierung mit NIYA TEAM per WhatsApp: https://wa.link/qrn627"
+      ],
+      statusMessage: "Reservierung per Direktkontakt."
+    }
+  },
+  "deawakening-sevilla": {
+    ...specialEventDetails["deawakening-sevilla"].es,
+    title: "ResoFusion Basic",
+    subtitle: "Srithanu, Koh Phangan, Thailand",
+    intro:
+      "Du und dein K\u00f6rper so, wie sie gemeint sind. Lerne, \u00fcber sanfte Resosense-Bewegungen in spezifischen Frequenzen Zugang zu deiner Essenz zu finden. Integriere diese neuen M\u00f6glichkeiten in deinen K\u00f6rper und dein Leben durch DEA-Gruppensitzungen.",
+    heroImageAlt: "ResoFusion Basic Orion Healing",
+    timePlaceRange: "06. Sep. 2024, 13:30 - 08. Sep. 2024, 17:00",
+    venue: "Srithanu, Koh Phangan, Thailand",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "\u00dcberblick" },
+      {
+        type: "p",
+        text: "ResoFusion Basic ist ein praxisnahes 2,5-Tage-Training, in dem du lernst, Resonanz f\u00fcr eine tiefe Transformation von K\u00f6rper und Leben zu nutzen."
+      },
+      { type: "heading", text: "Was du lernen wirst" },
+      {
+        type: "list",
+        items: [
+          "Stehende Resonanzwellen in deiner Grundfrequenz und drei zus\u00e4tzlichen Harmonischen zu erzeugen.",
+          "Denk- und Verhaltensmuster zu l\u00f6sen, die mit k\u00f6rperlichen Verzerrungen verbunden sind.",
+          "Eine einfache, kraftvolle und transformierende pers\u00f6nliche Praxis anzuwenden."
+        ]
+      },
+      { type: "heading", text: "DEA-Gruppenerfahrung" },
+      {
+        type: "p",
+        text: "W\u00e4hrend des Trainings empf\u00e4ngst du 5 DEA-Gruppensitzungen. W\u00e4hrend ein Teil der Gruppe empf\u00e4ngt, h\u00e4lt der Rest den Raum mit Pr\u00e4senz und verst\u00e4rkt so den Prozess."
+      },
+      { type: "heading", text: "Preis und Reservierung" },
+      {
+        type: "p",
+        text: "Preis: 15.000 THB. Reserviere mit einer Anzahlung von 3000 THB \u00fcber den Link oder direkt bei Orion. Der Restbetrag wird bar an der T\u00fcr bezahlt. Die Anzahlung ist \u00fcbertragbar, aber nicht erstattungsf\u00e4hig."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Resosense-Basiskurs mit Handbuch.",
+      "5 DEA-Sitzungen.",
+      "Wasser und leichte Erfrischungen."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-sevilla"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Preis: 15.000 THB",
+      currencyHint: "(thail\u00e4ndische baht)",
+      infoLines: [
+        "Reservierung mit 3000 THB Anzahlung.",
+        "Restbetrag bar an der T\u00fcr.",
+        "Anzahlung \u00fcbertragbar, nicht erstattungsf\u00e4hig."
+      ],
+      statusMessage: "Die Reservierung ist beendet."
+    }
+  },
+  "deawakening-bilbao": {
+    ...specialEventDetails["deawakening-bilbao"].es,
+    title: "ResoFusion Kennenlern-Session",
+    subtitle: "Orion Healing, Koh Phangan",
+    intro:
+      "ResoFusion: Du und dein K\u00f6rper so, wie sie sein sollten. Lerne, wie Resosense sanfte Bewegungen in spezifischen Frequenzen nutzt, um in Resonanz mit deiner wahren Essenz zu kommen. Empfange kraftvolle DEA-Gruppensitzungen, um das Bewusstsein zu entwickeln, das du f\u00fcr Ver\u00e4nderung brauchst.",
+    heroImageAlt: "ResoFusion Kennenlern-Session Orion Healing",
+    timePlaceRange: "05. September 2024, 13:30 - 17:30",
+    venue: "Orion Healing, Srithanu, Koh Pha Ngan, Thailand",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Einf\u00fchrung" },
+      {
+        type: "p",
+        text: "In dieser ResoFusion-Einf\u00fchrung zeigen wir dir, wie die Kraft der Resonanz durch stehende Wellen entsteht und wie du diese praktische Methode nutzen kannst, um dich auf deine Grundfrequenz einzustimmen."
+      },
+      {
+        type: "p",
+        text: "Du empf\u00e4ngst zwei DEA-Gruppensitzungen. W\u00e4hrend ein Teil der Gruppe empf\u00e4ngt, h\u00e4lt der Rest den Raum und erzeugt ein starkes kollektives Feld f\u00fcr neue Einsichten und tiefgreifende Ver\u00e4nderung."
+      },
+      { type: "heading", text: "Verbindung zum Vollprogramm" },
+      {
+        type: "p",
+        text: "Dieses Event ist eine Einf\u00fchrung in das vollst\u00e4ndige 2,5-Tage-Programm (Freitag 6. bis Sonntag 8.). Wenn du anschlie\u00dfend am Gesamtprogramm teilnimmst, erh\u00e4ltst du einen Rabatt von 2000 THB, vorbehaltlich verf\u00fcgbarer Pl\u00e4tze."
+      },
+      { type: "heading", text: "Preis und Kontakt" },
+      {
+        type: "p",
+        text: "Preis: 2000 THB. Du kannst deine Teilnahme hier best\u00e4tigen und bar an der T\u00fcr bezahlen oder vorab bei Orion zahlen. WhatsApp: +34 670 321 400 | E-Mail: info@resosense.com"
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "ResoFusion-Einf\u00fchrungssession.",
+      "2 DEA-Gruppensitzungen.",
+      "Gef\u00fchrte PEAK-Praxis."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-bilbao"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Preis: 2000 THB",
+      currencyHint: "(thail\u00e4ndische baht)",
+      infoLines: [
+        "Begrenzt auf 15 Teilnehmende.",
+        "Barzahlung an der T\u00fcr m\u00f6glich.",
+        "Kontakt: +34 670 321 400 | info@resosense.com"
+      ],
+      statusMessage: "Begrenzte Pl\u00e4tze: 15 Teilnehmende."
+    }
+  },
+  "deawakening-zaragoza": {
+    ...specialEventDetails["deawakening-zaragoza"].es,
+    title: "ResoFusion Basic auf Mallorca",
+    intro:
+      "M\u00f6chtest du etwas lernen, das du nutzen kannst, um deinen K\u00f6rper und dein Leben zu ver\u00e4ndern?",
+    heroImageAlt: "ResoFusion Basic auf Mallorca",
+    timePlaceRange: "29. Juni 2024, 10:00 - 30. Juni 2024, 17:00",
+    venue:
+      "Carrer de Marti Boneo, 31, Ponent, 07013 Palma, Illes Balears, Spanien",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      {
+        type: "p",
+        text: "ResoFusion Basic verbindet das Erlernen der kraftvollen pers\u00f6nlichen Resosense-Praxis mit dem Empfang von Deep Energetic Awakening (DEA) Gruppensitzungen."
+      },
+      {
+        type: "p",
+        text: "Resosense basiert auf der Physik der Resonanz und nutzt sanfte Bewegungen in spezifischen Frequenzen, um deinen K\u00f6rper und dein Leben in ihren urspr\u00fcnglich gesunden Zustand zur\u00fcckzuf\u00fchren."
+      },
+      {
+        type: "p",
+        text: "DEA hilft dir, besser Zugang zu deinen k\u00f6rperlichen und energetischen Ressourcen f\u00fcr Heilung zu finden und Resosense in einen gesunden Lebensstil zu integrieren."
+      },
+      {
+        type: "p",
+        text: "Die Ergebnisse dieses Wochenendprogramms sind tief transformierend. Preis: 360 EUR."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "ResoFusion Basic Training.",
+      "DEA-Gruppensitzungen.",
+      "Integrationsbegleitung."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-zaragoza"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Preis: 360 EUR",
+      currencyHint: "(euro)",
+      infoLines: [
+        "Immersives Wochenendformat.",
+        "Begrenzte Pl\u00e4tze.",
+        "Reservierung per Direktkontakt mit der Organisation."
+      ],
+      statusMessage: "Reservierung per Direktkontakt."
+    }
+  },
+  "deawakening-alicante": {
+    ...specialEventDetails["deawakening-alicante"].es,
+    title: "DEA im Casa Wald",
+    subtitle: "Balearen",
+    intro:
+      "Open Fire Cookout mit Finding the Others. Ein DEA-Treffen mit Fokus auf Pr\u00e4senz, menschliche Verbindung und energetischen Reset.",
+    heroImageAlt: "DEA im Casa Wald",
+    timePlaceRange: "02. Juni 2024",
+    venue: "Illes Balears, Spanien",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Open-Fire-Format" },
+      {
+        type: "p",
+        text: "Ein intimes Format, das DEA-Energiearbeit mit bewusster Gemeinschaft und einem Raum f\u00fcr Integration verbindet."
+      },
+      {
+        type: "p",
+        text: "Es ist darauf ausgelegt, energetische \u00d6ffnung, emotionale Klarheit und tiefere Pr\u00e4senz zu unterst\u00fctzen."
+      },
+      { type: "heading", text: "Erfahrungsfokus" },
+      {
+        type: "p",
+        text: "Das Treffen wurde als lebendiger Gemeinschaftsraum konzipiert, in dem Pr\u00e4senz, K\u00f6rperbewusstsein und menschliche Verbindung gemeinsam kultiviert werden."
+      },
+      { type: "heading", text: "Wie es funktioniert" },
+      {
+        type: "p",
+        text: "Ein Teil der Gruppe erh\u00e4lt direkte DEA-Unterst\u00fctzung, w\u00e4hrend der Rest den Raum mit fokussierter Aufmerksamkeit h\u00e4lt und das kollektive Feld verst\u00e4rkt."
+      },
+      {
+        type: "p",
+        text: "Die Ausrichtung ist praktisch: Du gehst mit mehr Pr\u00e4senz, emotionalem Raum und innerer Orientierung nach Hause."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "DEA-Gruppensitzung.",
+      "Gef\u00fchrter gemeinsamer Feldprozess.",
+      "Raum f\u00fcr gemeinschaftliche Integration."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Transport.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-alicante"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Externer Buchungslink",
+      infoLines: [
+        "Dieses Event wurde \u00fcber eine externe Ticketplattform verwaltet.",
+        "Bitte pr\u00fcfe den offiziellen Link f\u00fcr die aktuelle Verf\u00fcgbarkeit."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-granada": {
+    ...specialEventDetails["deawakening-granada"].es,
+    title: "DEA im Orion Healing Center, Koh Pha Ngan",
+    intro:
+      "Zwei DEA-Gruppenabende in Koh Pha Ngan, die durch die Zyklen Discover, Transform und Awaken in einem gehaltenen energetischen Feld f\u00fchren.",
+    heroImageAlt: "DEA im Orion Healing Center",
+    timePlaceRange: "28. Jan. 2024, 18:30 - 30. Jan. 2024, 21:30",
+    venue:
+      "Orion Healing Centre, 15/2 Moo 8, Srithanu, Koh Pha Ngan, Surat Thani 84280, Thailand",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Sitzungsformat" },
+      {
+        type: "p",
+        text: "David begleitet zwei Gruppensitzungen: Sonntag, den 28., und Montag, den 29. Januar, jeweils ab 18:30 Uhr."
+      },
+      {
+        type: "p",
+        text: "Jeder Abend ist in zwei Teile gegliedert, sodass du beim ersten Block bleiben oder in den tieferen Awaken-Block weitergehen kannst."
+      },
+      { type: "heading", text: "Discover, Transform, Awaken" },
+      {
+        type: "p",
+        text: "Die Arbeit bewegt sich durch die Lebenszyklen Discover, Transform und Awaken und unterst\u00fctzt das L\u00f6sen tief sitzender k\u00f6rperlicher, emotionaler und verhaltensbezogener Muster."
+      },
+      { type: "heading", text: "Preise laut Originalangebot" },
+      {
+        type: "p",
+        text: "Discover/Transform Sitzung (18:30-20:15): 2000 THB. Optionale Awaken-Fortsetzung (20:30-21:30): 1500 THB."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Zwei gef\u00fchrte DEA-Gruppensitzungen.",
+      "Discover/Transform-Lebenszyklusprozess.",
+      "Optionaler Awaken-Vertiefungsblock."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-granada"].es.sidebarTicket,
+      title: "Tickets",
+      currencyHint: "(thail\u00e4ndische baht)",
+      infoLines: [
+        "Optionale Awaken-Fortsetzung: 1500 THB.",
+        "Das Originalangebot ist als beendet markiert."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-palma": {
+    ...specialEventDetails["deawakening-palma"].es,
+    title: "DEA im The Sanctuary",
+    intro:
+      "Ein mehrt\u00e4giges DEA-Angebot im The Sanctuary f\u00fcr G\u00e4ste und Besucher, ausgerichtet auf tiefen energetischen Reset und verk\u00f6rperte Transformation.",
+    heroImageAlt: "DEA im The Sanctuary",
+    timePlaceRange: "10. Jan. 2024, 09:00 - 30. Jan. 2024, 18:00",
+    venue:
+      "Tambon Ban Tai, 153/14 Moo 6, Koh Pha Ngan, Surat Thani 84280, Thailand",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "DEA-Gruppensitzungen" },
+      {
+        type: "p",
+        text: "Die Sitzungen werden f\u00fcr G\u00e4ste und Besucher in kleinen Gruppen von 6 bis 12 Personen angeboten."
+      },
+      {
+        type: "p",
+        text: "Jeder Prozess l\u00e4uft durch drei Runden, die mit Discover, Transform und Awaken verbunden sind."
+      },
+      { type: "heading", text: "Ort und Ausrichtung" },
+      {
+        type: "p",
+        text: "Der Ort ist von Dschungel und Granitfelsen umgeben und schafft einen kraftvollen Rahmen f\u00fcr Detox, Ver\u00e4nderung und Integration."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "DEA-Gruppensitzungen (6-12 Personen).",
+      "Dreistufiger energetischer Prozess.",
+      "Getragenes Gruppenfeld f\u00fcr tiefere Integration."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Mahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-palma"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Info / Warteliste",
+      infoLines: [
+        "Die Originalseite verweist auf direkte Koordination mit dem Veranstaltungsort.",
+        "Das offizielle Angebot ist derzeit als beendet markiert."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-san-sebastian": {
+    ...specialEventDetails["deawakening-san-sebastian"].es,
+    intro:
+      "Ein eint\u00e4giges DEA-Intensiv, das dabei hilft, begrenzende Muster zu l\u00f6sen und praktische Werkzeuge in einem fokussierten Villa-Setting zu integrieren.",
+    timePlaceRange: "25. Juni 2023, 19:00 - 23:00",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Eint\u00e4giges Intensiv" },
+      {
+        type: "p",
+        text: "Deep Energetic Awakening (DEA) wird hier als praktischer Weg eingesetzt, um Denk-, Verhaltens- und K\u00f6rpermuster zu l\u00f6sen, die Ausdruck und Lebensfreude begrenzen."
+      },
+      {
+        type: "p",
+        text: "Der Tag umfasst drei Gruppensitzungen, unterst\u00fctzt durch Breathwork und weitere Modalit\u00e4ten bei Bedarf."
+      },
+      { type: "heading", text: "Praktische Details" },
+      {
+        type: "p",
+        text: "W\u00e4hrend des Programms wurden Snacks angeboten. Teilnehmende sollten eigenes Mittagessen sowie Badebekleidung und Handtuch f\u00fcr den Pool mitbringen."
+      },
+      {
+        type: "p",
+        text: "Preis laut Originalangebot: 150 EUR f\u00fcr den gesamten Tag."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Drei DEA-Gruppensitzungen.",
+      "Durch Breathwork unterst\u00fctzter Prozess.",
+      "Snacks w\u00e4hrend des Programms."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Hauptmahlzeiten.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-san-sebastian"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Anzahlung: 50 EUR",
+      currencyHint: "(euro)",
+      infoLines: [
+        "Gesamtpreis laut Angebot: 150 EUR.",
+        "Der Restbetrag wurde bei Ankunft bar bezahlt."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-murcia": {
+    ...specialEventDetails["deawakening-murcia"].es,
+    intro:
+      "Ein 4-t\u00e4giges Retreat, das DEA-Gruppensitzungen mit praktischem Resosense-Lernen in einem naturnahen und getragenen Rahmen verbindet.",
+    timePlaceRange: "19. Juni 2023, 17:00 - 23. Juni 2023, 11:00",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Retreat-Konzept" },
+      {
+        type: "p",
+        text: "Das Retreat verbindet DEA-Energiearbeit mit dem Erlernen der pers\u00f6nlichen Resosense-Praxis \u00fcber vier Tage."
+      },
+      {
+        type: "p",
+        text: "Die Originalbeschreibung legt den Fokus auf Lernen, Erfahrung und Integration in einem Umfeld von Pr\u00e4senz, F\u00fcrsorge und gutem Essen."
+      },
+      { type: "heading", text: "Reservierung laut Originalangebot" },
+      {
+        type: "p",
+        text: "Anzahlung im Mehrbettzimmer: 400 EUR. Early-Bird-Ersparnis von 100 EUR bei Zahlung bis 31.05.23. Der Restbetrag war bis 08.06.23 f\u00e4llig."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "4-t\u00e4giges ResoFusion-Retreat.",
+      "DEA-Gruppensitzungen.",
+      "Gef\u00fchrte Resosense-Praxis."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Transport.", "Pers\u00f6nliche Ausgaben."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-murcia"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Ver\u00f6ffentlichte Anzahlung: 400 EUR",
+      currencyHint: "(euro)",
+      infoLines: [
+        "Early-Bird-Ersparnis: 100 EUR (vor dem 31.05.23).",
+        "Der Restbetrag war bis zum 08.06.23 f\u00e4llig."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-santiago-compostela": {
+    ...specialEventDetails["deawakening-santiago-compostela"].es,
+    title: "Harvest Series 7 - Kaplankaya, T\u00fcrkei",
+    intro:
+      "Ein Premium-Treffen der Harvest Series, zu dem David eingeladen wurde, um in einem internationalen Retreat-Rahmen mehrere DEA-Sitzungen pro Tag zu begleiten.",
+    timePlaceRange: "10. Mai 2023, 19:00 - 14. Mai 2023, 19:00",
+    venue: "Six Senses Kaplankaya, Bozbuk, Milas/Mugla, T\u00fcrkei",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Programmkontext" },
+      {
+        type: "p",
+        text: "David kehrte zu diesem internationalen Treffen zur\u00fcck, um Teilnehmende \u00fcber mehrere Tage mit Workshops und gemeinsamen Erfahrungen zu begleiten."
+      },
+      {
+        type: "p",
+        text: "Das Originalangebot hebt hochkar\u00e4tige Speaker, immersive Workshops und ein starkes Gef\u00fchl von bewusster Gemeinschaft hervor."
+      },
+      { type: "heading", text: "DEA-Format" },
+      {
+        type: "p",
+        text: "Es wurden zwei DEA-Gruppensitzungen pro Tag f\u00fcr Gruppen mit bis zu 24 Personen angeboten, zus\u00e4tzlich zu privaten Sitzungen vor und nach dem Programm."
+      },
+      {
+        type: "p",
+        text: "Die DEA-Gruppensitzungen waren im allgemeinen Harvest-Paket enthalten."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Zwei DEA-Gruppensitzungen pro Tag.",
+      "Zugang zu Harvest-Workshops und Speakern.",
+      "Retreat-Umfeld und kuratierte Gemeinschaftserfahrung."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Transport.", "Unterschiede bei Unterkunftspaketen."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-santiago-compostela"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Im Harvest-Paket enthalten",
+      infoLines: [
+        "Private Sitzungen wurden separat angeboten.",
+        "Das Originalangebot ist derzeit als beendet markiert."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  },
+  "deawakening-las-palmas": {
+    ...specialEventDetails["deawakening-las-palmas"].es,
+    intro:
+      "Ein zweit\u00e4giges ResoFusion-Programm, das die pers\u00f6nliche Resosense-Praxis mit DEA-Energiesitzungen verbindet, um tiefe und praktische Ver\u00e4nderung zu erm\u00f6glichen.",
+    timePlaceRange: "06. Mai 2023, 9:30 - 07. Mai 2023, 18:00",
+    venue:
+      "Niagara Wellness, Akat, Acelya Sk No:43, 34335 Besiktas/Istanbul, T\u00fcrkei",
+    aboutTitle: "\u00dcber das Event",
+    aboutBlocks: [
+      { type: "heading", text: "Grundlage des Programms" },
+      {
+        type: "p",
+        text: "Das Treffen verbindet transformierende DEA-Sitzungen mit praktischem Resosense-Lernen f\u00fcr den Alltag."
+      },
+      { type: "heading", text: "Lerne Resosense" },
+      {
+        type: "p",
+        text: "Resosense basiert auf der Physik der Resonanz und nutzt sanfte, spezifische Bewegungen, die in wenigen Minuten pro Tag praktiziert werden k\u00f6nnen."
+      },
+      {
+        type: "list",
+        items: [
+          "K\u00f6rperlich: unterst\u00fctzt Beweglichkeit und k\u00f6rperliche Organisation.",
+          "Emotional: hilft, tiefen Stress zu l\u00f6sen.",
+          "Mental: bringt Fokus, Ruhe und Klarheit.",
+          "Energetisch: unterst\u00fctzt das Gleichgewicht des Energiesystems."
+        ]
+      },
+      { type: "heading", text: "Empfange DEA" },
+      {
+        type: "p",
+        text: "W\u00e4hrend ein Teil der Gruppe auf Liegen empf\u00e4ngt, h\u00e4lt der Rest den Raum mit fokussierter Pr\u00e4senz und verst\u00e4rkt den Prozess."
+      },
+      {
+        type: "p",
+        text: "Referenz des Originalangebots: zweit\u00e4giges Event f\u00fcr 500 USD. Privatsitzungen mit David (50 Min.): 200 USD."
+      }
+    ],
+    includesTitle: "Inklusive",
+    includesItems: [
+      "Zweit\u00e4giges ResoFusion-Programm.",
+      "DEA-Energiesitzungen in der Gruppe.",
+      "Anleitung und Integration der Resosense-Praxis."
+    ],
+    excludesTitle: "Nicht enthalten",
+    excludesItems: ["Transport.", "Unterkunft."],
+    sidebarTicket: {
+      ...specialEventDetails["deawakening-las-palmas"].es.sidebarTicket,
+      title: "Tickets",
+      ticketTypeValue: "Zweit\u00e4giges Event: 500 USD",
+      currencyHint: "(us-dollar)",
+      infoLines: [
+        "Privatsitzungen mit David (50 Min.): 200 USD.",
+        "Das Originalangebot ist als beendet markiert."
+      ],
+      statusMessage: "Der Verkauf ist beendet."
+    }
+  }
+};
+
 function formatDate(date, language) {
   const locale =
     language === "es" ? "es-ES" : language === "de" ? "de-DE" : "en-GB";
@@ -1961,12 +2697,11 @@ function EventDetail() {
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitState, setSubmitState] = useState("idle");
   const eventCustomBySlug = specialEventDetails[slug];
+  const eventCustomBySlugDe = specialEventDetailsDe[slug];
   const customDetails =
-    eventCustomBySlug?.[currentLanguage] ??
-    (currentLanguage === "de" ? eventCustomBySlug?.en : null) ??
-    eventCustomBySlug?.es ??
-    eventCustomBySlug?.en ??
-    null;
+    currentLanguage === "de"
+      ? eventCustomBySlugDe ?? eventCustomBySlug?.en ?? eventCustomBySlug?.es ?? null
+      : eventCustomBySlug?.[currentLanguage] ?? eventCustomBySlug?.es ?? eventCustomBySlug?.en ?? null;
   const eventDetails = event
     ? customDetails ?? buildDefaultEventDetails(event, currentLanguage, copy)
     : null;
