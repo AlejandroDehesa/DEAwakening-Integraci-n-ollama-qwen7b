@@ -175,6 +175,102 @@ function normalizeText(value) {
     .trim();
 }
 
+function stripCodeFence(text) {
+  if (typeof text !== "string") {
+    return "";
+  }
+
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("```")) {
+    return trimmed;
+  }
+
+  return trimmed
+    .replace(/^```[a-z0-9_-]*\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+}
+
+function parseJsonObject(rawText) {
+  const candidate = stripCodeFence(rawText);
+
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    const match = candidate.match(/\{[\s\S]*\}/);
+    if (!match) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
+function isValidRedirectUrl(value) {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  return trimmed.startsWith("/") || /^https?:\/\//i.test(trimmed);
+}
+
+function normalizeStructuredProviderOutput(rawText) {
+  const parsed = parseJsonObject(rawText);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return {
+      success: false,
+      reason: "invalid_json"
+    };
+  }
+
+  const respuesta = typeof parsed.respuesta === "string" ? parsed.respuesta.trim() : "";
+  if (!respuesta) {
+    return {
+      success: false,
+      reason: "missing_respuesta"
+    };
+  }
+
+  const accion = parsed.accion === "redirect" ? "redirect" : null;
+
+  let url = null;
+  if (accion === "redirect" && isValidRedirectUrl(parsed.url)) {
+    url = parsed.url.trim();
+  }
+
+  return {
+    success: true,
+    data: {
+      respuesta,
+      accion: url ? accion : null,
+      url
+    }
+  };
+}
+
+function fallbackParsedOutputFromText(rawText) {
+  const plainText = stripCodeFence(rawText);
+  const answer = plainText || "I am sorry, I could not generate a valid response.";
+
+  return {
+    answer,
+    pageIntent: "guidance",
+    confidence: 0.62,
+    suggestedActions: [],
+    relatedLinks: [],
+    recommendedEventSlug: null
+  };
+}
+
 function dedupeActions(items) {
   const result = [];
   const seen = new Set();
@@ -505,7 +601,16 @@ async function callProvider(messages) {
     15000
   );
 
-  const baseSystemPrompt = "Eres un asistente de esta web. Responde de forma clara y \u00fatil.";
+  const baseSystemPrompt = [
+    "Eres un asistente de esta web. Responde de forma clara y util.",
+    "Responde SIEMPRE con JSON valido y sin texto adicional.",
+    "Formato exacto:",
+    '{"respuesta":"texto para el usuario","accion":null,"url":null}',
+    'Reglas: "respuesta" es obligatoria y string.',
+    'Reglas: "accion" solo puede ser null o "redirect".',
+    'Reglas: "url" solo puede ser null o string.',
+    "No devuelvas markdown, bloques de codigo ni explicaciones fuera del JSON."
+  ].join("\n");
   const allowedRoles = new Set(["system", "user", "assistant", "tool"]);
   const safeMessages = (Array.isArray(messages) ? messages : [])
     .map((messageItem) => {
@@ -673,20 +778,43 @@ export async function generateAssistantChatResponse(input) {
   const rawModelOutput = await callProvider(messages);
 
   let parsedOutput;
-  try {
-    parsedOutput = parseAssistantOutput(
-      rawModelOutput,
-      {
-        language: input.language,
-        availableEventSlugs: assistantKnowledge.availableEventSlugs
-      }
+  const structuredOutput = normalizeStructuredProviderOutput(rawModelOutput);
+
+  if (structuredOutput.success) {
+    parsedOutput = {
+      answer: structuredOutput.data.respuesta,
+      pageIntent: "guidance",
+      confidence: 0.72,
+      suggestedActions: [],
+      relatedLinks: [],
+      recommendedEventSlug: null
+    };
+  } else {
+    console.warn(
+      `[assistant] provider_json_parse_failed reason=${structuredOutput.reason}`
     );
-  } catch (error) {
-    throw createAssistantError({
-      status: 502,
-      code: "assistant_invalid_provider_output",
-      message: `Assistant provider returned invalid structured output: ${error.message}`
-    });
+
+    if (structuredOutput.reason === "missing_respuesta") {
+      console.warn(
+        `[assistant] provider_fallback_plain_text reason="missing_respuesta"`
+      );
+      parsedOutput = fallbackParsedOutputFromText(rawModelOutput);
+    } else {
+      try {
+        parsedOutput = parseAssistantOutput(
+          rawModelOutput,
+          {
+            language: input.language,
+            availableEventSlugs: assistantKnowledge.availableEventSlugs
+          }
+        );
+      } catch (legacyError) {
+        console.warn(
+          `[assistant] provider_fallback_plain_text reason="${legacyError.message}"`
+        );
+        parsedOutput = fallbackParsedOutputFromText(rawModelOutput);
+      }
+    }
   }
 
   const finalOutput = postProcessAssistantOutput({
