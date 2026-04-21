@@ -51,6 +51,11 @@ export async function buildAssistantKnowledge({
       pageContext,
       pageSlug
     });
+    const includedSources = new Set(
+      snippets
+        .map((snippet) => snippet?.sourcePath)
+        .filter((sourcePath) => typeof sourcePath === "string" && sourcePath.trim())
+    ).size;
 
     documentKnowledge = {
       status: documentSource.status,
@@ -59,6 +64,10 @@ export async function buildAssistantKnowledge({
       snippets,
       warningCount: Number(documentSource.metadata?.warnings?.length || 0)
     };
+
+    console.log(
+      `[assistant] local_knowledge_loaded status=${documentKnowledge.status} totalDocuments=${documents.length} includedSnippets=${snippets.length} includedSources=${includedSources}`
+    );
   } catch (error) {
     const reason = sanitizeErrorMessage(error);
     console.warn(`[assistant] document_knowledge_unavailable reason="${reason}"`);
