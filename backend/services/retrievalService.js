@@ -242,6 +242,9 @@ export function retrieveDocumentSnippets({
       sourcePath: item.doc.sourcePath,
       excerpt: extractExcerpt(item.doc.content, terms)
     }));
+  const deduped = dedupeSnippets(ranked);
+  const sameLanguage = deduped.filter((snippet) => snippet.language === language);
+  const fallbackLanguage = deduped.filter((snippet) => snippet.language !== language);
 
-  return dedupeSnippets(ranked).slice(0, maxSnippets);
+  return [...sameLanguage, ...fallbackLanguage].slice(0, maxSnippets);
 }
