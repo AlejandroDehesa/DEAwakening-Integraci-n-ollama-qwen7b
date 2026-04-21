@@ -191,19 +191,75 @@ function stripCodeFence(text) {
     .trim();
 }
 
+function extractBalancedJsonObject(text) {
+  if (typeof text !== "string") {
+    return null;
+  }
+
+  const start = text.indexOf("{");
+  if (start < 0) {
+    return null;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (char === "\\") {
+        escaped = true;
+        continue;
+      }
+
+      if (char === "\"") {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    if (char === "\"") {
+      inString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      depth += 1;
+      continue;
+    }
+
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return text.slice(start, index + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
 function parseJsonObject(rawText) {
   const candidate = stripCodeFence(rawText);
 
   try {
     return JSON.parse(candidate);
   } catch {
-    const match = candidate.match(/\{[\s\S]*\}/);
-    if (!match) {
+    const rescuedJson = extractBalancedJsonObject(candidate);
+    if (!rescuedJson) {
       return null;
     }
 
     try {
-      return JSON.parse(match[0]);
+      return JSON.parse(rescuedJson);
     } catch {
       return null;
     }
@@ -258,8 +314,20 @@ function normalizeStructuredProviderOutput(rawText) {
 }
 
 function fallbackParsedOutputFromText(rawText) {
+  const parsed = parseJsonObject(rawText);
+  const jsonRespuesta =
+    typeof parsed?.respuesta === "string" && parsed.respuesta.trim()
+      ? parsed.respuesta.trim()
+      : typeof parsed?.answer === "string" && parsed.answer.trim()
+        ? parsed.answer.trim()
+        : "";
   const plainText = stripCodeFence(rawText);
-  const answer = plainText || "I am sorry, I could not generate a valid response.";
+  const looksLikeJsonOnly =
+    plainText.startsWith("{") && plainText.endsWith("}") && parseJsonObject(plainText) !== null;
+  const answer =
+    jsonRespuesta ||
+    (!looksLikeJsonOnly ? plainText : "") ||
+    "Ahora mismo no pude generar una respuesta clara. Intentalo de nuevo en unos segundos.";
 
   return {
     answer,
@@ -787,7 +855,10 @@ export async function generateAssistantChatResponse(input) {
       confidence: 0.72,
       suggestedActions: [],
       relatedLinks: [],
-      recommendedEventSlug: null
+      recommendedEventSlug: null,
+      // Reserved for next phase (redirect/action wiring) without changing current v2 contract.
+      _structuredAction: structuredOutput.data.accion,
+      _structuredUrl: structuredOutput.data.url
     };
   } else {
     console.warn(
