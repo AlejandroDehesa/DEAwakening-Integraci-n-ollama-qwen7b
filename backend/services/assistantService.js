@@ -495,32 +495,48 @@ function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
 }
 
 async function callProvider(messages) {
-  const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-  const model = process.env.OPENROUTER_MODEL || process.env.OPENAI_MODEL;
-  const baseUrl = trimTrailingSlashes(
-    process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1"
-  );
-  const siteUrl = process.env.OPENROUTER_SITE_URL || "";
-  const appName = process.env.OPENROUTER_APP_NAME || "";
+  const model = process.env.OLLAMA_MODEL || "qwen:7b";
+  const baseUrl = trimTrailingSlashes(process.env.OLLAMA_BASE_URL || "http://localhost:11434");
   const timeoutMs = Number(
+    process.env.OLLAMA_TIMEOUT_MS ||
     process.env.OPENROUTER_TIMEOUT_MS ||
     process.env.OPENAI_TIMEOUT_MS ||
     15000
   );
 
-  if (!apiKey) {
-    throw createAssistantError({
-      status: 503,
-      code: "assistant_missing_api_key",
-      message: "Assistant is not configured: missing OPENROUTER_API_KEY"
-    });
-  }
+  const baseSystemPrompt = "Eres un asistente de esta web. Responde de forma clara y útil.";
+  const safeMessages = Array.isArray(messages)
+    ? messages.filter(
+        (messageItem) =>
+          messageItem &&
+          typeof messageItem === "object" &&
+          typeof messageItem.role === "string" &&
+          typeof messageItem.content === "string"
+      )
+    : [];
 
-  if (!model) {
+  const sourceSystemMessage = safeMessages.find((messageItem) => messageItem.role === "system");
+  const sourceUserMessage = [...safeMessages].reverse().find(
+    (messageItem) => messageItem.role === "user"
+  );
+  const ollamaMessages = [
+    {
+      role: "system",
+      content: sourceSystemMessage?.content
+        ? `${baseSystemPrompt}\n\n${sourceSystemMessage.content}`
+        : baseSystemPrompt
+    },
+    {
+      role: "user",
+      content: sourceUserMessage?.content || ""
+    }
+  ];
+
+  if (!ollamaMessages[1].content.trim()) {
     throw createAssistantError({
-      status: 503,
-      code: "assistant_missing_model",
-      message: "Assistant is not configured: missing OPENROUTER_MODEL"
+      status: 400,
+      code: "assistant_invalid_input",
+      message: "Assistant provider request is missing user content"
     });
   }
 
@@ -529,28 +545,22 @@ async function callProvider(messages) {
 
   let response;
   let payload = null;
+  const endpoint = `${baseUrl}/api/chat`;
+
+  console.log(
+    `[assistant] provider_request provider=ollama endpoint=${endpoint} model=${model} messageCount=${ollamaMessages.length} userContentLength=${ollamaMessages[1].content.length}`
+  );
 
   try {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
-    };
-
-    if (siteUrl) {
-      headers["HTTP-Referer"] = siteUrl;
-    }
-
-    if (appName) {
-      headers["X-Title"] = appName;
-    }
-
-    response = await fetch(`${baseUrl}/chat/completions`, {
+    response = await fetch(endpoint, {
       method: "POST",
-      headers,
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         model,
-        temperature: 0.2,
-        messages
+        messages: ollamaMessages,
+        stream: false
       }),
       signal: controller.signal
     });
@@ -576,9 +586,12 @@ async function callProvider(messages) {
 
   if (!response.ok) {
     const apiMessage =
-      payload?.error?.message ||
+      payload?.error ||
       payload?.message ||
       `Provider request failed with status ${response.status}`;
+    console.error(
+      `[assistant] provider_response provider=ollama status=${response.status} error="${apiMessage}"`
+    );
     throw createAssistantError({
       status: 502,
       code: "assistant_provider_error",
@@ -586,7 +599,7 @@ async function callProvider(messages) {
     });
   }
 
-  const rawContent = payload?.choices?.[0]?.message?.content;
+  const rawContent = payload?.message?.content;
   if (typeof rawContent !== "string" || !rawContent.trim()) {
     throw createAssistantError({
       status: 502,
@@ -594,6 +607,10 @@ async function callProvider(messages) {
       message: "Assistant provider returned an empty response"
     });
   }
+
+  console.log(
+    `[assistant] provider_response provider=ollama status=${response.status} contentLength=${rawContent.length}`
+  );
 
   return rawContent;
 }
