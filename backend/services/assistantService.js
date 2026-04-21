@@ -313,6 +313,16 @@ function normalizeStructuredProviderOutput(rawText) {
   };
 }
 
+function normalizeStructuredActionForResponse(rawAction, rawUrl) {
+  const action = rawAction === "redirect" ? "redirect" : null;
+  const url = action === "redirect" && isValidRedirectUrl(rawUrl) ? rawUrl.trim() : null;
+
+  return {
+    action: url ? action : null,
+    url
+  };
+}
+
 function fallbackParsedOutputFromText(rawText) {
   const parsed = parseJsonObject(rawText);
   const jsonRespuesta =
@@ -893,6 +903,18 @@ export async function generateAssistantChatResponse(input) {
     input,
     siteKnowledge: assistantKnowledge.siteKnowledge
   });
+  const structuredFields = normalizeStructuredActionForResponse(
+    finalOutput?._structuredAction,
+    finalOutput?._structuredUrl
+  );
+
+  if (
+    (finalOutput?._structuredAction || finalOutput?._structuredUrl) &&
+    structuredFields.action === null &&
+    structuredFields.url === null
+  ) {
+    console.warn("[assistant] provider_structured_action_discarded reason=invalid_action_or_url");
+  }
 
   return {
     contractVersion: "assistant.v2",
@@ -904,6 +926,8 @@ export async function generateAssistantChatResponse(input) {
     relatedLinks: finalOutput.relatedLinks,
     recommendedEventSlug: finalOutput.recommendedEventSlug,
     recommendedEventTitle: finalOutput.recommendedEventTitle || null,
+    action: structuredFields.action,
+    url: structuredFields.url,
 
     // Backward compatibility alias.
     intent: finalOutput.pageIntent,
