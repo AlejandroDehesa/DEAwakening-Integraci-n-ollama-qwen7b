@@ -496,6 +496,7 @@ function postProcessAssistantOutput({ parsedOutput, input, siteKnowledge }) {
 
 async function callProvider(messages) {
   const model = process.env.OLLAMA_MODEL || "qwen:7b";
+  // localhost default only works when backend can reach Ollama on the same host or an accessible network address.
   const baseUrl = trimTrailingSlashes(process.env.OLLAMA_BASE_URL || "http://localhost:11434");
   const timeoutMs = Number(
     process.env.OLLAMA_TIMEOUT_MS ||
@@ -504,35 +505,54 @@ async function callProvider(messages) {
     15000
   );
 
-  const baseSystemPrompt = "Eres un asistente de esta web. Responde de forma clara y útil.";
-  const safeMessages = Array.isArray(messages)
-    ? messages.filter(
-        (messageItem) =>
-          messageItem &&
-          typeof messageItem === "object" &&
-          typeof messageItem.role === "string" &&
-          typeof messageItem.content === "string"
-      )
-    : [];
+  const baseSystemPrompt = "Eres un asistente de esta web. Responde de forma clara y \u00fatil.";
+  const allowedRoles = new Set(["system", "user", "assistant", "tool"]);
+  const safeMessages = (Array.isArray(messages) ? messages : [])
+    .map((messageItem) => {
+      if (!messageItem || typeof messageItem !== "object") {
+        return null;
+      }
 
-  const sourceSystemMessage = safeMessages.find((messageItem) => messageItem.role === "system");
-  const sourceUserMessage = [...safeMessages].reverse().find(
-    (messageItem) => messageItem.role === "user"
-  );
+      const role =
+        typeof messageItem.role === "string" ? messageItem.role.trim().toLowerCase() : "";
+      const content =
+        typeof messageItem.content === "string" ? messageItem.content.trim() : "";
+
+      if (!allowedRoles.has(role) || !content) {
+        return null;
+      }
+
+      return { role, content };
+    })
+    .filter(Boolean);
+
+  const systemParts = [baseSystemPrompt];
+  const conversationMessages = [];
+
+  for (const messageItem of safeMessages) {
+    if (messageItem.role === "system") {
+      if (
+        messageItem.content !== baseSystemPrompt &&
+        !systemParts.includes(messageItem.content)
+      ) {
+        systemParts.push(messageItem.content);
+      }
+      continue;
+    }
+
+    conversationMessages.push(messageItem);
+  }
+
   const ollamaMessages = [
     {
       role: "system",
-      content: sourceSystemMessage?.content
-        ? `${baseSystemPrompt}\n\n${sourceSystemMessage.content}`
-        : baseSystemPrompt
+      content: systemParts.join("\n\n")
     },
-    {
-      role: "user",
-      content: sourceUserMessage?.content || ""
-    }
+    ...conversationMessages
   ];
 
-  if (!ollamaMessages[1].content.trim()) {
+  const hasUserMessage = conversationMessages.some((messageItem) => messageItem.role === "user");
+  if (!hasUserMessage) {
     throw createAssistantError({
       status: 400,
       code: "assistant_invalid_input",
@@ -548,7 +568,7 @@ async function callProvider(messages) {
   const endpoint = `${baseUrl}/api/chat`;
 
   console.log(
-    `[assistant] provider_request provider=ollama endpoint=${endpoint} model=${model} messageCount=${ollamaMessages.length} userContentLength=${ollamaMessages[1].content.length}`
+    `[assistant] provider_request provider=ollama endpoint=${endpoint} model=${model} messageCount=${ollamaMessages.length} roles=${ollamaMessages.map((messageItem) => messageItem.role).join(",")}`
   );
 
   try {
@@ -585,8 +605,9 @@ async function callProvider(messages) {
   }
 
   if (!response.ok) {
+    const providerError = payload?.error;
     const apiMessage =
-      payload?.error ||
+      (typeof providerError === "string" ? providerError : providerError?.message) ||
       payload?.message ||
       `Provider request failed with status ${response.status}`;
     console.error(
@@ -599,7 +620,12 @@ async function callProvider(messages) {
     });
   }
 
-  const rawContent = payload?.message?.content;
+  const rawContent =
+    typeof payload?.message?.content === "string"
+      ? payload.message.content
+      : typeof payload?.response === "string"
+        ? payload.response
+        : "";
   if (typeof rawContent !== "string" || !rawContent.trim()) {
     throw createAssistantError({
       status: 502,
@@ -688,3 +714,4 @@ export async function generateAssistantChatResponse(input) {
     }
   };
 }
+
