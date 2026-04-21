@@ -2,6 +2,28 @@ import { useCallback } from "react";
 import { trackAssistantClick } from "../../services/assistantService";
 import { getQuickActionTelemetry, normalizeActionTarget } from "./assistantConfig";
 
+function normalizeStructuredRedirectTarget(action, url) {
+  if (action !== "redirect" || typeof url !== "string") {
+    return null;
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed || !trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(trimmed, window.location.origin);
+    if (parsed.origin !== window.location.origin) {
+      return null;
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return null;
+  }
+}
+
 export function useAssistantActionRouter({
   source,
   language,
@@ -70,8 +92,26 @@ export function useAssistantActionRouter({
     [reportClick]
   );
 
+  const handleStructuredAction = useCallback(
+    (assistantResponse) => {
+      const target = normalizeStructuredRedirectTarget(
+        assistantResponse?.action,
+        assistantResponse?.url
+      );
+      if (!target) {
+        return false;
+      }
+
+      navigate(target);
+      onAfterInternalNavigate?.();
+      return true;
+    },
+    [navigate, onAfterInternalNavigate]
+  );
+
   return {
     handleActionClick,
-    handleQuickActionClick
+    handleQuickActionClick,
+    handleStructuredAction
   };
 }

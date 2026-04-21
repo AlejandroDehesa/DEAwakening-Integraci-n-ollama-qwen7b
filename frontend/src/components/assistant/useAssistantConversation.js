@@ -127,6 +127,8 @@ export function useAssistantConversation({
           relatedLinks: [],
           recommendedEventSlug: null,
           recommendedEventTitle: null,
+          action: null,
+          url: null,
           interactionId: null
         }
       ];
@@ -161,6 +163,8 @@ export function useAssistantConversation({
             typeof assistantData.recommendedEventTitle === "string"
               ? assistantData.recommendedEventTitle
               : null,
+          action: assistantData.action === "redirect" ? "redirect" : null,
+          url: typeof assistantData.url === "string" ? assistantData.url : null,
           interactionId:
             Number.isInteger(assistantData.interactionId) && assistantData.interactionId > 0
               ? assistantData.interactionId

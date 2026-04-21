@@ -68,7 +68,8 @@ function AssistantHero() {
 
     actionRouter.handleQuickActionClick(actionItem);
     try {
-      await conversation.sendQuickAction(promptText);
+      const assistantData = await conversation.sendQuickAction(promptText);
+      actionRouter.handleStructuredAction(assistantData);
     } catch {
       // Error is already handled in local state.
     }
@@ -77,7 +78,8 @@ function AssistantHero() {
   async function handleSubmit(event) {
     event.preventDefault();
     try {
-      await conversation.sendInputMessage();
+      const assistantData = await conversation.sendInputMessage();
+      actionRouter.handleStructuredAction(assistantData);
     } catch {
       // Error is already handled in local state.
     }

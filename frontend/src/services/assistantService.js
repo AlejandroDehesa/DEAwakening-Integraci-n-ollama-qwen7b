@@ -16,11 +16,25 @@ function normalizeAssistantArray(items, expectedKeys) {
     .filter((item) => expectedKeys.every((key) => item[key]));
 }
 
+function normalizeStructuredRedirect(data) {
+  const action = data?.action === "redirect" ? "redirect" : null;
+  const url = typeof data?.url === "string" ? data.url.trim() : "";
+
+  if (!action || !url) {
+    return { action: null, url: null };
+  }
+
+  return { action, url };
+}
+
 export function sendAssistantChat(payload) {
   return apiRequest("/api/assistant/chat", {
     method: "POST",
     body: JSON.stringify(payload)
-  }).then((data) => ({
+  }).then((data) => {
+    const structuredRedirect = normalizeStructuredRedirect(data);
+
+    return {
     contractVersion: typeof data?.contractVersion === "string" ? data.contractVersion : "",
     answer: typeof data?.answer === "string" ? data.answer : "",
     language: typeof data?.language === "string" ? data.language : "en",
@@ -56,8 +70,11 @@ export function sendAssistantChat(payload) {
     recommendedEventSlug:
       typeof data?.recommendedEventSlug === "string" ? data.recommendedEventSlug : null,
     recommendedEventTitle:
-      typeof data?.recommendedEventTitle === "string" ? data.recommendedEventTitle : null
-  }));
+      typeof data?.recommendedEventTitle === "string" ? data.recommendedEventTitle : null,
+    action: structuredRedirect.action,
+    url: structuredRedirect.url
+  };
+  });
 }
 
 export async function trackAssistantClick(payload) {
